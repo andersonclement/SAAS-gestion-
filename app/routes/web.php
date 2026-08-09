@@ -3,7 +3,9 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BoutiqueController;
+use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +28,6 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('boutiques', BoutiqueController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show']);
+    Route::post('/categories', [CategorieController::class, 'store'])->name('categories.store');
 });

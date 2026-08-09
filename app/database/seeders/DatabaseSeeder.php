@@ -2,8 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\TypeProduit;
+use App\Enums\UniteMesure;
 use App\Enums\UserRole;
 use App\Models\Boutique;
+use App\Models\Categorie;
+use App\Models\Produit;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -73,6 +77,46 @@ class DatabaseSeeder extends Seeder
             'email' => 'gerant.nord@agroplus.test',
             'password' => 'password',
             'role' => UserRole::Gerant,
+        ]);
+
+        $categorieEngrais = Categorie::create(['tenant_id' => $tenant->id, 'nom' => 'Engrais']);
+        $categoriePhyto = Categorie::create(['tenant_id' => $tenant->id, 'nom' => 'Produits phytosanitaires']);
+        $categorieSemences = Categorie::create(['tenant_id' => $tenant->id, 'nom' => 'Semences']);
+
+        Produit::create([
+            'tenant_id' => $tenant->id,
+            'categorie_id' => $categorieEngrais->id,
+            'nom' => 'Engrais NPK 15-15-15',
+            'type' => TypeProduit::IntrantAgricole,
+            'unite_mesure' => UniteMesure::Sac,
+            'code_barres' => '3760000000011',
+            'prix_achat' => 12000,
+            'prix_vente' => 15000,
+            'seuil_alerte' => 10,
+        ]);
+
+        Produit::create([
+            'tenant_id' => $tenant->id,
+            'categorie_id' => $categorieSemences->id,
+            'nom' => 'Semence de maïs hybride',
+            'type' => TypeProduit::IntrantAgricole,
+            'unite_mesure' => UniteMesure::Sac,
+            'code_barres' => '3760000000028',
+            'prix_achat' => 8000,
+            'prix_vente' => 10000,
+            'seuil_alerte' => 15,
+        ]);
+
+        Produit::create([
+            'tenant_id' => $tenant->id,
+            'categorie_id' => $categoriePhyto->id,
+            'nom' => 'Glyphosate 1L',
+            'type' => TypeProduit::ProduitPhytosanitaire,
+            'unite_mesure' => UniteMesure::Litre,
+            'code_barres' => '3760000000035',
+            'prix_achat' => 5000,
+            'prix_vente' => 6500,
+            'seuil_alerte' => 5,
         ]);
 
         $this->command->info('Comptes de démonstration créés (mot de passe : "password") :');

@@ -31,6 +31,7 @@
         <div>
             <a href="{{ route('dashboard') }}">Tableau de bord</a>
             <a href="{{ route('boutiques.index') }}">Boutiques</a>
+            <a href="{{ route('produits.index') }}">Catalogue</a>
             @can('viewAny', App\Models\User::class)
                 <a href="{{ route('users.index') }}">Équipe</a>
             @endcan
