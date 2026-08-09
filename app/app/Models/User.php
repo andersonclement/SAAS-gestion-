@@ -3,13 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserRole;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -18,9 +21,14 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'tenant_id',
+        'boutique_id',
         'name',
         'email',
+        'telephone',
         'password',
+        'role',
+        'actif',
     ];
 
     /**
@@ -43,6 +51,43 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
+            'actif' => 'boolean',
         ];
+    }
+
+    // Volontairement sans trait BelongsToTenant : la portée du User est
+    // gérée explicitement dans les contrôleurs, car la recherche par email
+    // lors de l'authentification doit pouvoir s'exécuter avant tout contexte
+    // de tenant connu.
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function boutique(): BelongsTo
+    {
+        return $this->belongsTo(Boutique::class);
+    }
+
+    public function isPatron(): bool
+    {
+        return $this->role === UserRole::Patron;
+    }
+
+    public function isGerant(): bool
+    {
+        return $this->role === UserRole::Gerant;
+    }
+
+    public function isVendeur(): bool
+    {
+        return $this->role === UserRole::Vendeur;
+    }
+
+    public function isComptable(): bool
+    {
+        return $this->role === UserRole::Comptable;
     }
 }
