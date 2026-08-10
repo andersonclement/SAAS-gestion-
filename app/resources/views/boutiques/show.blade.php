@@ -6,18 +6,18 @@
     <h1>{{ $boutique->nom }}</h1>
 
     <div class="card">
-        <p><strong>Adresse :</strong> {{ $boutique->adresse ?? '—' }}</p>
-        <p><strong>Téléphone :</strong> {{ $boutique->telephone ?? '—' }}</p>
-        <p><strong>Statut :</strong> <span class="badge">{{ $boutique->actif ? 'Active' : 'Inactive' }}</span></p>
+        <p><strong>{{ __('Adresse') }} :</strong> {{ $boutique->adresse ?? '—' }}</p>
+        <p><strong>{{ __('Téléphone') }} :</strong> {{ $boutique->telephone ?? '—' }}</p>
+        <p><strong>{{ __('Statut') }} :</strong> <span class="badge">{{ $boutique->actif ? __('Active') : __('Inactive') }}</span></p>
     </div>
 
     <div class="card">
-        <h2 style="margin-top:0;">Équipe de la boutique</h2>
+        <h2 style="margin-top:0;">{{ __('Équipe de la boutique') }}</h2>
         @if ($boutique->utilisateurs->isEmpty())
-            <p>Aucun utilisateur assigné à cette boutique.</p>
+            <p>{{ __('Aucun utilisateur assigné à cette boutique.') }}</p>
         @else
             <table>
-                <thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th></tr></thead>
+                <thead><tr><th>{{ __('Nom') }}</th><th>{{ __('E-mail') }}</th><th>{{ __('Rôle') }}</th></tr></thead>
                 <tbody>
                     @foreach ($boutique->utilisateurs as $u)
                         <tr>

@@ -12,6 +12,6 @@ class CategorieController extends Controller
     {
         Categorie::create($request->validated());
 
-        return redirect()->route('produits.index')->with('status', 'Catégorie créée avec succès.');
+        return redirect()->route('produits.index')->with('status', __('Catégorie créée avec succès.'));
     }
 }

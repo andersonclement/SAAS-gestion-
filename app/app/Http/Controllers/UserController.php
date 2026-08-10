@@ -46,7 +46,7 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
-        return redirect()->route('users.index')->with('status', 'Compte créé avec succès.');
+        return redirect()->route('users.index')->with('status', __('Compte créé avec succès.'));
     }
 
     public function destroy(User $user): RedirectResponse
@@ -55,6 +55,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('users.index')->with('status', 'Compte supprimé.');
+        return redirect()->route('users.index')->with('status', __('Compte supprimé.'));
     }
 }

@@ -32,7 +32,7 @@ class ProduitController extends Controller
     {
         Produit::create($request->validated());
 
-        return redirect()->route('produits.index')->with('status', 'Produit créé avec succès.');
+        return redirect()->route('produits.index')->with('status', __('Produit créé avec succès.'));
     }
 
     public function show(Produit $produit): View

@@ -34,7 +34,7 @@ class BoutiqueController extends Controller
     {
         Boutique::create($request->validated());
 
-        return redirect()->route('boutiques.index')->with('status', 'Boutique créée avec succès.');
+        return redirect()->route('boutiques.index')->with('status', __('Boutique créée avec succès.'));
     }
 
     public function show(Boutique $boutique): View

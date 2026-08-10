@@ -12,10 +12,10 @@ enum UniteMesure: string
     public function label(): string
     {
         return match ($this) {
-            self::Kilogramme => 'Kilogramme (kg)',
-            self::Litre => 'Litre (L)',
-            self::Sac => 'Sac',
-            self::Unite => 'Unité',
+            self::Kilogramme => __('Kilogramme (kg)'),
+            self::Litre => __('Litre (L)'),
+            self::Sac => __('Sac'),
+            self::Unite => __('Unité'),
         };
     }
 }

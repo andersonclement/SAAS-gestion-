@@ -78,9 +78,25 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'fr'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'fr'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | Langues proposées à l'utilisateur (§5 : interface en français, avec
+    | possibilité de bascule). Le français est la langue source du texte des
+    | vues (clés de traduction), l'anglais est fourni via lang/en.json.
+    |
+    */
+
+    'available_locales' => [
+        'fr' => 'Français',
+        'en' => 'English',
+    ],
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 

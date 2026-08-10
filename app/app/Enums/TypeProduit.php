@@ -10,8 +10,8 @@ enum TypeProduit: string
     public function label(): string
     {
         return match ($this) {
-            self::IntrantAgricole => 'Intrant agricole',
-            self::ProduitPhytosanitaire => 'Produit phytosanitaire',
+            self::IntrantAgricole => __('Intrant agricole'),
+            self::ProduitPhytosanitaire => __('Produit phytosanitaire'),
         };
     }
 
