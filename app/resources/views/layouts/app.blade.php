@@ -34,6 +34,7 @@
             <a href="{{ route('dashboard') }}">{{ __('Tableau de bord') }}</a>
             <a href="{{ route('boutiques.index') }}">{{ __('Boutiques') }}</a>
             <a href="{{ route('produits.index') }}">{{ __('Catalogue') }}</a>
+            <a href="{{ route('ventes.index') }}">{{ __('Ventes') }}</a>
             <a href="{{ route('achats.index') }}">{{ __('Achats') }}</a>
             <a href="{{ route('stock.index') }}">{{ __('Stock') }}</a>
             @can('viewAny', App\Models\User::class)

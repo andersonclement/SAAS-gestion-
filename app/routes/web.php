@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\BoutiqueController;
 use App\Http\Controllers\CategorieController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\InventaireController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\TransfertStockController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VenteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -53,4 +55,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('transferts', TransfertStockController::class)->only(['index', 'create', 'store']);
         Route::resource('inventaires', InventaireController::class)->only(['index', 'create', 'store', 'show']);
     });
+
+    Route::resource('clients', ClientController::class)->only(['index', 'create', 'store']);
+    Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);
 });
