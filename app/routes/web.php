@@ -7,9 +7,12 @@ use App\Http\Controllers\BoutiqueController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\StockController;
+use App\Http\Controllers\TransfertStockController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,4 +47,10 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'create', 'store', 'show']);
     Route::get('/achats/{bon_commande}/receptionner', [ReceptionController::class, 'create'])->name('achats.receptionner.create');
     Route::post('/achats/{bon_commande}/receptionner', [ReceptionController::class, 'store'])->name('achats.receptionner.store');
+
+    Route::prefix('stock')->name('stock.')->group(function () {
+        Route::get('/', [StockController::class, 'index'])->name('index');
+        Route::resource('transferts', TransfertStockController::class)->only(['index', 'create', 'store']);
+        Route::resource('inventaires', InventaireController::class)->only(['index', 'create', 'store', 'show']);
+    });
 });

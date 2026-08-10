@@ -35,6 +35,7 @@
             <a href="{{ route('boutiques.index') }}">{{ __('Boutiques') }}</a>
             <a href="{{ route('produits.index') }}">{{ __('Catalogue') }}</a>
             <a href="{{ route('achats.index') }}">{{ __('Achats') }}</a>
+            <a href="{{ route('stock.index') }}">{{ __('Stock') }}</a>
             @can('viewAny', App\Models\User::class)
                 <a href="{{ route('users.index') }}">{{ __('Équipe') }}</a>
             @endcan
