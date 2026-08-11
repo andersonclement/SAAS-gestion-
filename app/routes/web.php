@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BonCommandeController;
@@ -65,4 +66,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tresorerie', [TresorerieController::class, 'index'])->name('tresorerie.index');
     Route::resource('depenses', DepenseController::class)->only(['index', 'create', 'store']);
+
+    Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
 });

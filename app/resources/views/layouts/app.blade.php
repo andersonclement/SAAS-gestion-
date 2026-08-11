@@ -38,6 +38,12 @@
             <a href="{{ route('achats.index') }}">{{ __('Achats') }}</a>
             <a href="{{ route('stock.index') }}">{{ __('Stock') }}</a>
             <a href="{{ route('tresorerie.index') }}">{{ __('Trésorerie') }}</a>
+            <a href="{{ route('alertes.index') }}">
+                {{ __('Alertes') }}
+                @if (($nombreAlertes ?? 0) > 0)
+                    <span class="badge" style="background:#c0392b;color:#fff;">{{ $nombreAlertes }}</span>
+                @endif
+            </a>
             @can('viewAny', App\Models\User::class)
                 <a href="{{ route('users.index') }}">{{ __('Équipe') }}</a>
             @endcan
