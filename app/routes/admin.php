@@ -23,6 +23,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/tenants', [TenantController::class, 'index'])->name('tenants.index');
         Route::get('/tenants/{tenant}', [TenantController::class, 'show'])->name('tenants.show');
+        Route::get('/tenants/{tenant}/journal', [TenantController::class, 'journal'])->name('tenants.journal');
+        Route::get('/tenants/{tenant}/ventes', [TenantController::class, 'ventes'])->name('tenants.ventes');
 
         Route::get('/codes', [CodeActivationController::class, 'index'])->name('codes.index');
         Route::get('/codes/creer', [CodeActivationController::class, 'create'])->name('codes.create');
