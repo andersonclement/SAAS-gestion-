@@ -13,6 +13,7 @@ use App\Models\Produit;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,6 +26,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ce seeder crée des comptes dont le mot de passe est « password » :
+        // l'exécuter en production ouvrirait la plateforme à n'importe qui.
+        if (app()->environment('production')) {
+            throw new RuntimeException(
+                'Le seeder de démonstration ne doit jamais être exécuté en production.'
+            );
+        }
+
         $tenant = Tenant::create([
             'nom' => 'AgroPlus Distribution',
             'email_contact' => 'contact@agroplus.test',

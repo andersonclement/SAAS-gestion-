@@ -10,6 +10,7 @@ use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class TransfertStockController extends Controller
@@ -49,8 +50,22 @@ class TransfertStockController extends Controller
     public function store(StoreTransfertStockRequest $request): RedirectResponse
     {
         $transfert = DB::transaction(function () use ($request) {
-            $stockSource = $request->stockBoutique();
             $quantite = (int) $request->validated('quantite');
+
+            // Verrou + re-vérification à l'intérieur de la transaction : la
+            // validation a lieu avant, donc deux transferts simultanés du
+            // même lot pourraient sinon rendre le stock source négatif.
+            $stockSource = StockBoutique::whereKey($request->stockBoutique()->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($stockSource->quantite < $quantite) {
+                throw ValidationException::withMessages([
+                    'quantite' => __('Stock insuffisant dans la boutique source (:disponible disponible).', [
+                        'disponible' => $stockSource->quantite,
+                    ]),
+                ]);
+            }
 
             $stockSource->decrement('quantite', $quantite);
 

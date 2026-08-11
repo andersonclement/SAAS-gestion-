@@ -3,6 +3,8 @@
 use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\BoutiqueContexteController;
@@ -38,10 +40,21 @@ Route::put('/locale/{locale}', [LocaleController::class, 'update'])->name('local
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:10,1');
 
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    // Filet de sécurité par IP, en complément du verrouillage par e-mail+IP
+    // appliqué dans le contrôleur (App\Support\LimiteurConnexions).
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:20,1');
+
+    Route::get('/mot-de-passe-oublie', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/mot-de-passe-oublie', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('password.email');
+    Route::get('/reinitialiser-mot-de-passe/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reinitialiser-mot-de-passe', [NewPasswordController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {

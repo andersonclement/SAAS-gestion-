@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\LimiteurConnexions;
 use App\Support\SuiviConnexions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,10 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        LimiteurConnexions::verifier($credentials['email'], 'admin');
+
         if (! Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
+            LimiteurConnexions::enregistrerEchec($credentials['email'], 'admin');
             SuiviConnexions::enregistrer($credentials['email'], false, 'admin');
 
             throw ValidationException::withMessages([
@@ -32,6 +36,7 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        LimiteurConnexions::reinitialiser($credentials['email'], 'admin');
         $request->session()->regenerate();
 
         SuiviConnexions::enregistrer($credentials['email'], true, 'admin');

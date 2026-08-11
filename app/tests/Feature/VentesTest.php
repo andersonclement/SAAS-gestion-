@@ -270,6 +270,47 @@ class VentesTest extends TestCase
         $response->assertSee('Payé comptant');
     }
 
+    /**
+     * La validation de StoreVenteRequest a lieu AVANT la transaction : si une
+     * autre caisse vend le même produit entre-temps, la vente ne doit pas
+     * passer quand même et rendre le stock négatif. On simule cette vente
+     * concurrente via un hook sur Vente::created, qui se déclenche à
+     * l'intérieur de la transaction, juste avant l'allocation du stock.
+     */
+    public function test_a_concurrent_sale_cannot_push_the_stock_negative(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $vendeur = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Vendeur, 'boutique_id' => $boutique->id]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'prix_vente' => 5000]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
+        $stock = StockBoutique::factory()->create([
+            'tenant_id' => $tenant->id, 'boutique_id' => $boutique->id,
+            'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 3,
+        ]);
+
+        Vente::created(function () use ($stock) {
+            // Une autre caisse vient d'écouler tout le stock disponible.
+            StockBoutique::whereKey($stock->id)->update(['quantite' => 0]);
+        });
+
+        $response = $this->actingAs($vendeur)->post('/ventes', [
+            'boutique_id' => $boutique->id,
+            'mode_paiement' => ModePaiement::Especes->value,
+            'lignes' => [
+                ['produit_id' => $produit->id, 'quantite' => 3],
+            ],
+        ]);
+
+        $response->assertSessionHasErrors();
+        // Le rollback annule aussi la vente concurrente simulée, d'où le
+        // retour à la quantité initiale : ce qui compte est qu'aucune
+        // quantité négative n'ait été écrite et que la vente soit rejetée.
+        $this->assertGreaterThanOrEqual(0, $stock->fresh()->quantite, 'Le stock ne doit jamais devenir négatif.');
+        // La vente doit être annulée avec la transaction.
+        $this->assertDatabaseCount('ventes', 0);
+    }
+
     public function test_a_vendeur_from_another_boutique_cannot_view_the_invoice(): void
     {
         $tenant = Tenant::factory()->create();

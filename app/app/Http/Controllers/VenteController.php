@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class VenteController extends Controller
@@ -121,6 +122,12 @@ class VenteController extends Controller
      * (FEFO — first-expired, first-out), et décrémente le stock en
      * conséquence. Le prix appliqué tient compte de la meilleure
      * promotion active pour ce produit/client (§4.16).
+     *
+     * Les lignes de stock sont verrouillées (SELECT ... FOR UPDATE) et la
+     * disponibilité est re-vérifiée à l'intérieur du verrou : la validation
+     * de StoreVenteRequest a lieu avant la transaction, donc deux ventes
+     * simultanées du même produit pourraient sinon passer toutes les deux
+     * ce contrôle et rendre le stock négatif (survente).
      */
     private function allouerStock(Vente $vente, int $produitId, int $quantiteDemandee, int $boutiqueId, ?Client $client): void
     {
@@ -128,13 +135,22 @@ class VenteController extends Controller
         $prixUnitaire = $this->prixApresPromotion($produit, $client);
 
         $stocks = StockBoutique::query()
-            ->join('lots', 'stock_boutiques.lot_id', '=', 'lots.id')
-            ->where('stock_boutiques.boutique_id', $boutiqueId)
-            ->where('stock_boutiques.produit_id', $produitId)
-            ->where('stock_boutiques.quantite', '>', 0)
-            ->orderByRaw('lots.date_peremption is null, lots.date_peremption asc')
-            ->select('stock_boutiques.*')
-            ->get();
+            ->where('boutique_id', $boutiqueId)
+            ->where('produit_id', $produitId)
+            ->where('quantite', '>', 0)
+            ->lockForUpdate()
+            ->get()
+            ->load('lot')
+            ->sortBy(fn (StockBoutique $stock) => $stock->lot->date_peremption ?? '9999-12-31')
+            ->values();
+
+        if ($stocks->sum('quantite') < $quantiteDemandee) {
+            throw ValidationException::withMessages([
+                'lignes' => __('Stock insuffisant dans la boutique source (:disponible disponible).', [
+                    'disponible' => $stocks->sum('quantite'),
+                ]),
+            ]);
+        }
 
         $restant = $quantiteDemandee;
 

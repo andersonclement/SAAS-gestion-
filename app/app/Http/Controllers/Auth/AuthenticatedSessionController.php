@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Support\Journal;
+use App\Support\LimiteurConnexions;
 use App\Support\SuiviConnexions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,10 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        LimiteurConnexions::verifier($credentials['email'], 'tenant');
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            LimiteurConnexions::enregistrerEchec($credentials['email'], 'tenant');
             SuiviConnexions::enregistrer($credentials['email'], false, 'tenant');
 
             throw ValidationException::withMessages([
@@ -34,6 +38,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         if (! Auth::user()->actif) {
+            LimiteurConnexions::enregistrerEchec($credentials['email'], 'tenant');
             SuiviConnexions::enregistrer($credentials['email'], false, 'tenant', Auth::user());
             Auth::logout();
 
@@ -43,6 +48,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         if (! Auth::user()->tenant->actif) {
+            LimiteurConnexions::enregistrerEchec($credentials['email'], 'tenant');
             SuiviConnexions::enregistrer($credentials['email'], false, 'tenant', Auth::user());
             Auth::logout();
 
@@ -51,6 +57,7 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        LimiteurConnexions::reinitialiser($credentials['email'], 'tenant');
         $request->session()->regenerate();
 
         SuiviConnexions::enregistrer($credentials['email'], true, 'tenant', Auth::user());

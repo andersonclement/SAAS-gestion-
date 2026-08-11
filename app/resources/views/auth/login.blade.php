@@ -22,7 +22,11 @@
             <button class="btn" type="submit">{{ __('Se connecter') }}</button>
         </form>
 
-        <p style="margin-top:1.5rem;font-size:.9rem;">
+        <p style="margin-top:1rem;font-size:.9rem;">
+            <a href="{{ route('password.request') }}">{{ __('Mot de passe oublié ?') }}</a>
+        </p>
+
+        <p style="margin-top:1rem;font-size:.9rem;">
             {{ __('Vous êtes un nouveau patron ?') }} <a href="{{ route('register') }}">{{ __('Créer votre espace') }}</a>
         </p>
     </div>
