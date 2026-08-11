@@ -28,6 +28,7 @@
                     <th>{{ __('Quantité') }}</th>
                     <th>{{ __('Prix unitaire') }}</th>
                     <th>{{ __('Sous-total') }}</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +39,13 @@
                         <td>{{ $ligne->quantite }}</td>
                         <td>{{ number_format($ligne->prix_unitaire, 0, ',', ' ') }} FCFA</td>
                         <td>{{ number_format($ligne->sousTotal(), 0, ',', ' ') }} FCFA</td>
+                        <td>
+                            @can('create', App\Models\Retour::class)
+                                @if ($ligne->quantiteRetournable() > 0)
+                                    <a href="{{ route('retours.create', $ligne) }}">{{ __('Retourner') }}</a>
+                                @endif
+                            @endcan
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

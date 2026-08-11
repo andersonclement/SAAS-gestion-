@@ -16,6 +16,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\ReglementController;
+use App\Http\Controllers\RetourController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\TransfertStockController;
 use App\Http\Controllers\TresorerieController;
@@ -64,6 +65,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/ventes/{vente}/reglements', [ReglementController::class, 'store'])->name('ventes.reglements.store');
+
+    Route::get('/retours', [RetourController::class, 'index'])->name('retours.index');
+    Route::get('/retours/{retour}', [RetourController::class, 'show'])->name('retours.show');
+    Route::get('/lignes-vente/{ligne_vente}/retour', [RetourController::class, 'create'])->name('retours.create');
+    Route::post('/lignes-vente/{ligne_vente}/retour', [RetourController::class, 'store'])->name('retours.store');
 
     Route::get('/tresorerie', [TresorerieController::class, 'index'])->name('tresorerie.index');
     Route::resource('depenses', DepenseController::class)->only(['index', 'create', 'store']);
