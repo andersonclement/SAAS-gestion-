@@ -6,6 +6,7 @@ use App\Http\Requests\StoreInventaireRequest;
 use App\Models\Boutique;
 use App\Models\Inventaire;
 use App\Models\StockBoutique;
+use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,8 @@ class InventaireController extends Controller
 
             return $inventaire;
         });
+
+        Journal::enregistrer('stock.inventaire', __('Inventaire réalisé pour la boutique.'), $inventaire->boutique_id);
 
         return redirect()->route('stock.inventaires.show', $inventaire)->with('status', __('Inventaire enregistré, le stock a été ajusté.'));
     }

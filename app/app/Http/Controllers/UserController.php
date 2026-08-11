@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\Boutique;
 use App\Models\User;
+use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +38,7 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
-        User::create([
+        $user = User::create([
             'tenant_id' => Auth::user()->tenant_id,
             'boutique_id' => $validated['boutique_id'] ?? null,
             'name' => $validated['name'],
@@ -46,6 +47,11 @@ class UserController extends Controller
             'role' => $validated['role'],
         ]);
 
+        Journal::enregistrer('utilisateur.cree', __('Compte créé pour :nom (:role).', [
+            'nom' => $user->name,
+            'role' => $user->role->label(),
+        ]), $user->boutique_id);
+
         return redirect()->route('users.index')->with('status', __('Compte créé avec succès.'));
     }
 
@@ -53,7 +59,12 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
 
+        $nom = $user->name;
+        $boutiqueId = $user->boutique_id;
+
         $user->delete();
+
+        Journal::enregistrer('utilisateur.supprime', __('Compte de :nom supprimé.', ['nom' => $nom]), $boutiqueId);
 
         return redirect()->route('users.index')->with('status', __('Compte supprimé.'));
     }

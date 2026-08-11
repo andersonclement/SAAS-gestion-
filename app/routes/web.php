@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\InventaireController;
+use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ReceptionController;
@@ -68,4 +69,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('depenses', DepenseController::class)->only(['index', 'create', 'store']);
 
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
+
+    Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
 });

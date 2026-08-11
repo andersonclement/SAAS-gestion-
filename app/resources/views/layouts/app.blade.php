@@ -47,6 +47,7 @@
             @can('viewAny', App\Models\User::class)
                 <a href="{{ route('users.index') }}">{{ __('Équipe') }}</a>
             @endcan
+            <a href="{{ route('journal.index') }}">{{ __('Journal') }}</a>
         </div>
         <div>
             @include('partials.locale-switcher')

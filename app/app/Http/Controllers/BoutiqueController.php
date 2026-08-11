@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBoutiqueRequest;
 use App\Models\Boutique;
+use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -32,7 +33,9 @@ class BoutiqueController extends Controller
 
     public function store(StoreBoutiqueRequest $request): RedirectResponse
     {
-        Boutique::create($request->validated());
+        $boutique = Boutique::create($request->validated());
+
+        Journal::enregistrer('boutique.creee', __('Boutique :nom créée.', ['nom' => $boutique->nom]), $boutique->id);
 
         return redirect()->route('boutiques.index')->with('status', __('Boutique créée avec succès.'));
     }

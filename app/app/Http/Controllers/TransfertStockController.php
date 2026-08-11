@@ -6,6 +6,7 @@ use App\Http\Requests\StoreTransfertStockRequest;
 use App\Models\Boutique;
 use App\Models\StockBoutique;
 use App\Models\TransfertStock;
+use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,7 @@ class TransfertStockController extends Controller
 
     public function store(StoreTransfertStockRequest $request): RedirectResponse
     {
-        DB::transaction(function () use ($request) {
+        $transfert = DB::transaction(function () use ($request) {
             $stockSource = $request->stockBoutique();
             $quantite = (int) $request->validated('quantite');
 
@@ -66,7 +67,7 @@ class TransfertStockController extends Controller
             );
             $stockDestination->increment('quantite', $quantite);
 
-            TransfertStock::create([
+            return TransfertStock::create([
                 'produit_id' => $stockSource->produit_id,
                 'lot_id' => $stockSource->lot_id,
                 'boutique_source_id' => $stockSource->boutique_id,
@@ -74,6 +75,10 @@ class TransfertStockController extends Controller
                 'quantite' => $quantite,
             ]);
         });
+
+        Journal::enregistrer('stock.transfert', __(':quantite unité(s) transférées vers une autre boutique.', [
+            'quantite' => $transfert->quantite,
+        ]), $transfert->boutique_source_id);
 
         return redirect()->route('stock.index')->with('status', __('Transfert de stock enregistré.'));
     }

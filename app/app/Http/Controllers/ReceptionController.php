@@ -6,6 +6,7 @@ use App\Http\Requests\StoreReceptionRequest;
 use App\Models\BonCommande;
 use App\Models\Lot;
 use App\Models\StockBoutique;
+use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -62,6 +63,10 @@ class ReceptionController extends Controller
 
             $bonCommande->update(['statut' => 'recu', 'recu_le' => now()]);
         });
+
+        Journal::enregistrer('achat.receptionne', __('Bon de commande :numero réceptionné.', [
+            'numero' => $bonCommande->numero,
+        ]), $bonCommande->boutique_id);
 
         return redirect()->route('achats.show', $bonCommande)->with('status', __('Réception enregistrée, le stock a été mis à jour.'));
     }

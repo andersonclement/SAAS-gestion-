@@ -9,6 +9,7 @@ use App\Models\Paiement;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Models\Vente;
+use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -76,6 +77,11 @@ class VenteController extends Controller
 
             return $vente;
         });
+
+        Journal::enregistrer('vente.creee', __('Vente :numero enregistrée (:montant FCFA).', [
+            'numero' => $vente->numero,
+            'montant' => number_format($vente->montantTotal(), 0, ',', ' '),
+        ]), $vente->boutique_id);
 
         return redirect()->route('ventes.show', $vente)->with('status', __('Vente enregistrée avec succès.'));
     }
