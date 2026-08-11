@@ -38,6 +38,14 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        if (! Auth::user()->tenant->actif) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => __("Cet espace a été suspendu par l'administrateur de la plateforme."),
+            ]);
+        }
+
         $request->session()->regenerate();
 
         Journal::enregistrer('connexion', __('Connexion à la plateforme.'));

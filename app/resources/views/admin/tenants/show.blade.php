@@ -4,7 +4,21 @@
 
 @section('content')
     <p><a href="{{ route('admin.tenants.index') }}">&larr; {{ __('Clients (tenants)') }}</a></p>
-    <h1 style="margin-top:0;">{{ $tenant->nom }}</h1>
+    <h1 style="margin-top:0;display:flex;align-items:center;gap:.75rem;">
+        {{ $tenant->nom }}
+        @if (! $tenant->actif)
+            <span class="badge" style="background:#fdecea;color:#7a1f1f;font-size:.85rem;">{{ __('Suspendu') }}</span>
+        @endif
+    </h1>
+
+    <p>
+        <form method="POST" action="{{ route('admin.tenants.toggle-actif', $tenant) }}" onsubmit="return confirm('{{ $tenant->actif ? __('Suspendre ce client ? Il sera immédiatement déconnecté et ne pourra plus se reconnecter.') : __('Réactiver ce client ?') }}');">
+            @csrf
+            <button type="submit" class="btn {{ $tenant->actif ? 'btn-danger' : '' }}">
+                {{ $tenant->actif ? __('Suspendre ce client') : __('Réactiver ce client') }}
+            </button>
+        </form>
+    </p>
 
     <div style="margin-bottom:1.5rem;">
         <a href="{{ route('admin.tenants.show', $tenant) }}" style="margin-right:1.25rem;font-weight:700;">{{ __("Vue d'ensemble") }}</a>

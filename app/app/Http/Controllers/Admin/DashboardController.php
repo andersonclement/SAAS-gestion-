@@ -18,6 +18,7 @@ class DashboardController extends Controller
         $tenantsActifs = $tenants->filter(fn (Tenant $tenant) => $tenant->abonnementActif());
         $tenantsExpires = $tenants->filter(fn (Tenant $tenant) => $tenant->plan !== null && ! $tenant->abonnementActif());
         $tenantsExpirentBientot = $tenantsActifs->filter(fn (Tenant $tenant) => $tenant->joursAvantExpiration() <= 7);
+        $tenantsSuspendus = $tenants->filter(fn (Tenant $tenant) => ! $tenant->actif);
 
         $revenuMensuelRecurrent = $tenantsActifs->sum(fn (Tenant $tenant) => $tenant->plan->prixMensuel());
 
@@ -31,6 +32,7 @@ class DashboardController extends Controller
             'nombreTenantsActifs' => $tenantsActifs->count(),
             'nombreTenantsExpires' => $tenantsExpires->count(),
             'nombreTenantsExpirentBientot' => $tenantsExpirentBientot->count(),
+            'nombreTenantsSuspendus' => $tenantsSuspendus->count(),
             'revenuMensuelRecurrent' => $revenuMensuelRecurrent,
             'codesEnAttente' => $codesEnAttente,
             'derniersTenants' => $derniersTenants,

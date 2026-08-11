@@ -11,6 +11,7 @@ use App\Models\Tenant;
 use App\Models\Vente;
 use App\Models\VersementCaisse;
 use App\Support\CentreAlertes;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -20,15 +21,25 @@ class TenantController extends Controller
     public function index(Request $request): View
     {
         $recherche = trim((string) $request->query('q'));
+        $statut = $request->query('statut');
+        $aujourdhui = Carbon::today()->toDateString();
 
         $tenants = Tenant::withCount(['boutiques', 'users'])
             ->when($recherche !== '', fn ($query) => $query->where(fn ($q) => $q
                 ->where('nom', 'like', "%{$recherche}%")
                 ->orWhere('email_contact', 'like', "%{$recherche}%")))
+            ->when($statut === 'suspendu', fn ($query) => $query->where('actif', false))
+            ->when($statut === 'actif', fn ($query) => $query->where('actif', true)
+                ->whereNotNull('abonnement_expire_le')->where('abonnement_expire_le', '>=', $aujourdhui))
+            ->when($statut === 'expire', fn ($query) => $query->where(fn ($q) => $q
+                ->whereNull('abonnement_expire_le')->orWhere('abonnement_expire_le', '<', $aujourdhui)))
+            ->when($statut === 'expire_bientot', fn ($query) => $query
+                ->whereNotNull('abonnement_expire_le')
+                ->whereBetween('abonnement_expire_le', [$aujourdhui, Carbon::today()->addDays(7)->toDateString()]))
             ->orderBy('nom')
             ->get();
 
-        return view('admin.tenants.index', compact('tenants', 'recherche'));
+        return view('admin.tenants.index', compact('tenants', 'recherche', 'statut'));
     }
 
     /**
@@ -130,5 +141,23 @@ class TenantController extends Controller
             ->paginate(50);
 
         return view('admin.tenants.ventes', compact('tenant', 'ventes'));
+    }
+
+    /**
+     * Suspend ou réactive un tenant : contrairement à l'expiration
+     * d'abonnement (que le patron peut lever lui-même avec un code), seul
+     * le superadmin peut lever une suspension. Un tenant suspendu est
+     * immédiatement déconnecté (VerifierAbonnement) et ne peut plus se
+     * reconnecter tant qu'il n'est pas réactivé.
+     */
+    public function toggleActif(Tenant $tenant): RedirectResponse
+    {
+        $tenant->update(['actif' => ! $tenant->actif]);
+
+        $message = $tenant->actif
+            ? __('Client réactivé.')
+            : __('Client suspendu.');
+
+        return back()->with('status', $message);
     }
 }

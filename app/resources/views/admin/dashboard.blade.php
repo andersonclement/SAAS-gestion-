@@ -6,30 +6,34 @@
     <h1 style="margin-top:0;">{{ __('Tableau de bord') }}</h1>
 
     <div class="kpi-grid">
-        <div class="kpi-card">
+        <a class="kpi-card" href="{{ route('admin.tenants.index') }}" style="text-decoration:none;color:inherit;display:block;">
             <p class="label">{{ __('Clients (tenants)') }}</p>
             <p class="value">{{ $nombreTenants }}</p>
-        </div>
-        <div class="kpi-card">
+        </a>
+        <a class="kpi-card" href="{{ route('admin.tenants.index', ['statut' => 'actif']) }}" style="text-decoration:none;color:inherit;display:block;">
             <p class="label">{{ __('Abonnements actifs') }}</p>
             <p class="value" style="color:#1e4620;">{{ $nombreTenantsActifs }}</p>
-        </div>
-        <div class="kpi-card">
+        </a>
+        <a class="kpi-card" href="{{ route('admin.tenants.index', ['statut' => 'expire']) }}" style="text-decoration:none;color:inherit;display:block;">
             <p class="label">{{ __('Abonnements expirés') }}</p>
             <p class="value" style="color:#7a1f1f;">{{ $nombreTenantsExpires }}</p>
-        </div>
-        <div class="kpi-card">
+        </a>
+        <a class="kpi-card" href="{{ route('admin.tenants.index', ['statut' => 'expire_bientot']) }}" style="text-decoration:none;color:inherit;display:block;">
             <p class="label">{{ __('Expirent sous 7 jours') }}</p>
             <p class="value" style="color:#92400e;">{{ $nombreTenantsExpirentBientot }}</p>
-        </div>
+        </a>
+        <a class="kpi-card" href="{{ route('admin.tenants.index', ['statut' => 'suspendu']) }}" style="text-decoration:none;color:inherit;display:block;">
+            <p class="label">{{ __('Clients suspendus') }}</p>
+            <p class="value" style="color:#7a1f1f;">{{ $nombreTenantsSuspendus }}</p>
+        </a>
         <div class="kpi-card">
             <p class="label">{{ __('Revenu mensuel récurrent') }}</p>
             <p class="value">{{ number_format($revenuMensuelRecurrent, 0, ',', ' ') }} FCFA</p>
         </div>
-        <div class="kpi-card">
+        <a class="kpi-card" href="{{ route('admin.codes.index', ['statut' => 'en_attente']) }}" style="text-decoration:none;color:inherit;display:block;">
             <p class="label">{{ __("Codes en attente d'utilisation") }}</p>
             <p class="value">{{ $codesEnAttente }}</p>
-        </div>
+        </a>
     </div>
 
     <p><a class="btn" href="{{ route('admin.codes.create') }}">+ {{ __("Générer un code d'activation") }}</a></p>

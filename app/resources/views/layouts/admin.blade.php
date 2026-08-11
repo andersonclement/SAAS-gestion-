@@ -48,6 +48,8 @@
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">{{ __('Tableau de bord') }}</a>
             <a href="{{ route('admin.tenants.index') }}" class="{{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}">{{ __('Clients (tenants)') }}</a>
             <a href="{{ route('admin.codes.index') }}" class="{{ request()->routeIs('admin.codes.*') ? 'active' : '' }}">{{ __("Codes d'activation") }}</a>
+            <a href="{{ route('admin.journal.index') }}" class="{{ request()->routeIs('admin.journal.*') ? 'active' : '' }}">{{ __('Journal global') }}</a>
+            <a href="{{ route('admin.admins.index') }}" class="{{ request()->routeIs('admin.admins.*') ? 'active' : '' }}">{{ __('Administrateurs') }}</a>
         </nav>
         <div class="admin-main">
             <div class="admin-topbar">
