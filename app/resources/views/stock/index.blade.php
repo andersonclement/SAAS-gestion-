@@ -47,8 +47,12 @@
         @endif
 
         <p style="margin-top:1rem;">
-            <a class="btn" href="{{ route('stock.transferts.create') }}">{{ __('Transférer du stock') }}</a>
-            <a class="btn" style="background:#555;margin-left:.5rem;" href="{{ route('stock.inventaires.create') }}">{{ __('Faire un inventaire') }}</a>
+            @can('create', App\Models\TransfertStock::class)
+                <a class="btn" href="{{ route('stock.transferts.create') }}">{{ __('Transférer du stock') }}</a>
+            @endcan
+            @can('create', App\Models\Inventaire::class)
+                <a class="btn" style="background:#555;margin-left:.5rem;" href="{{ route('stock.inventaires.create') }}">{{ __('Faire un inventaire') }}</a>
+            @endcan
             <a href="{{ route('stock.transferts.index') }}" style="margin-left:1rem;">{{ __('Historique des transferts') }}</a>
             <a href="{{ route('stock.inventaires.index') }}" style="margin-left:1rem;">{{ __('Historique des inventaires') }}</a>
         </p>

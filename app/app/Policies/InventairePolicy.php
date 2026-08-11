@@ -22,11 +22,13 @@ class InventairePolicy
     }
 
     /**
-     * Seuls le patron et les gérants réalisent un inventaire, un gérant
-     * uniquement pour sa propre boutique (vérifié dans la requête).
+     * L'inventaire ajuste directement les quantités en stock sans passer
+     * par une facture ou une transaction (vente, achat, transfert) : pour
+     * éviter toute modification de stock non tracée par un gérant, seul
+     * le patron peut réaliser un inventaire.
      */
     public function create(User $user): bool
     {
-        return $user->isPatron() || $user->isGerant();
+        return $user->isPatron();
     }
 }

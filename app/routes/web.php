@@ -25,6 +25,7 @@ use App\Http\Controllers\TransfertStockController;
 use App\Http\Controllers\TresorerieController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VenteController;
+use App\Http\Controllers\VersementCaisseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -78,6 +79,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tresorerie', [TresorerieController::class, 'index'])->name('tresorerie.index');
     Route::resource('depenses', DepenseController::class)->only(['index', 'create', 'store']);
+    Route::resource('versements', VersementCaisseController::class)->only(['index', 'create', 'store']);
 
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
 

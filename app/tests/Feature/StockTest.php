@@ -168,4 +168,26 @@ class StockTest extends TestCase
         $this->actingAs($vendeur)->get('/stock/transferts/create')->assertForbidden();
         $this->actingAs($vendeur)->get('/stock/inventaires/create')->assertForbidden();
     }
+
+    public function test_a_gerant_cannot_perform_an_inventory_adjustment(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $gerant = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Gerant, 'boutique_id' => $boutique->id]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
+        $stock = StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 20]);
+
+        $this->actingAs($gerant)->get('/stock/inventaires/create')->assertForbidden();
+
+        $response = $this->actingAs($gerant)->post('/stock/inventaires', [
+            'boutique_id' => $boutique->id,
+            'lignes' => [
+                $stock->id => ['quantite_physique' => 5],
+            ],
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('stock_boutiques', ['id' => $stock->id, 'quantite' => 20]);
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\Depense;
 use App\Models\LigneBonCommande;
 use App\Models\LigneVente;
 use App\Models\Paiement;
+use App\Models\VersementCaisse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -36,7 +37,11 @@ class TresorerieController extends Controller
             ->whereDate('date', Carbon::today())
             ->sum('montant');
 
-        $caisseDuJour = $encaissementsDuJour - $depensesDuJour;
+        $versementsDuJour = VersementCaisse::whereIn('boutique_id', $boutiqueIds)
+            ->whereDate('date', Carbon::today())
+            ->sum('montant');
+
+        $caisseDuJour = $encaissementsDuJour - $depensesDuJour - $versementsDuJour;
 
         $ventesDuMois = LigneVente::whereHas('vente', fn ($query) => $query
             ->whereIn('boutique_id', $boutiqueIds)
@@ -63,15 +68,23 @@ class TresorerieController extends Controller
             ->limit(10)
             ->get();
 
+        $versementsRecents = VersementCaisse::with(['boutique', 'remisPar'])
+            ->whereIn('boutique_id', $boutiqueIds)
+            ->latest('date')
+            ->limit(10)
+            ->get();
+
         return view('tresorerie.index', [
             'caisseDuJour' => $caisseDuJour,
             'encaissementsDuJour' => $encaissementsDuJour,
             'depensesDuJour' => $depensesDuJour,
+            'versementsDuJour' => $versementsDuJour,
             'ventesDuMois' => $ventesDuMois,
             'achatsDuMois' => $achatsDuMois,
             'depensesDuMois' => $depensesDuMois,
             'beneficeNetDuMois' => $beneficeNetDuMois,
             'depensesRecentes' => $depensesRecentes,
+            'versementsRecents' => $versementsRecents,
         ]);
     }
 }
