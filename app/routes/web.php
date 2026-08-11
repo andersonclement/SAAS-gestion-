@@ -14,6 +14,7 @@ use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProduitController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\ReglementController;
 use App\Http\Controllers\RetourController;
@@ -61,6 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('transferts', TransfertStockController::class)->only(['index', 'create', 'store']);
         Route::resource('inventaires', InventaireController::class)->only(['index', 'create', 'store', 'show']);
     });
+
+    Route::resource('promotions', PromotionController::class)->only(['index', 'create', 'store']);
 
     Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);

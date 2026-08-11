@@ -7,10 +7,12 @@ use App\Models\Boutique;
 use App\Models\Client;
 use App\Models\Paiement;
 use App\Models\Produit;
+use App\Models\Promotion;
 use App\Models\StockBoutique;
 use App\Models\Vente;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -52,12 +54,15 @@ class VenteController extends Controller
         $vente = DB::transaction(function () use ($request) {
             $vente = Vente::create($request->safe()->only(['boutique_id', 'client_id', 'date_echeance']));
 
+            $client = $request->validated('client_id') ? Client::find($request->validated('client_id')) : null;
+
             foreach ($request->validated('lignes') as $ligne) {
                 $this->allouerStock(
                     $vente,
                     (int) $ligne['produit_id'],
                     (int) $ligne['quantite'],
-                    (int) $request->validated('boutique_id')
+                    (int) $request->validated('boutique_id'),
+                    $client
                 );
             }
 
@@ -99,11 +104,13 @@ class VenteController extends Controller
      * Alloue la quantité vendue sur les lots disponibles de la boutique en
      * épuisant en priorité ceux dont la péremption est la plus proche
      * (FEFO — first-expired, first-out), et décrémente le stock en
-     * conséquence.
+     * conséquence. Le prix appliqué tient compte de la meilleure
+     * promotion active pour ce produit/client (§4.16).
      */
-    private function allouerStock(Vente $vente, int $produitId, int $quantiteDemandee, int $boutiqueId): void
+    private function allouerStock(Vente $vente, int $produitId, int $quantiteDemandee, int $boutiqueId, ?Client $client): void
     {
         $produit = Produit::findOrFail($produitId);
+        $prixUnitaire = $this->prixApresPromotion($produit, $client);
 
         $stocks = StockBoutique::query()
             ->join('lots', 'stock_boutiques.lot_id', '=', 'lots.id')
@@ -128,10 +135,25 @@ class VenteController extends Controller
                 'produit_id' => $produitId,
                 'lot_id' => $stock->lot_id,
                 'quantite' => $prelevement,
-                'prix_unitaire' => $produit->prix_vente,
+                'prix_unitaire' => $prixUnitaire,
             ]);
 
             $restant -= $prelevement;
         }
+    }
+
+    private function prixApresPromotion(Produit $produit, ?Client $client): int
+    {
+        $aujourdhui = Carbon::today();
+
+        $meilleureRemise = Promotion::where('actif', true)
+            ->where('date_debut', '<=', $aujourdhui)
+            ->where('date_fin', '>=', $aujourdhui)
+            ->get()
+            ->filter(fn (Promotion $promotion) => $promotion->sApplique($produit, $client))
+            ->map(fn (Promotion $promotion) => $promotion->remisePour($produit->prix_vente))
+            ->max() ?? 0;
+
+        return $produit->prix_vente - $meilleureRemise;
     }
 }

@@ -36,6 +36,7 @@
             <a href="{{ route('produits.index') }}">{{ __('Catalogue') }}</a>
             <a href="{{ route('ventes.index') }}">{{ __('Ventes') }}</a>
             <a href="{{ route('retours.index') }}">{{ __('Retours') }}</a>
+            <a href="{{ route('promotions.index') }}">{{ __('Promotions') }}</a>
             <a href="{{ route('achats.index') }}">{{ __('Achats') }}</a>
             <a href="{{ route('stock.index') }}">{{ __('Stock') }}</a>
             <a href="{{ route('tresorerie.index') }}">{{ __('Trésorerie') }}</a>
