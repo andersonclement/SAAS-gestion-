@@ -38,6 +38,12 @@
                 <input id="adresse" type="text" name="adresse" value="{{ old('adresse') }}">
             </div>
 
+            <div class="field">
+                <label for="plafond_credit">{{ __('Plafond de crédit (FCFA, optionnel)') }}</label>
+                <input id="plafond_credit" type="number" min="0" name="plafond_credit" value="{{ old('plafond_credit') }}">
+                <small style="color:#555;">{{ __('Laisser vide pour interdire toute vente à crédit à ce client.') }}</small>
+            </div>
+
             <button class="btn" type="submit">{{ __('Créer le client') }}</button>
         </form>
     </div>

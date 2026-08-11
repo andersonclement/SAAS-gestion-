@@ -12,6 +12,7 @@ use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\ReglementController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\TransfertStockController;
 use App\Http\Controllers\UserController;
@@ -56,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('inventaires', InventaireController::class)->only(['index', 'create', 'store', 'show']);
     });
 
-    Route::resource('clients', ClientController::class)->only(['index', 'create', 'store']);
+    Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);
+    Route::post('/ventes/{vente}/reglements', [ReglementController::class, 'store'])->name('ventes.reglements.store');
 });

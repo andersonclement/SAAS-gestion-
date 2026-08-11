@@ -56,6 +56,22 @@
                 </select>
             </div>
 
+            <div class="field">
+                <label><input type="checkbox" id="vente-a-credit" @checked(old('montant_paye') !== null)> {{ __('Vente à crédit (paiement partiel)') }}</label>
+            </div>
+
+            <div id="champs-credit" style="display:none;">
+                <div class="field">
+                    <label for="montant_paye">{{ __('Montant payé maintenant (FCFA)') }}</label>
+                    <input id="montant_paye" type="number" min="0" name="montant_paye" value="{{ old('montant_paye', 0) }}">
+                </div>
+                <div class="field">
+                    <label for="date_echeance">{{ __("Date d'échéance") }}</label>
+                    <input id="date_echeance" type="date" name="date_echeance" value="{{ old('date_echeance') }}">
+                </div>
+                <p style="color:#555;font-size:.85rem;">{{ __('Un client doit être sélectionné et disposer d\'un plafond de crédit suffisant.') }}</p>
+            </div>
+
             <button class="btn" type="submit">{{ __('Enregistrer la vente') }}</button>
         </form>
     </div>
@@ -123,6 +139,14 @@
             });
 
             ajouterLigne();
+
+            const caseACredit = document.getElementById('vente-a-credit');
+            const champsCredit = document.getElementById('champs-credit');
+            function basculerChampsCredit() {
+                champsCredit.style.display = caseACredit.checked ? 'block' : 'none';
+            }
+            caseACredit.addEventListener('change', basculerChampsCredit);
+            basculerChampsCredit();
         })();
     </script>
 @endsection

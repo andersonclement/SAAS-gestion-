@@ -21,6 +21,7 @@ class StoreClientRequest extends FormRequest
             'telephone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'adresse' => ['nullable', 'string', 'max:255'],
+            'plafond_credit' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

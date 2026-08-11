@@ -49,7 +49,7 @@ class VenteController extends Controller
     public function store(StoreVenteRequest $request): RedirectResponse
     {
         $vente = DB::transaction(function () use ($request) {
-            $vente = Vente::create($request->safe()->only(['boutique_id', 'client_id']));
+            $vente = Vente::create($request->safe()->only(['boutique_id', 'client_id', 'date_echeance']));
 
             foreach ($request->validated('lignes') as $ligne) {
                 $this->allouerStock(
@@ -62,11 +62,17 @@ class VenteController extends Controller
 
             $vente->load('lignes');
 
-            Paiement::create([
-                'vente_id' => $vente->id,
-                'mode' => $request->validated('mode_paiement'),
-                'montant' => $vente->montantTotal(),
-            ]);
+            $montantPaye = $request->filled('montant_paye')
+                ? (int) $request->validated('montant_paye')
+                : $vente->montantTotal();
+
+            if ($montantPaye > 0) {
+                Paiement::create([
+                    'vente_id' => $vente->id,
+                    'mode' => $request->validated('mode_paiement'),
+                    'montant' => $montantPaye,
+                ]);
+            }
 
             return $vente;
         });

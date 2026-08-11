@@ -10,6 +10,13 @@
         <p><strong>{{ __('Boutique') }} :</strong> {{ $vente->boutique->nom }}</p>
         <p><strong>{{ __('Client') }} :</strong> {{ $vente->client?->nom ?? __('Client de passage') }}</p>
         <p><strong>{{ __('Vendeur') }} :</strong> {{ $vente->vendeur->name }}</p>
+        @if ($vente->estACredit())
+            <p><strong>{{ __("Date d'échéance") }} :</strong> {{ $vente->date_echeance->format('d/m/Y') }}
+                @if ($vente->estEnRetard())
+                    <span class="badge" style="background:#fdecea;color:#611a15;">{{ __('En retard') }}</span>
+                @endif
+            </p>
+        @endif
     </div>
 
     <div class="card">
@@ -43,5 +50,28 @@
         @foreach ($vente->paiements as $paiement)
             <p>{{ $paiement->mode->label() }} — {{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</p>
         @endforeach
+
+        @if ($vente->montantDu() > 0)
+            <p style="font-weight:700;color:#7a1f1f;">{{ __('Solde dû') }} : {{ number_format($vente->montantDu(), 0, ',', ' ') }} FCFA</p>
+
+            @if (! auth()->user()->isComptable())
+                <form method="POST" action="{{ route('ventes.reglements.store', $vente) }}" style="display:flex;gap:.5rem;align-items:end;max-width:420px;">
+                    @csrf
+                    <div class="field" style="margin-bottom:0;">
+                        <label for="reglement_mode">{{ __('Mode') }}</label>
+                        <select id="reglement_mode" name="mode" required>
+                            @foreach (\App\Enums\ModePaiement::cases() as $mode)
+                                <option value="{{ $mode->value }}">{{ $mode->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field" style="margin-bottom:0;">
+                        <label for="reglement_montant">{{ __('Montant (FCFA)') }}</label>
+                        <input id="reglement_montant" type="number" min="1" max="{{ $vente->montantDu() }}" name="montant" value="{{ $vente->montantDu() }}" required>
+                    </div>
+                    <button class="btn" type="submit">{{ __('Enregistrer le règlement') }}</button>
+                </form>
+            @endif
+        @endif
     </div>
 @endsection

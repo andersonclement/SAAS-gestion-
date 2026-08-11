@@ -11,7 +11,14 @@
         @else
             <table>
                 <thead>
-                    <tr><th>{{ __('Nom') }}</th><th>{{ __('Type') }}</th><th>{{ __('Téléphone') }}</th><th>{{ __('E-mail') }}</th></tr>
+                    <tr>
+                        <th>{{ __('Nom') }}</th>
+                        <th>{{ __('Type') }}</th>
+                        <th>{{ __('Téléphone') }}</th>
+                        <th>{{ __('Plafond de crédit') }}</th>
+                        <th>{{ __('Solde dû') }}</th>
+                        <th></th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach ($clients as $client)
@@ -19,7 +26,14 @@
                             <td>{{ $client->nom }}</td>
                             <td>{{ $client->type->label() }}</td>
                             <td>{{ $client->telephone ?? '—' }}</td>
-                            <td>{{ $client->email ?? '—' }}</td>
+                            <td>{{ $client->plafond_credit !== null ? number_format($client->plafond_credit, 0, ',', ' ').' FCFA' : '—' }}</td>
+                            <td>
+                                @php($soldeDette = $client->soldeDette())
+                                <span @if ($soldeDette > 0) style="color:#7a1f1f;font-weight:600;" @endif>
+                                    {{ number_format($soldeDette, 0, ',', ' ') }} FCFA
+                                </span>
+                            </td>
+                            <td><a href="{{ route('clients.show', $client) }}">{{ __('Voir') }}</a></td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -19,7 +19,15 @@ class Vente extends Model
         'client_id',
         'vendeur_id',
         'numero',
+        'date_echeance',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'date_echeance' => 'date',
+        ];
+    }
 
     protected static function booted(): void
     {
@@ -69,5 +77,25 @@ class Vente extends Model
     public function montantPaye(): int
     {
         return $this->paiements->sum('montant');
+    }
+
+    public function montantDu(): int
+    {
+        return max(0, $this->montantTotal() - $this->montantPaye());
+    }
+
+    public function estACredit(): bool
+    {
+        return $this->date_echeance !== null;
+    }
+
+    public function estSoldee(): bool
+    {
+        return $this->montantDu() === 0;
+    }
+
+    public function estEnRetard(): bool
+    {
+        return $this->estACredit() && ! $this->estSoldee() && $this->date_echeance->isPast();
     }
 }

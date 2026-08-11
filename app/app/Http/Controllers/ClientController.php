@@ -29,4 +29,23 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')->with('status', __('Client créé avec succès.'));
     }
+
+    /**
+     * Fiche client : plafond de crédit, solde de dette et échéancier des
+     * ventes à crédit non soldées (§4.9).
+     */
+    public function show(Client $client): View
+    {
+        $ventesACredit = $client->ventes()
+            ->with(['lignes', 'paiements', 'boutique'])
+            ->whereNotNull('date_echeance')
+            ->latest()
+            ->get()
+            ->filter(fn ($vente) => ! $vente->estSoldee());
+
+        return view('clients.show', [
+            'client' => $client,
+            'ventesACredit' => $ventesACredit,
+        ]);
+    }
 }
