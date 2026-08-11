@@ -14,7 +14,7 @@ class StoreRetourRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', Retour::class);
+        return $this->user()->can('create', [Retour::class, $this->route('ligne_vente')]);
     }
 
     public function rules(): array

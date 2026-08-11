@@ -68,6 +68,18 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 php artisan up
 ```
 
+### Vérifier les dépendances à chaque déploiement
+
+```bash
+composer audit
+```
+
+Cette commande signale les vulnérabilités connues des paquets installés.
+Elle doit renvoyer *No security vulnerability advisories found* ; sinon,
+mettre à jour le paquet concerné avant de déployer. À exécuter également
+une fois par mois même sans déploiement : une faille peut être publiée
+sur une version que vous utilisez déjà.
+
 ## 4. Tâches planifiées
 
 Le planificateur Laravel doit tourner (utile pour les traitements

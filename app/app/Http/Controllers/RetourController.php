@@ -30,7 +30,7 @@ class RetourController extends Controller
 
     public function create(LigneVente $ligneVente): View
     {
-        $this->authorize('create', Retour::class);
+        $this->authorize('create', [Retour::class, $ligneVente]);
 
         $ligneVente->load(['produit', 'lot', 'vente.boutique']);
 
