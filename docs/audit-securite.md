@@ -72,6 +72,74 @@ d'en-tête lors d'un envoi d'e-mail.
 renvoie désormais *No security vulnerability advisories found*. Les 163
 tests passent et l'ensemble des écrans a été revalidé dans un navigateur.
 
+### 1.3 Détournement du lien de réinitialisation via l'en-tête `Host` — *corrigé*
+
+**Gravité : élevée** (prise de contrôle de compte).
+
+Les URL absolues générées par l'application sont construites à partir de
+l'en-tête `Host` de la requête. Sans liste blanche, un attaquant pouvait
+demander une réinitialisation de mot de passe **pour le compte d'une
+victime** en falsifiant cet en-tête : le lien reçu par la victime pointait
+alors vers le domaine de l'attaquant, qui récupérait le jeton en clair dès
+le clic — donc le compte.
+
+**Vérification en conditions réelles.** Sur un serveur réel, une requête
+portant `Host: attaquant.test` produisait bien des liens
+`http://attaquant.test/…`. Cette faille était créée par l'ajout de la
+réinitialisation de mot de passe : elle n'existait pas avant.
+
+**Correction.** `trustHosts()` restreint les hôtes acceptés au domaine
+déclaré dans `APP_URL` et à ses sous-domaines. Après correction, un `Host`
+falsifié reçoit un **400**, l'hôte légitime un **200**.
+
+> Ce contrôle ne s'active pas en environnement `local` (comportement
+> Laravel). Il faut donc que `APP_ENV=production` **et** que `APP_URL`
+> contienne le domaine réel — voir `deploiement-production.md`.
+
+### 1.4 IP réelle derrière un proxy — *corrigé*
+
+**Gravité : moyenne.**
+
+Derrière nginx, un load-balancer ou un CDN, l'IP vue par l'application est
+celle du proxy. Deux protections en dépendaient :
+
+- le verrouillage anti-force-brute, qui aurait regroupé **tous** les
+  utilisateurs sous une seule clé (un attaquant pouvait faire verrouiller
+  les connexions de tout le monde, et le blocage par IP perdait son sens) ;
+- le journal des connexions, qui n'aurait enregistré qu'une IP inutile.
+
+La détection du HTTPS terminé par le proxy en dépendait aussi, et donc
+l'émission de l'en-tête HSTS.
+
+**Correction.** `trustProxies()` piloté par la variable `TRUSTED_PROXIES`.
+
+### 1.5 Absence de limite sur l'activation d'abonnement — *corrigé*
+
+**Gravité : faible.** Le point de terminaison `/abonnement/activer`
+n'imposait aucune limite : un code d'activation valant un abonnement
+payant, il était possible d'en tester un grand nombre. Un `throttle:10,1`
+a été ajouté, et la génération des codes tire désormais directement dans
+un alphabet non ambigu via `random_int()` — l'implémentation précédente
+repliait des minuscules sur des majuscules, ce qui réduisait l'entropie
+sans nécessité.
+
+### 1.6 Politique de sécurité de contenu (CSP) — *ajouté*
+
+Défense en profondeur contre le XSS. Les 9 gestionnaires d'évènements en
+attribut (`onclick`, `onchange`, `onsubmit`) ont été convertis en
+attributs `data-*` pilotés par un script externe, ce qui permet une
+directive `script-src` **sans `'unsafe-inline'`** — celle qui neutralise
+réellement les charges utiles XSS.
+
+`style-src` conserve `'unsafe-inline'` : la mise en forme repose sur des
+attributs `style="…"`, auxquels un nonce ne peut pas s'appliquer
+(limitation de la spécification CSP). C'est une faiblesse assumée, sans
+commune mesure avec l'exécution de script.
+
+Un test (`test_no_view_reintroduces_an_inline_event_handler`) échoue si un
+gestionnaire inline est réintroduit dans une vue : sans lui, la
+fonctionnalité concernée casserait silencieusement, bloquée par la CSP.
+
 ## 2. Points vérifiés et jugés conformes
 
 | Surface | Méthode | Résultat |
@@ -98,8 +166,11 @@ tests passent et l'ensemble des écrans a été revalidé dans un navigateur.
 - **Transport** : HTTPS forcé hors développement, HSTS, cookies `secure` +
   `httpOnly`, sessions chiffrées au repos.
 - **En-têtes** : `X-Frame-Options`, `X-Content-Type-Options`,
-  `Referrer-Policy`, `X-Permitted-Cross-Domain-Policies` sur toutes les
+  `Referrer-Policy`, `X-Permitted-Cross-Domain-Policies`,
+  `Permissions-Policy` et `Content-Security-Policy` sur toutes les
   réponses (`tests/Feature/EnTetesSecuriteTest.php`).
+- **Hôtes et proxys** : seuls le domaine d'`APP_URL` et ses sous-domaines
+  sont acceptés ; l'IP réelle du client est rétablie derrière un proxy.
 - **Intégrité des stocks** : verrous de ligne (`lockForUpdate`) et
   re-vérification dans la transaction, à la vente comme au transfert
   (`test_a_concurrent_sale_cannot_push_the_stock_negative`).

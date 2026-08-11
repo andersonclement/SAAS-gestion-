@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
 /**
  * Code d'abonnement généré par le superadmin et communiqué au patron
@@ -50,10 +49,24 @@ class CodeActivation extends Model
         });
     }
 
+    /**
+     * Alphabet sans les caractères ambigus à la lecture (0/O, 1/I/L) :
+     * les codes sont recopiés à la main par le patron depuis un message.
+     */
+    private const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
     public static function genererCode(): string
     {
         do {
-            $code = 'AGRO-'.Str::upper(Str::random(4)).'-'.Str::upper(Str::random(4));
+            // Str::random() puis Str::upper() ferait perdre de l'entropie en
+            // repliant les minuscules sur les majuscules : on tire donc
+            // directement dans l'alphabet cible, avec une source aléatoire
+            // cryptographique (random_int).
+            $segments = collect(range(1, 8))
+                ->map(fn () => self::ALPHABET[random_int(0, strlen(self::ALPHABET) - 1)])
+                ->join('');
+
+            $code = 'AGRO-'.substr($segments, 0, 4).'-'.substr($segments, 4, 4);
         } while (static::where('code', $code)->exists());
 
         return $code;

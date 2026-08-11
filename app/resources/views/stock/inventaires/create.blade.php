@@ -10,7 +10,7 @@
             <form method="GET" action="{{ route('stock.inventaires.create') }}">
                 <div class="field">
                     <label for="boutique_id">{{ __('Boutique') }}</label>
-                    <select id="boutique_id" name="boutique_id" onchange="this.form.submit()">
+                    <select id="boutique_id" name="boutique_id" data-auto-submit>
                         @foreach ($boutiques as $boutique)
                             <option value="{{ $boutique->id }}" @selected($boutiqueId === $boutique->id)>{{ $boutique->nom }}</option>
                         @endforeach

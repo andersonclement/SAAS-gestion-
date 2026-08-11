@@ -39,6 +39,7 @@
         .kpi-card .value { font-size: 1.6rem; font-weight: 700; margin: 0; }
         code.code-pill { background: #eef2ff; color: #3730a3; padding: .2rem .5rem; border-radius: 5px; font-weight: 600; letter-spacing: .02em; }
     </style>
+    <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 <body>
 @auth('admin')

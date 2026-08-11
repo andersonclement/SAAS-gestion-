@@ -32,12 +32,13 @@
             .facture { border: none; margin: 0; max-width: 100%; }
         }
     </style>
+    <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 <body>
     <div class="print-toolbar">
         <div>{{ config('app.name') }}</div>
         <div>
-            <button class="btn" type="button" onclick="window.print()">{{ __('Télécharger / Imprimer') }}</button>
+            <button class="btn" type="button" data-print>{{ __('Télécharger / Imprimer') }}</button>
         </div>
     </div>
     @yield('content')

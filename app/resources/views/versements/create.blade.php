@@ -51,7 +51,7 @@
         </form>
     </div>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
         (function () {
             const boutiqueSelect = document.getElementById('boutique_id');
             const remisParSelect = document.getElementById('remis_par_id');

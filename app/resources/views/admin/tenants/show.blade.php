@@ -12,7 +12,7 @@
     </h1>
 
     <p>
-        <form method="POST" action="{{ route('admin.tenants.toggle-actif', $tenant) }}" onsubmit="return confirm('{{ $tenant->actif ? __('Suspendre ce client ? Il sera immédiatement déconnecté et ne pourra plus se reconnecter.') : __('Réactiver ce client ?') }}');">
+        <form method="POST" action="{{ route('admin.tenants.toggle-actif', $tenant) }}" data-confirm="{{ $tenant->actif ? __('Suspendre ce client ? Il sera immédiatement déconnecté et ne pourra plus se reconnecter.') : __('Réactiver ce client ?') }}">
             @csrf
             <button type="submit" class="btn {{ $tenant->actif ? 'btn-danger' : '' }}">
                 {{ $tenant->actif ? __('Suspendre ce client') : __('Réactiver ce client') }}

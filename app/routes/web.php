@@ -61,7 +61,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/abonnement', [AbonnementController::class, 'index'])->name('abonnement.index');
-    Route::post('/abonnement/activer', [AbonnementController::class, 'activer'])->name('abonnement.activer');
+    // Un code d'activation vaut un abonnement : sans limite, il serait
+    // possible d'en tester un grand nombre à la recherche d'un code valide.
+    Route::post('/abonnement/activer', [AbonnementController::class, 'activer'])
+        ->middleware('throttle:10,1')
+        ->name('abonnement.activer');
 });
 
 Route::middleware(['auth', 'abonnement.actif'])->group(function () {

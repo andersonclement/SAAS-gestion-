@@ -31,6 +31,73 @@ php artisan key:generate
 php artisan migrate --force
 ```
 
+### Brancher le nom de domaine
+
+Trois réglages doivent concorder, sans quoi l'application se protège en
+refusant les requêtes (erreur 400) :
+
+1. **`APP_URL`** doit contenir le domaine réel, en `https` :
+   `APP_URL=https://exemple.com`.
+   L'application n'accepte que ce domaine et ses sous-domaines dans
+   l'en-tête `Host`. C'est ce qui empêche un attaquant de falsifier cet
+   en-tête pour détourner vers son propre site le lien de réinitialisation
+   de mot de passe envoyé à vos clients.
+2. **`TRUSTED_PROXIES`** doit être renseigné si l'application est derrière
+   nginx, un load-balancer ou Cloudflare (voir les commentaires du fichier
+   `.env.production.example`).
+3. **Le certificat TLS** doit couvrir le domaine ; l'application force le
+   HTTPS sur toutes les URL qu'elle génère.
+
+Exemple de configuration nginx (reverse proxy + PHP-FPM) :
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name exemple.com www.exemple.com;
+
+    ssl_certificate     /etc/letsencrypt/live/exemple.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/exemple.com/privkey.pem;
+
+    root /chemin/vers/app/public;   # jamais /chemin/vers/app
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        # Transmet le protocole d'origine : sans cela l'application croit
+        # être en HTTP et n'émet pas l'en-tête HSTS.
+        fastcgi_param HTTP_X_FORWARDED_PROTO $scheme;
+    }
+
+    # Ne jamais servir les fichiers sensibles.
+    location ~ /\.(env|git) { deny all; }
+}
+
+server {
+    listen 80;
+    server_name exemple.com www.exemple.com;
+    return 301 https://$host$request_uri;
+}
+```
+
+**Vérification après branchement :**
+
+```bash
+# Doit répondre 200 et des liens en https://exemple.com
+curl -sI https://exemple.com/login | head -3
+
+# Doit répondre 400 : un Host falsifié est rejeté
+curl -sI -H "Host: attaquant.test" https://exemple.com/login | head -1
+
+# Doit lister Strict-Transport-Security et Content-Security-Policy
+curl -sI https://exemple.com/login | grep -iE "strict-transport|content-security"
+```
+
 ### Créer le premier compte superadmin
 
 Aucune inscription publique n'existe pour ce rôle (c'est voulu). Le premier

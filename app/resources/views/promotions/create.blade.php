@@ -81,7 +81,7 @@
         </form>
     </div>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
         (function () {
             const porteeSelect = document.getElementById('portee');
             const champsPortee = document.querySelectorAll('[data-portee]');

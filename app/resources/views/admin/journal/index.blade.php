@@ -10,7 +10,7 @@
         <form method="GET" style="display:flex;gap:.75rem;align-items:end;flex-wrap:wrap;margin-bottom:1rem;">
             <div class="field" style="margin-bottom:0;">
                 <label for="tenant_id">{{ __('Client') }}</label>
-                <select id="tenant_id" name="tenant_id" onchange="this.form.submit()">
+                <select id="tenant_id" name="tenant_id" data-auto-submit>
                     <option value="">{{ __('Tous') }}</option>
                     @foreach ($tenants as $t)
                         <option value="{{ $t->id }}" @selected((string) $tenantId === (string) $t->id)>{{ $t->nom }}</option>
@@ -19,7 +19,7 @@
             </div>
             <div class="field" style="margin-bottom:0;">
                 <label for="action">{{ __('Action') }}</label>
-                <select id="action" name="action" onchange="this.form.submit()">
+                <select id="action" name="action" data-auto-submit>
                     <option value="">{{ __('Toutes les actions') }}</option>
                     @foreach ($actions as $a)
                         <option value="{{ $a }}" @selected($action === $a)>{{ $a }}</option>

@@ -26,6 +26,7 @@
         .lang-switch a { opacity: .7; }
         .lang-switch a.active { opacity: 1; font-weight: 700; text-decoration: underline; }
     </style>
+    <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 <body>
 @auth
@@ -67,7 +68,7 @@
             @if (auth()->user()->isPatron())
                 <form method="POST" action="{{ route('boutique-contexte.update') }}" style="display:inline-block;margin-right:1rem;">
                     @csrf
-                    <select name="boutique_id" onchange="this.form.submit()" style="padding:.3rem .5rem;border-radius:6px;border:none;">
+                    <select name="boutique_id" data-auto-submit style="padding:.3rem .5rem;border-radius:6px;border:none;">
                         <option value="">{{ __('Toutes les boutiques') }}</option>
                         @foreach ($boutiquesPourSelecteur ?? [] as $boutique)
                             <option value="{{ $boutique->id }}" @selected(($boutiqueContexteId ?? null) === $boutique->id)>

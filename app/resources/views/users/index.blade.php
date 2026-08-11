@@ -20,7 +20,7 @@
                             <td>{{ $u->boutique?->nom ?? '—' }}</td>
                             <td>
                                 @can('delete', $u)
-                                    <form method="POST" action="{{ route('users.destroy', $u) }}" onsubmit="return confirm('{{ __('Supprimer ce compte ?') }}');" style="display:inline">
+                                    <form method="POST" action="{{ route('users.destroy', $u) }}" data-confirm="{{ __('Supprimer ce compte ?') }}"style="display:inline">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn" type="submit" style="background:#7a1f1f;">{{ __('Supprimer') }}</button>

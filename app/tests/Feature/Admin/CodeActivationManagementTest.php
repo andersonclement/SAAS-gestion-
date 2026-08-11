@@ -93,4 +93,19 @@ class CodeActivationManagementTest extends TestCase
         $response->assertOk();
         $response->assertSee('130 000 FCFA');
     }
+
+    public function test_generated_codes_use_an_unambiguous_alphabet_and_are_unique(): void
+    {
+        $codes = collect(range(1, 200))->map(fn () => CodeActivation::genererCode());
+
+        // Pas de doublon sur un échantillon significatif.
+        $this->assertCount(200, $codes->unique());
+
+        foreach ($codes as $code) {
+            $this->assertMatchesRegularExpression('/^AGRO-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/', $code);
+            // Caractères ambigus à la lecture, volontairement exclus : le
+            // patron recopie le code à la main depuis un message.
+            $this->assertDoesNotMatchRegularExpression('/[01OIL]/', substr($code, 5));
+        }
+    }
 }

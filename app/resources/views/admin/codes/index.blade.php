@@ -45,7 +45,7 @@
                             <td>{{ $code->created_at->format('d/m/Y') }}</td>
                             <td>
                                 @if ($code->estUtilisable())
-                                    <form method="POST" action="{{ route('admin.codes.revoquer', $code) }}" onsubmit="return confirm('{{ __('Révoquer ce code ?') }}');">
+                                    <form method="POST" action="{{ route('admin.codes.revoquer', $code) }}" data-confirm="{{ __('Révoquer ce code ?') }}">
                                         @csrf
                                         <button type="submit" class="btn btn-danger" style="padding:.3rem .6rem;font-size:.8rem;">{{ __('Révoquer') }}</button>
                                     </form>

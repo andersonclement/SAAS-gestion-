@@ -25,7 +25,7 @@
                         <td>{{ $admin->created_at->format('d/m/Y') }}</td>
                         <td>
                             @unless ($admin->id === auth('admin')->id())
-                                <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}" onsubmit="return confirm('{{ __('Supprimer cet administrateur ?') }}');">
+                                <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}" data-confirm="{{ __('Supprimer cet administrateur ?') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger" style="padding:.3rem .6rem;font-size:.8rem;">{{ __('Supprimer') }}</button>

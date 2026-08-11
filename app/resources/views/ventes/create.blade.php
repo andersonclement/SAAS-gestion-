@@ -92,7 +92,7 @@
         </tr>
     </template>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
         (function () {
             const body = document.getElementById('lignes-body');
             const template = document.getElementById('ligne-template');
