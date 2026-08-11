@@ -53,6 +53,7 @@
                 <a href="{{ route('users.index') }}">{{ __('Équipe') }}</a>
             @endcan
             <a href="{{ route('journal.index') }}">{{ __('Journal') }}</a>
+            <a href="{{ route('rapports.index') }}">{{ __('Rapports') }}</a>
         </div>
         <div>
             @include('partials.locale-switcher')

@@ -16,6 +16,7 @@ use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\RapportController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\ReglementController;
 use App\Http\Controllers\RetourController;
@@ -83,4 +84,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
 
     Route::get('/comparatif', [ComparatifController::class, 'index'])->name('comparatif.index');
+
+    Route::prefix('rapports')->name('rapports.')->group(function () {
+        Route::get('/', [RapportController::class, 'index'])->name('index');
+        Route::get('/ventes.csv', [RapportController::class, 'ventes'])->name('ventes');
+        Route::get('/achats.csv', [RapportController::class, 'achats'])->name('achats');
+        Route::get('/stock.csv', [RapportController::class, 'stock'])->name('stock');
+    });
 });
