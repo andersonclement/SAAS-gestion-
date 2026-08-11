@@ -17,8 +17,8 @@ class StockController extends Controller
     {
         $user = Auth::user();
 
-        $boutiques = $user->boutique_id
-            ? Boutique::whereKey($user->boutique_id)->get()
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::whereKey($user->effectiveBoutiqueId())->get()
             : Boutique::orderBy('nom')->get();
 
         $stocks = StockBoutique::with(['boutique', 'produit', 'lot'])

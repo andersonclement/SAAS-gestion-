@@ -21,9 +21,9 @@ class TransfertStockController extends Controller
         $user = Auth::user();
 
         $transferts = TransfertStock::with(['produit', 'lot', 'boutiqueSource', 'boutiqueDestination'])
-            ->when($user->boutique_id, fn ($query) => $query->where(fn ($q) => $q
-                ->where('boutique_source_id', $user->boutique_id)
-                ->orWhere('boutique_destination_id', $user->boutique_id)))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where(fn ($q) => $q
+                ->where('boutique_source_id', $user->effectiveBoutiqueId())
+                ->orWhere('boutique_destination_id', $user->effectiveBoutiqueId())))
             ->latest()
             ->get();
 
@@ -37,7 +37,7 @@ class TransfertStockController extends Controller
         $user = Auth::user();
 
         $stocksDisponibles = StockBoutique::with(['boutique', 'produit', 'lot'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->where('quantite', '>', 0)
             ->get();
 

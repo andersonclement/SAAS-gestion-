@@ -26,9 +26,17 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.app', function ($view): void {
             $user = Auth::user();
 
+            $boutiqueId = $user?->effectiveBoutiqueId();
+
             $view->with('nombreAlertes', $user
-                ? CentreAlertes::compter($user->boutique_id ? collect([$user->boutique_id]) : Boutique::pluck('id'))
+                ? CentreAlertes::compter($boutiqueId ? collect([$boutiqueId]) : Boutique::pluck('id'))
                 : 0);
+
+            $view->with('boutiqueContexteId', $boutiqueId);
+
+            $view->with('boutiquesPourSelecteur', $user?->isPatron()
+                ? Boutique::orderBy('nom')->get()
+                : collect());
         });
     }
 }

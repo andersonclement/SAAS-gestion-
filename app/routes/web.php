@@ -4,6 +4,7 @@ use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BonCommandeController;
+use App\Http\Controllers\BoutiqueContexteController;
 use App\Http\Controllers\BoutiqueController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ClientController;
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('boutiques', BoutiqueController::class)->only(['index', 'create', 'store', 'show']);
+    Route::post('/boutique-contexte', [BoutiqueContexteController::class, 'update'])->name('boutique-contexte.update');
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/categories', [CategorieController::class, 'store'])->name('categories.store');
@@ -70,6 +72,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('/ventes/{vente}/facture', [VenteController::class, 'facture'])->name('ventes.facture');
     Route::post('/ventes/{vente}/reglements', [ReglementController::class, 'store'])->name('ventes.reglements.store');
 
     Route::get('/retours', [RetourController::class, 'index'])->name('retours.index');

@@ -26,7 +26,7 @@ class RapportController extends Controller
         $user = Auth::user();
 
         $ventes = Vente::with(['boutique', 'client', 'vendeur', 'lignes'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->orderBy('created_at')
             ->get();
 
@@ -48,7 +48,7 @@ class RapportController extends Controller
         $user = Auth::user();
 
         $bonsCommande = BonCommande::with(['boutique', 'fournisseur', 'lignes'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->orderBy('created_at')
             ->get();
 
@@ -69,7 +69,7 @@ class RapportController extends Controller
         $user = Auth::user();
 
         $stocks = StockBoutique::with(['boutique', 'produit', 'lot'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->orderBy('boutique_id')
             ->get();
 

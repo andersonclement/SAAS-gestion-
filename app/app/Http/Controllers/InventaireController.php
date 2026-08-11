@@ -22,7 +22,7 @@ class InventaireController extends Controller
         $user = Auth::user();
 
         $inventaires = Inventaire::with(['boutique', 'creePar'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->latest()
             ->get();
 
@@ -35,8 +35,8 @@ class InventaireController extends Controller
 
         $user = Auth::user();
 
-        $boutiques = $user->boutique_id
-            ? Boutique::whereKey($user->boutique_id)->get()
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::whereKey($user->effectiveBoutiqueId())->get()
             : Boutique::orderBy('nom')->get();
 
         $boutiqueId = (int) $request->query('boutique_id', $boutiques->first()?->id);

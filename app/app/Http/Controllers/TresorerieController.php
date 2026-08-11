@@ -22,9 +22,9 @@ class TresorerieController extends Controller
     {
         $user = Auth::user();
 
-        $boutiques = $user->isPatron() || $user->isComptable()
-            ? Boutique::orderBy('nom')->get()
-            : Boutique::whereKey($user->boutique_id)->get();
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::whereKey($user->effectiveBoutiqueId())->get()
+            : Boutique::orderBy('nom')->get();
 
         $boutiqueIds = $boutiques->pluck('id');
         $debutMois = Carbon::now()->startOfMonth();

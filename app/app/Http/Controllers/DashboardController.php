@@ -22,9 +22,9 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $boutiques = $user->isPatron() || $user->isComptable()
-            ? Boutique::withCount('utilisateurs')->orderBy('nom')->get()
-            : Boutique::withCount('utilisateurs')->whereKey($user->boutique_id)->get();
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::withCount('utilisateurs')->whereKey($user->effectiveBoutiqueId())->get()
+            : Boutique::withCount('utilisateurs')->orderBy('nom')->get();
 
         $boutiqueIds = $boutiques->pluck('id');
 

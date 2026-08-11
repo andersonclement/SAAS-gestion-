@@ -56,6 +56,19 @@
             <a href="{{ route('rapports.index') }}">{{ __('Rapports') }}</a>
         </div>
         <div>
+            @if (auth()->user()->isPatron())
+                <form method="POST" action="{{ route('boutique-contexte.update') }}" style="display:inline-block;margin-right:1rem;">
+                    @csrf
+                    <select name="boutique_id" onchange="this.form.submit()" style="padding:.3rem .5rem;border-radius:6px;border:none;">
+                        <option value="">{{ __('Toutes les boutiques') }}</option>
+                        @foreach ($boutiquesPourSelecteur ?? [] as $boutique)
+                            <option value="{{ $boutique->id }}" @selected(($boutiqueContexteId ?? null) === $boutique->id)>
+                                {{ __('Vue gérant') }} — {{ $boutique->nom }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            @endif
             @include('partials.locale-switcher')
             <span>{{ auth()->user()->name }} ({{ auth()->user()->role->label() }})</span>
             <form method="POST" action="{{ route('logout') }}" style="display:inline">
@@ -64,6 +77,15 @@
             </form>
         </div>
     </div>
+    @if (auth()->user()->isPatron() && ($boutiqueContexteId ?? null))
+        <div class="status" style="border-radius:0;margin-bottom:0;text-align:center;">
+            {{ __('Vous consultez la vue gérant.') }}
+            <form method="POST" action="{{ route('boutique-contexte.update') }}" style="display:inline">
+                @csrf
+                <button type="submit" style="background:none;border:none;color:#1e4620;text-decoration:underline;cursor:pointer;padding:0;font:inherit;">{{ __('Revenir à la vue de toutes les boutiques') }}</button>
+            </form>
+        </div>
+    @endif
 @else
     <div class="topbar">
         <div><strong>{{ config('app.name') }}</strong></div>

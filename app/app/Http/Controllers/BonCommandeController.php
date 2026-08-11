@@ -21,7 +21,7 @@ class BonCommandeController extends Controller
         $user = Auth::user();
 
         $bonsCommande = BonCommande::with(['boutique', 'fournisseur'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->latest()
             ->get();
 
@@ -34,8 +34,8 @@ class BonCommandeController extends Controller
 
         $user = Auth::user();
 
-        $boutiques = $user->boutique_id
-            ? Boutique::whereKey($user->boutique_id)->get()
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::whereKey($user->effectiveBoutiqueId())->get()
             : Boutique::orderBy('nom')->get();
 
         $fournisseurs = Fournisseur::orderBy('nom')->get();

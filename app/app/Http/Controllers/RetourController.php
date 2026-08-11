@@ -21,7 +21,7 @@ class RetourController extends Controller
         $user = Auth::user();
 
         $retours = Retour::with(['boutique', 'produit', 'lot', 'creePar'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->latest()
             ->get();
 

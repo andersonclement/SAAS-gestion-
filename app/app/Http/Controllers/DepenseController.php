@@ -19,7 +19,7 @@ class DepenseController extends Controller
         $user = Auth::user();
 
         $depenses = Depense::with(['boutique', 'creePar'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->latest('date')
             ->get();
 
@@ -32,8 +32,8 @@ class DepenseController extends Controller
 
         $user = Auth::user();
 
-        $boutiques = $user->boutique_id
-            ? Boutique::whereKey($user->boutique_id)->get()
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::whereKey($user->effectiveBoutiqueId())->get()
             : Boutique::orderBy('nom')->get();
 
         return view('depenses.create', compact('boutiques'));

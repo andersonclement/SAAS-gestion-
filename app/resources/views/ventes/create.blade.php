@@ -142,8 +142,15 @@
 
             const caseACredit = document.getElementById('vente-a-credit');
             const champsCredit = document.getElementById('champs-credit');
+            const montantPaye = document.getElementById('montant_paye');
+            const dateEcheance = document.getElementById('date_echeance');
             function basculerChampsCredit() {
                 champsCredit.style.display = caseACredit.checked ? 'block' : 'none';
+                // Désactivés (et donc absents de l'envoi du formulaire) tant que la
+                // vente n'est pas à crédit, pour que le paiement soit considéré
+                // comptant par défaut (voir StoreVenteRequest::withValidator).
+                montantPaye.disabled = ! caseACredit.checked;
+                dateEcheance.disabled = ! caseACredit.checked;
             }
             caseACredit.addEventListener('change', basculerChampsCredit);
             basculerChampsCredit();

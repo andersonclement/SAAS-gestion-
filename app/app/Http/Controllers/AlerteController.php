@@ -13,8 +13,8 @@ class AlerteController extends Controller
     {
         $user = Auth::user();
 
-        $boutiqueIds = $user->boutique_id
-            ? collect([$user->boutique_id])
+        $boutiqueIds = $user->effectiveBoutiqueId()
+            ? collect([$user->effectiveBoutiqueId()])
             : Boutique::pluck('id');
 
         return view('alertes.index', CentreAlertes::pour($boutiqueIds));

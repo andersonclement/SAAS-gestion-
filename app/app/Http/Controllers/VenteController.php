@@ -26,7 +26,7 @@ class VenteController extends Controller
         $user = Auth::user();
 
         $ventes = Vente::with(['boutique', 'client', 'vendeur', 'lignes'])
-            ->when($user->boutique_id, fn ($query) => $query->where('boutique_id', $user->boutique_id))
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
             ->latest()
             ->get();
 
@@ -39,8 +39,8 @@ class VenteController extends Controller
 
         $user = Auth::user();
 
-        $boutiques = $user->boutique_id
-            ? Boutique::whereKey($user->boutique_id)->get()
+        $boutiques = $user->effectiveBoutiqueId()
+            ? Boutique::whereKey($user->effectiveBoutiqueId())->get()
             : Boutique::orderBy('nom')->get();
 
         $clients = Client::orderBy('nom')->get();
@@ -98,6 +98,21 @@ class VenteController extends Controller
         $vente->load(['boutique', 'client', 'vendeur', 'lignes.produit', 'lignes.lot', 'paiements']);
 
         return view('ventes.show', compact('vente'));
+    }
+
+    /**
+     * Facture client imprimable/téléchargeable (format compact, adapté à
+     * une mini-imprimante de caisse) : en-tête boutique, produits achetés
+     * avec numéro de lot pour la traçabilité, et statut du paiement
+     * (comptant ou reste à payer).
+     */
+    public function facture(Vente $vente): View
+    {
+        $this->authorize('view', $vente);
+
+        $vente->load(['boutique', 'client', 'vendeur', 'lignes.produit', 'lignes.lot', 'paiements']);
+
+        return view('ventes.facture', compact('vente'));
     }
 
     /**

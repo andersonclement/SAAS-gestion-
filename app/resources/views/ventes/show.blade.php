@@ -5,6 +5,10 @@
 @section('content')
     <h1>{{ __('Ticket de caisse') }} — {{ $vente->numero }}</h1>
 
+    <p>
+        <a class="btn" href="{{ route('ventes.facture', $vente) }}" target="_blank" rel="noopener">{{ __('Télécharger / Imprimer la facture') }}</a>
+    </p>
+
     <div class="card">
         <p><strong>{{ __('Date') }} :</strong> {{ $vente->created_at->format('d/m/Y H:i') }}</p>
         <p><strong>{{ __('Boutique') }} :</strong> {{ $vente->boutique->nom }}</p>

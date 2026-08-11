@@ -210,4 +210,76 @@ class VentesTest extends TestCase
         $response->assertRedirect(route('clients.index'));
         $this->assertDatabaseHas('clients', ['nom' => 'Coopérative AgroSud', 'tenant_id' => $tenant->id]);
     }
+
+    public function test_the_invoice_shows_the_shop_products_lot_and_payment_status(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'AgroPlus Centre-ville']);
+        $vendeur = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Vendeur, 'boutique_id' => $boutique->id]);
+        $client = Client::factory()->create(['tenant_id' => $tenant->id, 'plafond_credit' => 100000]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'Glyphosate 1L', 'prix_vente' => 6500]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id, 'numero_lot' => 'LOT-2026-001']);
+        StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 10]);
+
+        $venteResponse = $this->actingAs($vendeur)->post('/ventes', [
+            'boutique_id' => $boutique->id,
+            'client_id' => $client->id,
+            'mode_paiement' => ModePaiement::Especes->value,
+            'montant_paye' => 5000,
+            'date_echeance' => now()->addDays(15)->toDateString(),
+            'lignes' => [
+                ['produit_id' => $produit->id, 'quantite' => 1],
+            ],
+        ]);
+        $venteResponse->assertSessionDoesntHaveErrors();
+
+        $vente = Vente::latest()->first();
+
+        $response = $this->actingAs($vendeur)->get(route('ventes.facture', $vente));
+
+        $response->assertOk();
+        $response->assertSee('AgroPlus Centre-ville');
+        $response->assertSee('Glyphosate 1L');
+        $response->assertSee('LOT-2026-001');
+        $response->assertSee('1 500 FCFA');
+        $response->assertSee('Reste à payer');
+    }
+
+    public function test_a_fully_paid_invoice_is_marked_as_paid_in_full(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $vendeur = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Vendeur, 'boutique_id' => $boutique->id]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'prix_vente' => 5000]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
+        StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 10]);
+
+        $this->actingAs($vendeur)->post('/ventes', [
+            'boutique_id' => $boutique->id,
+            'mode_paiement' => ModePaiement::Especes->value,
+            'lignes' => [
+                ['produit_id' => $produit->id, 'quantite' => 1],
+            ],
+        ])->assertRedirect();
+
+        $vente = Vente::latest()->first();
+
+        $response = $this->actingAs($vendeur)->get(route('ventes.facture', $vente));
+
+        $response->assertOk();
+        $response->assertSee('Payé comptant');
+    }
+
+    public function test_a_vendeur_from_another_boutique_cannot_view_the_invoice(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutiqueA = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $boutiqueB = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $vendeurB = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Vendeur, 'boutique_id' => $boutiqueB->id]);
+        $vente = Vente::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutiqueA->id]);
+
+        $response = $this->actingAs($vendeurB)->get(route('ventes.facture', $vente));
+
+        $response->assertForbidden();
+    }
 }

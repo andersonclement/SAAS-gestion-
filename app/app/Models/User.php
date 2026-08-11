@@ -90,4 +90,24 @@ class User extends Authenticatable
     {
         return $this->role === UserRole::Comptable;
     }
+
+    /**
+     * Boutique à laquelle limiter les vues consultées par cet utilisateur :
+     * celle du gérant/vendeur, ou — pour un patron — la boutique qu'il a
+     * choisi de consulter "comme le ferait son gérant" (voir
+     * BoutiqueContexteController). Retourne null quand rien ne doit
+     * restreindre la vue (patron/comptable sans boutique choisie).
+     */
+    public function effectiveBoutiqueId(): ?int
+    {
+        if ($this->boutique_id) {
+            return $this->boutique_id;
+        }
+
+        if ($this->isPatron()) {
+            return session('boutique_contexte_id');
+        }
+
+        return null;
+    }
 }
