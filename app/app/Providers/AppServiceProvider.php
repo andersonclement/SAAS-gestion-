@@ -37,6 +37,11 @@ class AppServiceProvider extends ServiceProvider
             $view->with('boutiquesPourSelecteur', $user?->isPatron()
                 ? Boutique::orderBy('nom')->get()
                 : collect());
+
+            $view->with('abonnementActif', $user === null || $user->tenant->abonnementActif());
+
+            $joursAvantExpiration = $user?->tenant?->joursAvantExpiration();
+            $view->with('abonnementExpireBientot', $joursAvantExpiration !== null && $joursAvantExpiration >= 0 && $joursAvantExpiration <= 7);
         });
     }
 }

@@ -54,6 +54,14 @@
             @endcan
             <a href="{{ route('journal.index') }}">{{ __('Journal') }}</a>
             <a href="{{ route('rapports.index') }}">{{ __('Rapports') }}</a>
+            <a href="{{ route('abonnement.index') }}">
+                {{ __('Abonnement') }}
+                @if (! ($abonnementActif ?? true))
+                    <span class="badge" style="background:#c0392b;color:#fff;">!</span>
+                @elseif ($abonnementExpireBientot ?? false)
+                    <span class="badge" style="background:#d97706;color:#fff;">!</span>
+                @endif
+            </a>
         </div>
         <div>
             @if (auth()->user()->isPatron())

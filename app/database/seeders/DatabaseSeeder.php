@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Plan;
 use App\Enums\TypeProduit;
 use App\Enums\UniteMesure;
 use App\Enums\UserRole;
+use App\Models\Admin;
 use App\Models\Boutique;
 use App\Models\Categorie;
 use App\Models\Produit;
@@ -27,7 +29,14 @@ class DatabaseSeeder extends Seeder
             'nom' => 'AgroPlus Distribution',
             'email_contact' => 'contact@agroplus.test',
             'telephone' => '+225 07 00 00 00 00',
-            'plan' => 'essai',
+            'plan' => Plan::Pro,
+            'abonnement_expire_le' => now()->addMonth(),
+        ]);
+
+        Admin::create([
+            'name' => 'Superadmin',
+            'email' => 'superadmin@gestion-stock.test',
+            'password' => 'password',
         ]);
 
         $patron = User::create([
@@ -127,6 +136,7 @@ class DatabaseSeeder extends Seeder
                 ['Gérant — Centre-ville', 'gerant.centre@agroplus.test'],
                 ['Vendeur — Centre-ville', 'vendeur.centre@agroplus.test'],
                 ['Gérant — Zone Nord', 'gerant.nord@agroplus.test'],
+                ['Superadmin (/admin/login)', 'superadmin@gestion-stock.test'],
             ]
         );
     }

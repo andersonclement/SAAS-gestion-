@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AbonnementController;
 use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -46,6 +47,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
+    Route::get('/abonnement', [AbonnementController::class, 'index'])->name('abonnement.index');
+    Route::post('/abonnement/activer', [AbonnementController::class, 'activer'])->name('abonnement.activer');
+});
+
+Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('boutiques', BoutiqueController::class)->only(['index', 'create', 'store', 'show']);
@@ -97,3 +103,5 @@ Route::middleware('auth')->group(function () {
         Route::get('/stock.csv', [RapportController::class, 'stock'])->name('stock');
     });
 });
+
+require __DIR__.'/admin.php';

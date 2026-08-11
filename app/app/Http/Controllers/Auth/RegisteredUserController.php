@@ -27,20 +27,25 @@ class RegisteredUserController extends Controller
     public function store(StoreTenantRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $code = $request->codeActivation();
 
-        $user = DB::transaction(function () use ($validated) {
+        $user = DB::transaction(function () use ($validated, $code) {
             $tenant = Tenant::create([
                 'nom' => $validated['entreprise'],
                 'email_contact' => $validated['email'],
             ]);
 
-            return User::create([
+            $user = User::create([
                 'tenant_id' => $tenant->id,
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => UserRole::Patron,
             ]);
+
+            $code->activerPour($tenant, $user);
+
+            return $user;
         });
 
         Auth::login($user);

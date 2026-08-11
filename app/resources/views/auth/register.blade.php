@@ -11,8 +11,14 @@
             @csrf
 
             <div class="field">
+                <label for="code_activation">{{ __("Code d'activation") }}</label>
+                <input id="code_activation" type="text" name="code_activation" value="{{ old('code_activation') }}" placeholder="AGRO-XXXX-XXXX" required autofocus>
+                <p style="color:#555;font-size:.8rem;margin:.3rem 0 0;">{{ __('Ce code vous a été communiqué par notre équipe.') }}</p>
+            </div>
+
+            <div class="field">
                 <label for="entreprise">{{ __("Nom de l'entreprise") }}</label>
-                <input id="entreprise" type="text" name="entreprise" value="{{ old('entreprise') }}" required autofocus>
+                <input id="entreprise" type="text" name="entreprise" value="{{ old('entreprise') }}" required>
             </div>
 
             <div class="field">

@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\VerifierAbonnement;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,6 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLocale::class,
         ]);
+
+        $middleware->alias([
+            'abonnement.actif' => VerifierAbonnement::class,
+        ]);
+
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? route('admin.login') : route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
