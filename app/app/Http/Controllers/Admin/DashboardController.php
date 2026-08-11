@@ -6,6 +6,7 @@ use App\Enums\StatutCodeActivation;
 use App\Http\Controllers\Controller;
 use App\Models\CodeActivation;
 use App\Models\Tenant;
+use App\Models\TentativeConnexion;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
@@ -24,8 +25,13 @@ class DashboardController extends Controller
 
         $codesEnAttente = CodeActivation::where('statut', StatutCodeActivation::EnAttente)->count();
 
+        $depuis24h = Carbon::now()->subDay();
+        $connexionsReussies24h = TentativeConnexion::where('reussie', true)->where('created_at', '>=', $depuis24h)->count();
+        $connexionsEchouees24h = TentativeConnexion::where('reussie', false)->where('created_at', '>=', $depuis24h)->count();
+
         $derniersTenants = Tenant::withCount('boutiques')->latest()->limit(8)->get();
         $derniersCodes = CodeActivation::with(['tenant', 'generePar'])->latest()->limit(8)->get();
+        $dernieresConnexions = TentativeConnexion::with('tenant')->latest()->limit(8)->get();
 
         return view('admin.dashboard', [
             'nombreTenants' => $tenants->count(),
@@ -35,8 +41,11 @@ class DashboardController extends Controller
             'nombreTenantsSuspendus' => $tenantsSuspendus->count(),
             'revenuMensuelRecurrent' => $revenuMensuelRecurrent,
             'codesEnAttente' => $codesEnAttente,
+            'connexionsReussies24h' => $connexionsReussies24h,
+            'connexionsEchouees24h' => $connexionsEchouees24h,
             'derniersTenants' => $derniersTenants,
             'derniersCodes' => $derniersCodes,
+            'dernieresConnexions' => $dernieresConnexions,
             'aujourdhui' => Carbon::today(),
         ]);
     }

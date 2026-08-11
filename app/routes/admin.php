@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\CodeActivationController;
+use App\Http\Controllers\Admin\ConnexionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\JournalController;
 use App\Http\Controllers\Admin\TenantController;
@@ -35,6 +36,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/codes/{code}/revoquer', [CodeActivationController::class, 'revoquer'])->name('codes.revoquer');
 
         Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
+        Route::get('/connexions', [ConnexionController::class, 'index'])->name('connexions.index');
 
         Route::get('/administrateurs', [AdminController::class, 'index'])->name('admins.index');
         Route::get('/administrateurs/creer', [AdminController::class, 'create'])->name('admins.create');

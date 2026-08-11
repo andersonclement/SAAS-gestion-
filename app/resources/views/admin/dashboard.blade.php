@@ -34,6 +34,14 @@
             <p class="label">{{ __("Codes en attente d'utilisation") }}</p>
             <p class="value">{{ $codesEnAttente }}</p>
         </a>
+        <a class="kpi-card" href="{{ route('admin.connexions.index', ['statut' => 'reussie']) }}" style="text-decoration:none;color:inherit;display:block;">
+            <p class="label">{{ __('Connexions réussies (24h)') }}</p>
+            <p class="value" style="color:#1e4620;">{{ $connexionsReussies24h }}</p>
+        </a>
+        <a class="kpi-card" href="{{ route('admin.connexions.index', ['statut' => 'echouee']) }}" style="text-decoration:none;color:inherit;display:block;">
+            <p class="label">{{ __('Connexions échouées (24h)') }}</p>
+            <p class="value" style="color:{{ $connexionsEchouees24h > 0 ? '#b91c1c' : '#1e4620' }};">{{ $connexionsEchouees24h }}</p>
+        </a>
     </div>
 
     <p><a class="btn" href="{{ route('admin.codes.create') }}">+ {{ __("Générer un code d'activation") }}</a></p>
@@ -101,6 +109,43 @@
                     @endforeach
                 </tbody>
             </table>
+        @endif
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;font-size:1.05rem;">{{ __('Dernières connexions') }}</h2>
+        @if ($dernieresConnexions->isEmpty())
+            <p>{{ __('Aucune tentative de connexion enregistrée.') }}</p>
+        @else
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ __('Date') }}</th>
+                        <th>{{ __('E-mail') }}</th>
+                        <th>{{ __('Client') }}</th>
+                        <th>{{ __('Résultat') }}</th>
+                        <th>{{ __('Adresse IP') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($dernieresConnexions as $tentative)
+                        <tr>
+                            <td>{{ $tentative->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $tentative->email }}</td>
+                            <td>{{ $tentative->tenant?->nom ?? '—' }}</td>
+                            <td>
+                                @if ($tentative->reussie)
+                                    <span class="badge" style="background:#e6f4ea;color:#1e4620;">{{ __('Réussie') }}</span>
+                                @else
+                                    <span class="badge" style="background:#fdecea;color:#7a1f1f;">{{ __('Échouée') }}</span>
+                                @endif
+                            </td>
+                            <td>{{ $tentative->adresse_ip ?? '—' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <p style="margin-top:1rem;"><a href="{{ route('admin.connexions.index') }}">{{ __('Voir toutes les connexions') }} &rarr;</a></p>
         @endif
     </div>
 @endsection

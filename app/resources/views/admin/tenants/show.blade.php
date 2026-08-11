@@ -147,11 +147,22 @@
         <h2 style="margin-top:0;font-size:1.05rem;">{{ __('Équipe') }}</h2>
         <table>
             <thead>
-                <tr><th>{{ __('Nom') }}</th><th>{{ __('E-mail') }}</th><th>{{ __('Rôle') }}</th></tr>
+                <tr><th>{{ __('Nom') }}</th><th>{{ __('E-mail') }}</th><th>{{ __('Rôle') }}</th><th>{{ __('Dernière connexion') }}</th></tr>
             </thead>
             <tbody>
                 @foreach ($tenant->users as $user)
-                    <tr><td>{{ $user->name }}</td><td>{{ $user->email }}</td><td>{{ $user->role->label() }}</td></tr>
+                    <tr>
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ $user->role->label() }}</td>
+                        <td>
+                            @if ($derniere = $dernieresConnexionsParUser->get($user->id))
+                                {{ \Illuminate\Support\Carbon::parse($derniere)->format('d/m/Y H:i') }}
+                            @else
+                                <span style="color:#92400e;">{{ __('Jamais connecté') }}</span>
+                            @endif
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>

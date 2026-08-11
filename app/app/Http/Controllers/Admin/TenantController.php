@@ -8,6 +8,7 @@ use App\Models\Depense;
 use App\Models\JournalActivite;
 use App\Models\LigneVente;
 use App\Models\Tenant;
+use App\Models\TentativeConnexion;
 use App\Models\Vente;
 use App\Models\VersementCaisse;
 use App\Support\CentreAlertes;
@@ -92,6 +93,12 @@ class TenantController extends Controller
             ->limit(8)
             ->get();
 
+        $dernieresConnexionsParUser = TentativeConnexion::where('tenant_id', $tenant->id)
+            ->where('reussie', true)
+            ->selectRaw('user_id, MAX(created_at) as derniere_connexion')
+            ->groupBy('user_id')
+            ->pluck('derniere_connexion', 'user_id');
+
         return view('admin.tenants.show', compact(
             'tenant',
             'chiffreAffairesTotal',
@@ -105,6 +112,7 @@ class TenantController extends Controller
             'nombreAlertes',
             'dernieresVentes',
             'dernieresActivites',
+            'dernieresConnexionsParUser',
         ));
     }
 

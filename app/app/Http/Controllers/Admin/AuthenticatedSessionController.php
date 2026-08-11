@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\SuiviConnexions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,12 +25,16 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         if (! Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
+            SuiviConnexions::enregistrer($credentials['email'], false, 'admin');
+
             throw ValidationException::withMessages([
                 'email' => __('Identifiants incorrects.'),
             ]);
         }
 
         $request->session()->regenerate();
+
+        SuiviConnexions::enregistrer($credentials['email'], true, 'admin');
 
         return redirect()->intended(route('admin.dashboard'));
     }
