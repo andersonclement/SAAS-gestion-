@@ -40,6 +40,9 @@
             <a href="{{ route('achats.index') }}">{{ __('Achats') }}</a>
             <a href="{{ route('stock.index') }}">{{ __('Stock') }}</a>
             <a href="{{ route('tresorerie.index') }}">{{ __('Trésorerie') }}</a>
+            @if (auth()->user()->isPatron() || auth()->user()->isComptable())
+                <a href="{{ route('comparatif.index') }}">{{ __('Comparatif') }}</a>
+            @endif
             <a href="{{ route('alertes.index') }}">
                 {{ __('Alertes') }}
                 @if (($nombreAlertes ?? 0) > 0)

@@ -7,6 +7,7 @@ use App\Http\Controllers\BonCommandeController;
 use App\Http\Controllers\BoutiqueController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ComparatifController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
 use App\Http\Controllers\FournisseurController;
@@ -80,4 +81,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
 
     Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
+
+    Route::get('/comparatif', [ComparatifController::class, 'index'])->name('comparatif.index');
 });
