@@ -26,18 +26,74 @@ récurrentes à mettre en place. Il complète `app/.env.production.example`.
 La suite de tests tourne sur le même moteur que la production : voir
 `environnement-local.md`.
 
-## 2. Première installation
+## 2. Préparer le serveur
+
+Un script fait l'installation complète d'un VPS Ubuntu 24.04 nu :
 
 ```bash
-git clone <dépôt> && cd SAAS-gestion-/app
+git clone <dépôt> /var/www/gestion-stock
+cd /var/www/gestion-stock
+sudo DOMAINE=exemple.com ./deploiement/preparer-serveur.sh
+```
 
-composer install --no-dev --optimize-autoloader
+Sans domaine encore acheté, omettre `DOMAINE=` : le script prend l'adresse IP
+du serveur et l'application est joignable en HTTP, ce qui permet de valider
+l'installation tout de suite.
+
+Ce que le script met en place :
+
+| | |
+|---|---|
+| Paquets | PHP 8.3 et ses extensions, nginx, MySQL, composer, certbot |
+| Base | `gestion_stock` en `utf8mb4`, compte applicatif, mot de passe généré |
+| Identifiants | `~/.my.cnf` en `chmod 600`, lu par le script de sauvegarde |
+| Compte système | `gestionstock`, propriétaire du code ; `www-data` dans son groupe |
+| nginx | vhost installé depuis `deploiement/nginx-gestion-stock.conf` |
+| PHP-FPM | OPcache activé (voir plus bas) |
+| Durcissement | pare-feu, SSH, fail2ban, mises à jour automatiques |
+
+Il est **idempotent** : le relancer après avoir changé le domaine met la
+configuration à jour sans rien détruire. Il ne touche ni au DNS ni au
+certificat TLS, qui exigent que le domaine pointe déjà sur le serveur.
+
+### Durcissement appliqué
+
+- **Pare-feu** (`ufw`) : seuls 22, 80 et 443 sont ouverts.
+- **SSH** : connexion root et authentification par mot de passe désactivées —
+  mais **seulement si une clé publique est déjà autorisée**. Sans clé, le
+  script laisse le mot de passe actif et vous avertit, plutôt que de vous
+  verrouiller dehors. Déposez votre clé (`ssh-copy-id`) puis relancez-le.
+- **fail2ban** sur `sshd`, contre le balayage de mots de passe.
+- **Mises à jour de sécurité automatiques** : sur un serveur qui tourne des
+  mois sans qu'on s'en occupe, c'est ce qui évite de rester sur une faille
+  publiée.
+
+### OPcache
+
+PHP recompile par défaut chaque fichier à chaque requête. Le cache d'opcode
+(`deploiement/opcache.ini`, posé par le script) change l'ordre de grandeur du
+temps de réponse sur un petit VPS : c'est le réglage le plus rentable de la
+pile, et il ne coûte que de la mémoire.
+
+Il est réglé sur `validate_timestamps=0` — PHP ne va plus vérifier la date des
+fichiers. **Conséquence : un déploiement n'a d'effet qu'après rechargement de
+PHP-FPM**, ce que `deployer.sh` fait à chaque passage.
+
+## 3. Première installation
+
+Le serveur étant préparé, il reste à configurer l'application :
+
+```bash
+cd /var/www/gestion-stock/app
 
 cp .env.production.example .env
-# Remplir les valeurs « À REMPLIR » (base de données, SMTP, domaine)
+# Remplir les « À REMPLIR » : DB_PASSWORD (affiché par preparer-serveur.sh),
+# SMTP, APP_URL, SESSION_DOMAIN
 php artisan key:generate
 
-php artisan migrate --force
+# Le premier déploiement fait le reste : dépendances, migrations, caches.
+cd /var/www/gestion-stock
+sudo -u gestionstock ./deploiement/deployer.sh
 ```
 
 ### Brancher le nom de domaine
@@ -51,48 +107,35 @@ refusant les requêtes (erreur 400) :
    l'en-tête `Host`. C'est ce qui empêche un attaquant de falsifier cet
    en-tête pour détourner vers son propre site le lien de réinitialisation
    de mot de passe envoyé à vos clients.
-2. **`TRUSTED_PROXIES`** doit être renseigné si l'application est derrière
-   nginx, un load-balancer ou Cloudflare (voir les commentaires du fichier
-   `.env.production.example`).
+2. **`TRUSTED_PROXIES`** doit rester à `*` avec nginx sur la même machine.
+   Contre-intuitif, mais nginx transmet à PHP `REMOTE_ADDR = l'IP du
+   visiteur`, pas la sienne : `TRUSTED_PROXIES=127.0.0.1` ne correspondrait
+   jamais, `X-Forwarded-Proto` serait ignoré et **l'en-tête HSTS ne serait pas
+   émis**. `*` est sans risque ici, PHP-FPM n'écoutant que sur une socket unix
+   joignable par le seul nginx. Ne mettre une liste d'adresses que si
+   l'application est exposée derrière un service tiers (plages Cloudflare).
 3. **Le certificat TLS** doit couvrir le domaine ; l'application force le
    HTTPS sur toutes les URL qu'elle génère.
 
-Exemple de configuration nginx (reverse proxy + PHP-FPM) :
+La configuration nginx est versionnée dans
+`deploiement/nginx-gestion-stock.conf` et installée par
+`preparer-serveur.sh` — ne pas éditer la copie du serveur, mais ce fichier,
+puis relancer le script.
 
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name exemple.com www.exemple.com;
+Elle sert la racine sur `app/public` (jamais sur `app/`), refuse les fichiers
+sensibles (`.env`, `.git`, `*.sql`, `*.log`), met en cache les ressources
+statiques et transmet `X-Forwarded-Proto` — sans quoi l'application se croirait
+en HTTP derrière le proxy TLS et n'émettrait pas l'en-tête HSTS.
 
-    ssl_certificate     /etc/letsencrypt/live/exemple.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/exemple.com/privkey.pem;
+Le certificat s'obtient **une fois que l'enregistrement DNS A pointe sur le
+serveur** ; certbot ajoute lui-même le bloc HTTPS et la redirection :
 
-    root /chemin/vers/app/public;   # jamais /chemin/vers/app
-    index index.php;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        # Transmet le protocole d'origine : sans cela l'application croit
-        # être en HTTP et n'émet pas l'en-tête HSTS.
-        fastcgi_param HTTP_X_FORWARDED_PROTO $scheme;
-    }
-
-    # Ne jamais servir les fichiers sensibles.
-    location ~ /\.(env|git) { deny all; }
-}
-
-server {
-    listen 80;
-    server_name exemple.com www.exemple.com;
-    return 301 https://$host$request_uri;
-}
+```bash
+sudo certbot --nginx -d exemple.com -d www.exemple.com
 ```
+
+Puis mettre `APP_URL` et `SESSION_DOMAIN` à jour dans `.env`, relancer
+`sudo DOMAINE=exemple.com ./deploiement/preparer-serveur.sh`, et redéployer.
 
 **Vérification après branchement :**
 
@@ -125,44 +168,50 @@ php artisan tinker
 > Ne lancez **jamais** `php artisan db:seed` en production : le seeder crée
 > des comptes de démonstration dont le mot de passe est `password`.
 
-### Mise en cache (à refaire à chaque déploiement)
+## 4. Déploiements suivants
 
 ```bash
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+sudo -u gestionstock ./deploiement/deployer.sh
 ```
 
-## 3. Déploiements suivants
+Le script enchaîne : récupération du code, dépendances, passage en
+maintenance, migrations, reconstruction des caches, permissions, rechargement
+de PHP-FPM, remise en ligne.
 
-```bash
-php artisan down --render="errors::503"
-git pull
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan config:cache && php artisan route:cache && php artisan view:cache
-php artisan up
-```
+**Ne pas le lancer en root** : le code ne doit pas appartenir au compte qui
+l'exécute, sinon une faille applicative permettrait de le réécrire.
 
-### Vérifier les dépendances à chaque déploiement
+Trois garde-fous qu'un déploiement à la main n'a pas :
 
-```bash
-composer audit
-```
+- **La remise en ligne est posée en piège de sortie dès le départ.** Migration
+  en échec, disque plein, interruption au clavier : le site ressort de
+  maintenance quoi qu'il arrive, sur la version précédente qui fonctionnait.
+- **Les permissions sont réappliquées à chaque passage** — l'étape la plus
+  souvent oubliée. Seuls `storage/` et `bootstrap/cache` sont inscriptibles
+  par le serveur web ; `.env` est refermé en `600`.
+- **`composer audit` est lancé en amont** et signale les vulnérabilités
+  connues sans bloquer : une faille publiée mérite d'être vue, mais ne doit
+  pas empêcher de livrer un correctif urgent.
 
-Cette commande signale les vulnérabilités connues des paquets installés.
-Elle doit renvoyer *No security vulnerability advisories found* ; sinon,
-mettre à jour le paquet concerné avant de déployer. À exécuter également
-une fois par mois même sans déploiement : une faille peut être publiée
-sur une version que vous utilisez déjà.
+Exécuter aussi `composer audit` une fois par mois même sans déploiement : une
+faille peut être publiée sur une version que vous utilisez déjà.
 
-## 4. Tâches planifiées
+### Aucun worker de file d'attente n'est nécessaire
+
+`QUEUE_CONNECTION=database` est configuré, mais **rien n'est mis en file dans
+le code actuel** : les e-mails partent en synchrone. Inutile donc de faire
+tourner `queue:work` ou de le superviser. Si des envois différés sont ajoutés
+plus tard, il faudra un service systemd — pas avant.
+
+## 5. Tâches planifiées
 
 Le planificateur Laravel doit tourner (utile pour les traitements
 périodiques et la purge des tokens expirés) :
 
+À installer dans la crontab de `gestionstock` (`sudo -u gestionstock crontab -e`) :
+
 ```cron
-* * * * * cd /chemin/vers/app && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/gestion-stock/app && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 Sans cette ligne, **le récapitulatif quotidien des alertes de stock ne part
@@ -192,33 +241,79 @@ de quoi les messages finiront en indésirables.
 Pour tester après déploiement, sans attendre 06 h 30 :
 
 ```bash
-php artisan alertes:envoyer --force
+sudo -u gestionstock php artisan alertes:envoyer --force
+```
+
+Vérifier ensuite que le planificateur tourne réellement — une ligne de cron
+est facile à croire installée :
+
+```bash
+sudo -u gestionstock crontab -l          # la ligne doit apparaître
+grep CRON /var/log/syslog | tail -3      # elle doit s'exécuter chaque minute
 ```
 
 Chaque responsable peut couper la réception depuis **Équipe → Modifier** ;
 seuls les patrons et les gérants sont destinataires.
 
-## 5. Sauvegardes
+## 6. Sauvegardes
 
-**À mettre en place avant la première vraie donnée client.** L'application
-contient l'inventaire, les ventes, les dettes clients et la trésorerie de
-chaque boutique : une perte est irrécupérable.
+**À mettre en place avant la première vraie donnée client.** La base contient
+l'inventaire, les ventes, les dettes clients et la trésorerie de chaque
+boutique. Une perte est irrécupérable : il n'existe aucune autre source pour
+ces données.
 
 ```cron
-30 2 * * * mysqldump --single-transaction --quick \
-  -u gestion_stock -p'MOT_DE_PASSE' gestion_stock \
-  | gzip > /sauvegardes/gestion_stock_$(date +\%F).sql.gz
+30 2 * * * /var/www/gestion-stock/deploiement/sauvegarder.sh \
+           >> /var/log/gestion-stock-sauvegarde.log 2>&1
 ```
 
-Recommandations :
+À installer dans la crontab de `gestionstock`, qui possède le `~/.my.cnf` écrit
+par `preparer-serveur.sh`. Le mot de passe MySQL n'est **jamais** passé en
+argument : il serait visible par `ps aux` depuis n'importe quel compte du
+serveur.
 
-- conserver au moins 30 jours d'historique ;
-- copier les sauvegardes **hors du serveur applicatif** (un serveur perdu
-  emporte sinon ses propres sauvegardes) ;
-- **tester une restauration** au moins une fois : une sauvegarde jamais
-  restaurée n'est pas une sauvegarde vérifiée.
+Le script fait un dump cohérent sans verrouiller les tables — les ventes en
+cours ne sont pas interrompues — puis :
 
-## 6. Supervision
+- **il vérifie l'archive avant tout le reste** : taille non nulle, gzip
+  lisible, marqueur de fin que `mysqldump` n'écrit que s'il est allé au bout ;
+- **il n'écrit dans le dossier qu'après vérification.** Le dump se fait dans un
+  fichier temporaire qui ne prend son nom définitif qu'une fois validé. Sans
+  cela, un dump interrompu — disque plein, base injoignable, serveur redémarré
+  — laisserait un fichier tronqué portant le nom du jour, qu'on prendrait plus
+  tard pour une sauvegarde valable ;
+- **il ne purge qu'ensuite.** Une sauvegarde ratée n'efface jamais
+  l'historique : c'est le scénario qui transforme un incident en catastrophe.
+
+Deux réglages à ne pas laisser par défaut :
+
+| Variable | Défaut | À faire |
+|---|---|---|
+| `RETENTION_JOURS` | 30 | suffisant dans la plupart des cas |
+| `COPIE_DISTANTE` | vide | **à renseigner** |
+
+Tant que `COPIE_DISTANTE` est vide, les sauvegardes restent sur le serveur
+qu'elles sont censées protéger : une panne disque, une compromission ou une
+erreur de l'hébergeur emporte les deux d'un coup. Renseigner une destination
+`rclone` (`distant:dossier`) ou `rsync` (`user@hote:/dossier`).
+
+### Restaurer — à tester une fois
+
+Une sauvegarde jamais restaurée n'est pas une sauvegarde vérifiée. Sur une
+base jetable, sans toucher à la production :
+
+```bash
+mysql -e "CREATE DATABASE restauration_test"
+gunzip < /var/sauvegardes/gestion-stock/gestion_stock_AAAA-MM-JJ.sql.gz \
+  | mysql restauration_test
+mysql restauration_test -e "SELECT COUNT(*) FROM ventes"
+mysql -e "DROP DATABASE restauration_test"
+```
+
+Si le compte de la vraie base doit servir à la restauration, lui accorder
+d'abord les droits sur la base de test.
+
+## 7. Supervision
 
 Sans supervision, une erreur en production passe inaperçue jusqu'à ce qu'un
 client la signale.
@@ -233,7 +328,7 @@ client la signale.
   **Journal global**. Une hausse anormale des échecs de connexion mérite
   un coup d'œil.
 
-## 7. Points de vigilance connus
+## 8. Points de vigilance connus
 
 - **Activation des abonnements manuelle.** Chaque code est généré et
   transmis à la main par le superadmin. C'est le fonctionnement voulu ;
