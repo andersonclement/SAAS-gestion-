@@ -701,5 +701,6 @@
     "Quantité reçue": "Quantity received",
     "Enregistrer le stock": "Save the stock",
     "Stock enregistré.": "Stock saved.",
-    ":quantite :produit entrés en stock (lot :lot, péremption :peremption).": ":quantite :produit added to stock (batch :lot, expiry :peremption)."
+    ":quantite :produit entrés en stock (lot :lot, péremption :peremption).": ":quantite :produit added to stock (batch :lot, expiry :peremption).",
+    "Le lot :lot existe déjà avec la péremption du :date. Utilisez ce numéro et cette date, ou un autre numéro de lot.": "Batch :lot already exists with expiry :date. Use that number and date, or a different batch number."
 }

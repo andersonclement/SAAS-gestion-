@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Lot;
 use App\Models\StockBoutique;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -48,6 +49,21 @@ class StoreApprovisionnementRequest extends FormRequest
 
             if ($fabrication && $peremption && $fabrication >= $peremption) {
                 $validator->errors()->add('date_peremption', __('La date de péremption doit suivre la date de fabrication.'));
+            }
+
+            // Un numéro de lot déjà connu désigne le même lot physique : lui
+            // attribuer une autre péremption fausserait la traçabilité et les
+            // alertes de tout ce qui est déjà en rayon sous ce numéro. Deux
+            // lots différents doivent porter deux numéros différents.
+            $lot = Lot::where('produit_id', $this->input('produit_id'))
+                ->where('numero_lot', $this->input('numero_lot'))
+                ->first();
+
+            if ($lot && $peremption && $lot->date_peremption?->toDateString() !== $peremption) {
+                $validator->errors()->add('numero_lot', __(
+                    'Le lot :lot existe déjà avec la péremption du :date. Utilisez ce numéro et cette date, ou un autre numéro de lot.',
+                    ['lot' => $lot->numero_lot, 'date' => $lot->date_peremption?->format('d/m/Y') ?? '—']
+                ));
             }
         });
     }

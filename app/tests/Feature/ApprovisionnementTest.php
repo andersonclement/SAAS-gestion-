@@ -68,6 +68,29 @@ class ApprovisionnementTest extends TestCase
         ]);
     }
 
+    public function test_an_existing_batch_cannot_be_given_a_different_expiry_date(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAs($patron)->post('/stock/approvisionnements', $this->donnees($boutique, $produit))->assertRedirect();
+
+        // Même numéro de lot, autre péremption : refusé, sinon la traçabilité
+        // de ce qui est déjà en rayon sous ce numéro serait faussée.
+        $this->actingAs($patron)->from('/stock/approvisionnements/creer')
+            ->post('/stock/approvisionnements', $this->donnees($boutique, $produit, [
+                'date_peremption' => now()->addMonths(2)->toDateString(),
+            ]))->assertSessionHasErrors('numero_lot');
+
+        $this->assertDatabaseHas('stock_boutiques', [
+            'boutique_id' => $boutique->id,
+            'produit_id' => $produit->id,
+            'quantite' => 25,
+        ]);
+    }
+
     public function test_the_expiry_date_is_required_and_must_be_in_the_future(): void
     {
         $tenant = Tenant::factory()->create();
