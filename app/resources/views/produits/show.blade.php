@@ -5,6 +5,10 @@
 @section('content')
     <h1>{{ $produit->nom }}</h1>
 
+    @can('update', $produit)
+        <p><a class="btn" href="{{ route('produits.edit', $produit) }}">{{ __('Modifier') }}</a></p>
+    @endcan
+
     <div class="card">
         <p><strong>{{ __('Type') }} :</strong> {{ $produit->type->label() }}</p>
         <p><strong>{{ __('Catégorie') }} :</strong> {{ $produit->categorie?->nom ?? '—' }}</p>

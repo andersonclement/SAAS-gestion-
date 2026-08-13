@@ -3,6 +3,15 @@
 @section('title', __('Catalogue produits'))
 
 @section('content')
+    <div class="card">
+        <form method="GET" style="display:flex;gap:.75rem;align-items:end;max-width:460px;">
+            <div class="field" style="margin-bottom:0;flex:1;">
+                <label for="q">{{ __('Rechercher') }}</label>
+                <input id="q" type="text" name="q" value="{{ $recherche }}" placeholder="{{ __('Nom ou code-barres') }}">
+            </div>
+            <button class="btn" type="submit">{{ __('Rechercher') }}</button>
+        </form>
+    </div>
     <h1>{{ __('Catalogue produits') }}</h1>
 
     <div class="card">

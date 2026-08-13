@@ -5,6 +5,10 @@
 @section('content')
     <h1>{{ $client->nom }}</h1>
 
+    @unless (auth()->user()->isComptable())
+        <p><a class="btn" href="{{ route('clients.edit', $client) }}">{{ __('Modifier') }}</a></p>
+    @endunless
+
     <div class="card">
         <p><strong>{{ __('Type') }} :</strong> {{ $client->type->label() }}</p>
         <p><strong>{{ __('Téléphone') }} :</strong> {{ $client->telephone ?? '—' }}</p>

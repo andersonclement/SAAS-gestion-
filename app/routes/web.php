@@ -71,13 +71,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('boutiques', BoutiqueController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('boutiques', BoutiqueController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::post('/boutique-contexte', [BoutiqueContexteController::class, 'update'])->name('boutique-contexte.update');
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
-    Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::post('/categories', [CategorieController::class, 'store'])->name('categories.store');
 
-    Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'create', 'store']);
+    Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'create', 'store', 'edit', 'update']);
 
     Route::resource('achats', BonCommandeController::class)
         ->parameters(['achats' => 'bon_commande'])
@@ -93,7 +93,7 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
 
     Route::resource('promotions', PromotionController::class)->only(['index', 'create', 'store']);
 
-    Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/ventes/{vente}/facture', [VenteController::class, 'facture'])->name('ventes.facture');
     Route::post('/ventes/{vente}/reglements', [ReglementController::class, 'store'])->name('ventes.reglements.store');

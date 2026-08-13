@@ -11,7 +11,7 @@
         @else
             <table>
                 <thead>
-                    <tr><th>{{ __('Nom') }}</th><th>{{ __('Contact') }}</th><th>{{ __('Téléphone') }}</th><th>{{ __('Adresse') }}</th></tr>
+                    <tr><th>{{ __('Nom') }}</th><th>{{ __('Contact') }}</th><th>{{ __('Téléphone') }}</th><th>{{ __('Adresse') }}</th><th></th></tr>
                 </thead>
                 <tbody>
                     @foreach ($fournisseurs as $fournisseur)
@@ -20,6 +20,11 @@
                             <td>{{ $fournisseur->contact ?? '—' }}</td>
                             <td>{{ $fournisseur->telephone ?? '—' }}</td>
                             <td>{{ $fournisseur->adresse ?? '—' }}</td>
+                            <td>
+                                @if (auth()->user()->isPatron() || auth()->user()->isGerant())
+                                    <a href="{{ route('fournisseurs.edit', $fournisseur) }}">{{ __('Modifier') }}</a>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

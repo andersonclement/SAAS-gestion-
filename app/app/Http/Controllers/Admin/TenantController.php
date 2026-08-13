@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TenantController extends Controller
 {
@@ -167,5 +168,55 @@ class TenantController extends Controller
             : __('Client suspendu.');
 
         return back()->with('status', $message);
+    }
+
+    /**
+     * Notes internes du superadmin sur ce client. Elles ne sont jamais
+     * exposées côté tenant : le patron ne doit pas les voir.
+     */
+    public function enregistrerNotes(Tenant $tenant, Request $request): RedirectResponse
+    {
+        $valide = $request->validate([
+            'notes_internes' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $tenant->update($valide);
+
+        return back()->with('status', __('Notes enregistrées.'));
+    }
+
+    /**
+     * Export du portefeuille clients pour le suivi commercial hors ligne
+     * (relances d'abonnement, prévisionnel de revenus).
+     */
+    public function exporter(): StreamedResponse
+    {
+        $tenants = Tenant::withCount(['boutiques', 'users'])->orderBy('nom')->get();
+
+        return response()->streamDownload(function () use ($tenants) {
+            $flux = fopen('php://output', 'w');
+            fputcsv($flux, [
+                __('Nom'), __('E-mail'), __('Téléphone'), __('Formule'),
+                __('Prix mensuel'), __('Expiration'), __('Compte'),
+                __('Boutiques'), __('Équipe'), __('Inscrit le'),
+            ]);
+
+            foreach ($tenants as $tenant) {
+                fputcsv($flux, [
+                    $tenant->nom,
+                    $tenant->email_contact,
+                    $tenant->telephone,
+                    $tenant->plan?->label() ?? __('Aucun'),
+                    $tenant->plan?->prixMensuel() ?? 0,
+                    $tenant->abonnement_expire_le?->format('Y-m-d') ?? '',
+                    $tenant->actif ? __('Actif') : __('Suspendu'),
+                    $tenant->boutiques_count,
+                    $tenant->users_count,
+                    $tenant->created_at->format('Y-m-d'),
+                ]);
+            }
+
+            fclose($flux);
+        }, 'clients.csv', ['Content-Type' => 'text/csv']);
     }
 }

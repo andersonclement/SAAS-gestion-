@@ -22,8 +22,16 @@ class VenteFactory extends Factory
     {
         return [
             'tenant_id' => Tenant::factory(),
-            'boutique_id' => Boutique::factory(),
-            'vendeur_id' => User::factory(),
+            // La boutique et le vendeur suivent le tenant de la vente : sinon
+            // ils appartiendraient à un tenant distinct, les relations
+            // seraient filtrées par le scope multi-tenant et reviendraient
+            // nulles — produisant des données de test incohérentes.
+            'boutique_id' => fn (array $attributs) => Boutique::factory()->create([
+                'tenant_id' => $attributs['tenant_id'],
+            ]),
+            'vendeur_id' => fn (array $attributs) => User::factory()->create([
+                'tenant_id' => $attributs['tenant_id'],
+            ]),
             'numero' => 'VT-'.fake()->unique()->numerify('######'),
         ];
     }

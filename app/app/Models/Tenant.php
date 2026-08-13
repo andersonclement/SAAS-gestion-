@@ -18,6 +18,7 @@ class Tenant extends Model
         'telephone',
         'plan',
         'abonnement_expire_le',
+        'notes_internes',
         'actif',
     ];
 

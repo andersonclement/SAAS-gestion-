@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBoutiqueRequest;
+use App\Http\Requests\UpdateBoutiqueRequest;
 use App\Models\Boutique;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
@@ -47,5 +48,21 @@ class BoutiqueController extends Controller
         $boutique->load('utilisateurs');
 
         return view('boutiques.show', compact('boutique'));
+    }
+
+    public function edit(Boutique $boutique): View
+    {
+        $this->authorize('update', $boutique);
+
+        return view('boutiques.edit', compact('boutique'));
+    }
+
+    public function update(UpdateBoutiqueRequest $request, Boutique $boutique): RedirectResponse
+    {
+        $boutique->update($request->validated());
+
+        Journal::enregistrer('boutique.modifiee', __('Boutique :nom modifiée.', ['nom' => $boutique->nom]), $boutique->id);
+
+        return redirect()->route('boutiques.show', $boutique)->with('status', __('Boutique mise à jour.'));
     }
 }

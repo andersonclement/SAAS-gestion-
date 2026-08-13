@@ -3,6 +3,15 @@
 @section('title', __('Clients'))
 
 @section('content')
+    <div class="card">
+        <form method="GET" style="display:flex;gap:.75rem;align-items:end;max-width:460px;">
+            <div class="field" style="margin-bottom:0;flex:1;">
+                <label for="q">{{ __('Rechercher') }}</label>
+                <input id="q" type="text" name="q" value="{{ $recherche }}" placeholder="{{ __('Nom ou téléphone') }}">
+            </div>
+            <button class="btn" type="submit">{{ __('Rechercher') }}</button>
+        </form>
+    </div>
     <h1>{{ __('Clients') }}</h1>
 
     <div class="card">
@@ -39,6 +48,8 @@
                 </tbody>
             </table>
         @endif
+
+        <div style="margin-top:1rem;">{{ $clients->links() }}</div>
 
         @if (! auth()->user()->isComptable())
             <p style="margin-top:1rem;"><a class="btn" href="{{ route('clients.create') }}">+ {{ __('Nouveau client') }}</a></p>

@@ -5,6 +5,10 @@
 @section('content')
     <h1>{{ $boutique->nom }}</h1>
 
+    @can('update', $boutique)
+        <p><a class="btn" href="{{ route('boutiques.edit', $boutique) }}">{{ __('Modifier') }}</a></p>
+    @endcan
+
     <div class="card">
         <p><strong>{{ __('Adresse') }} :</strong> {{ $boutique->adresse ?? '—' }}</p>
         <p><strong>{{ __('Téléphone') }} :</strong> {{ $boutique->telephone ?? '—' }}</p>

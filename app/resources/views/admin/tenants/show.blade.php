@@ -193,6 +193,18 @@
     </div>
 
     <div class="card">
+        <h2 style="margin-top:0;font-size:1.05rem;">{{ __('Notes internes') }}</h2>
+        <p style="color:#555;font-size:.9rem;">{{ __("Visibles uniquement dans l'espace superadmin — le client ne les voit jamais.") }}</p>
+        <form method="POST" action="{{ route('admin.tenants.notes', $tenant) }}">
+            @csrf
+            <div class="field">
+                <textarea name="notes_internes" rows="5" placeholder="{{ __('Conditions négociées, historique d\'un incident, contexte commercial…') }}">{{ old('notes_internes', $tenant->notes_internes) }}</textarea>
+            </div>
+            <button class="btn" type="submit">{{ __('Enregistrer les notes') }}</button>
+        </form>
+    </div>
+
+    <div class="card">
         <h2 style="margin-top:0;font-size:1.05rem;">{{ __("Historique des codes d'activation") }}</h2>
         @if ($tenant->codesActivation->isEmpty())
             <p>{{ __('Aucun code utilisé pour ce client.') }}</p>

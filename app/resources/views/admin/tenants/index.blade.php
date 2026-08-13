@@ -5,6 +5,8 @@
 @section('content')
     <h1 style="margin-top:0;">{{ __('Clients (tenants)') }}</h1>
 
+    <p><a class="btn btn-muted" href="{{ route('admin.tenants.export') }}">{{ __('Exporter en CSV') }}</a></p>
+
     <div class="card">
         <form method="GET" style="display:flex;gap:.75rem;align-items:end;max-width:420px;margin-bottom:1rem;">
             <div class="field" style="margin-bottom:0;flex:1;">

@@ -6,6 +6,27 @@
     <h1>{{ __('Ventes') }}</h1>
 
     <div class="card">
+        <form method="GET" style="display:flex;gap:.75rem;align-items:end;flex-wrap:wrap;">
+            <div class="field" style="margin-bottom:0;min-width:200px;">
+                <label for="q">{{ __('Rechercher') }}</label>
+                <input id="q" type="text" name="q" value="{{ $recherche }}" placeholder="{{ __('Numéro ou client') }}">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+                <label for="du">{{ __('Du') }}</label>
+                <input id="du" type="date" name="du" value="{{ $du }}">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+                <label for="au">{{ __('Au') }}</label>
+                <input id="au" type="date" name="au" value="{{ $au }}">
+            </div>
+            <button class="btn" type="submit">{{ __('Filtrer') }}</button>
+            @if ($recherche || $du || $au)
+                <a href="{{ route('ventes.index') }}" style="margin-left:.5rem;">{{ __('Réinitialiser') }}</a>
+            @endif
+        </form>
+    </div>
+
+    <div class="card">
         @if ($ventes->isEmpty())
             <p>{{ __('Aucune vente pour le moment.') }}</p>
         @else
@@ -36,6 +57,8 @@
                 </tbody>
             </table>
         @endif
+
+        <div style="margin-top:1rem;">{{ $ventes->links() }}</div>
 
         @can('create', App\Models\Vente::class)
             <p style="margin-top:1rem;">

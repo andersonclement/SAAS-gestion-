@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClientRequest;
+use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -11,9 +12,16 @@ class ClientController extends Controller
 {
     public function index(): View
     {
-        $clients = Client::orderBy('nom')->get();
+        $recherche = trim((string) request()->query('q'));
 
-        return view('clients.index', compact('clients'));
+        $clients = Client::when($recherche !== '', fn ($query) => $query->where(fn ($q) => $q
+            ->where('nom', 'like', "%{$recherche}%")
+            ->orWhere('telephone', 'like', "%{$recherche}%")))
+            ->orderBy('nom')
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('clients.index', compact('clients', 'recherche'));
     }
 
     public function create(): View
@@ -47,5 +55,19 @@ class ClientController extends Controller
             'client' => $client,
             'ventesACredit' => $ventesACredit,
         ]);
+    }
+
+    public function edit(Client $client): View
+    {
+        abort_if(auth()->user()->isComptable(), 403);
+
+        return view('clients.edit', compact('client'));
+    }
+
+    public function update(UpdateClientRequest $request, Client $client): RedirectResponse
+    {
+        $client->update($request->validated());
+
+        return redirect()->route('clients.show', $client)->with('status', __('Client mis à jour.'));
     }
 }

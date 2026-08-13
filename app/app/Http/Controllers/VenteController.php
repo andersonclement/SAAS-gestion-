@@ -26,12 +26,22 @@ class VenteController extends Controller
 
         $user = Auth::user();
 
-        $ventes = Vente::with(['boutique', 'client', 'vendeur', 'lignes'])
-            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
-            ->latest()
-            ->get();
+        $recherche = trim((string) request()->query('q'));
+        $du = request()->query('du');
+        $au = request()->query('au');
 
-        return view('ventes.index', compact('ventes'));
+        $ventes = Vente::with(['boutique', 'client', 'vendeur', 'lignes', 'paiements'])
+            ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where('boutique_id', $user->effectiveBoutiqueId()))
+            ->when($recherche !== '', fn ($query) => $query->where(fn ($q) => $q
+                ->where('numero', 'like', "%{$recherche}%")
+                ->orWhereHas('client', fn ($c) => $c->where('nom', 'like', "%{$recherche}%"))))
+            ->when($du, fn ($query) => $query->whereDate('created_at', '>=', $du))
+            ->when($au, fn ($query) => $query->whereDate('created_at', '<=', $au))
+            ->latest()
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('ventes.index', compact('ventes', 'recherche', 'du', 'au'));
     }
 
     public function create(): View
