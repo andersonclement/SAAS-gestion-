@@ -31,8 +31,10 @@
                             <td>
                                 @if ($stock->quantite === 0)
                                     <span class="badge" style="background:#fdecea;color:#611a15;">{{ __('Rupture de stock') }}</span>
-                                @elseif ($stock->quantite <= $stock->produit->seuil_alerte)
-                                    <span class="badge" style="background:#fff3cd;color:#7a5b00;">{{ __('Stock faible') }}</span>
+                                @elseif ($stock->quantite <= $stock->produit->stock_min)
+                                    <span class="badge" style="background:#fff3cd;color:#7a5b00;">{{ __('Stock au minimum') }}</span>
+                                @elseif ($stock->produit->stock_max > 0 && $stock->quantite > $stock->produit->stock_max)
+                                    <span class="badge" style="background:#e8eaf6;color:#283593;">{{ __('Surstock') }}</span>
                                 @endif
                                 @if ($stock->lot->estPerime())
                                     <span class="badge" style="background:#fdecea;color:#611a15;">{{ __('Périmé') }}</span>
@@ -47,6 +49,9 @@
         @endif
 
         <p style="margin-top:1rem;">
+            @can('create', App\Models\StockBoutique::class)
+                <a class="btn" href="{{ route('stock.approvisionnements.create') }}">+ {{ __('Entrée de stock') }}</a>
+            @endcan
             @can('create', App\Models\TransfertStock::class)
                 <a class="btn" href="{{ route('stock.transferts.create') }}">{{ __('Transférer du stock') }}</a>
             @endcan

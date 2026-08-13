@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
 class CentreAlertes
 {
     /**
-     * @return array{ruptures: Collection, stockFaible: Collection, peremptionProche: Collection, perimes: Collection, creancesEnRetard: Collection}
+     * @return array{ruptures: Collection, stockFaible: Collection, surstock: Collection, peremptionProche: Collection, perimes: Collection, creancesEnRetard: Collection}
      */
     public static function pour(Collection $boutiqueIds): array
     {
@@ -38,11 +38,29 @@ class CentreAlertes
             ])
             ->values();
 
+        // Le stock minimum est fixé produit par produit à la création : dès que
+        // la quantité en boutique l'atteint, le produit est signalé.
         $stockFaible = $niveauxStock
             ->filter(function ($ligne) use ($produits) {
                 $produit = $produits->get($ligne->produit_id);
 
-                return $produit && $ligne->quantite_totale > 0 && $ligne->quantite_totale <= $produit->seuil_alerte;
+                return $produit && $ligne->quantite_totale > 0 && $ligne->quantite_totale <= $produit->stock_min;
+            })
+            ->map(fn ($ligne) => [
+                'boutique' => $boutiques->get($ligne->boutique_id),
+                'produit' => $produits->get($ligne->produit_id),
+                'quantite' => $ligne->quantite_totale,
+            ])
+            ->values();
+
+        // Symétrique du seuil bas : un stock au-dessus du maximum immobilise de
+        // la trésorerie et vieillit en rayon. stock_max à 0 signifie « pas de
+        // plafond défini » (produits enregistrés avant la mise en place).
+        $surstock = $niveauxStock
+            ->filter(function ($ligne) use ($produits) {
+                $produit = $produits->get($ligne->produit_id);
+
+                return $produit && $produit->stock_max > 0 && $ligne->quantite_totale > $produit->stock_max;
             })
             ->map(fn ($ligne) => [
                 'boutique' => $boutiques->get($ligne->boutique_id),
@@ -71,6 +89,7 @@ class CentreAlertes
         return [
             'ruptures' => $ruptures,
             'stockFaible' => $stockFaible,
+            'surstock' => $surstock,
             'peremptionProche' => $peremptionProche,
             'perimes' => $perimes,
             'creancesEnRetard' => $creancesEnRetard,

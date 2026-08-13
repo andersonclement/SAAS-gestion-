@@ -28,7 +28,8 @@ class ProduitFactory extends Factory
             'code_barres' => fake()->unique()->ean13(),
             'prix_achat' => fake()->numberBetween(500, 20000),
             'prix_vente' => fake()->numberBetween(500, 25000),
-            'seuil_alerte' => fake()->numberBetween(5, 50),
+            'stock_min' => $minimum = fake()->numberBetween(5, 50),
+            'stock_max' => $minimum * fake()->numberBetween(4, 10),
             'actif' => true,
         ];
     }

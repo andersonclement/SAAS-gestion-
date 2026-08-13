@@ -10,7 +10,7 @@
     @endcan
 
     <div class="card">
-        <p><strong>{{ __('Adresse') }} :</strong> {{ $boutique->adresse ?? '—' }}</p>
+        <p><strong>{{ __('Localisation') }} :</strong> {{ $boutique->adresse ?? '—' }}</p>
         <p><strong>{{ __('Téléphone') }} :</strong> {{ $boutique->telephone ?? '—' }}</p>
         <p><strong>{{ __('Statut') }} :</strong> <span class="badge">{{ $boutique->actif ? __('Active') : __('Inactive') }}</span></p>
     </div>

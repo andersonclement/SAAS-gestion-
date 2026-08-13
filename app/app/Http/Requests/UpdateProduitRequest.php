@@ -36,7 +36,8 @@ class UpdateProduitRequest extends FormRequest
             ],
             'prix_achat' => ['required', 'integer', 'min:0'],
             'prix_vente' => ['required', 'integer', 'min:0'],
-            'seuil_alerte' => ['required', 'integer', 'min:0'],
+            'stock_min' => ['required', 'integer', 'min:0'],
+            'stock_max' => ['required', 'integer', 'min:1', 'gte:stock_min'],
             'actif' => ['boolean'],
         ];
     }

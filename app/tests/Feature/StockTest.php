@@ -59,14 +59,14 @@ class StockTest extends TestCase
         $tenant = Tenant::factory()->create();
         $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
-        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'seuil_alerte' => 20]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'stock_min' => 20]);
         $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
         StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 5]);
 
         $response = $this->actingAs($patron)->get('/stock');
 
         $response->assertOk();
-        $response->assertSee('Stock faible');
+        $response->assertSee('Stock au minimum');
     }
 
     public function test_a_patron_can_transfer_stock_between_boutiques(): void

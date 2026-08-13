@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProduitRequest;
 use App\Http\Requests\UpdateProduitRequest;
+use App\Models\Boutique;
 use App\Models\Categorie;
+use App\Models\Lot;
 use App\Models\Produit;
+use App\Models\StockBoutique;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ProduitController extends Controller
@@ -35,14 +40,55 @@ class ProduitController extends Controller
 
         $categories = Categorie::orderBy('nom')->get();
 
-        return view('produits.create', compact('categories'));
+        $user = Auth::user();
+        $boutiques = $user->boutique_id
+            ? Boutique::whereKey($user->boutique_id)->get()
+            : Boutique::orderBy('nom')->get();
+
+        return view('produits.create', compact('categories', 'boutiques'));
     }
 
+    /**
+     * Crée le produit et son premier lot en stock d'un seul tenant : bornes de
+     * stock, quantité, numéro de lot et date de péremption sont saisis
+     * ensemble, si bien qu'aucun produit ne peut exister au catalogue sans
+     * péremption connue ni seuils d'alerte.
+     */
     public function store(StoreProduitRequest $request): RedirectResponse
     {
-        Produit::create($request->validated());
+        $validated = $request->validated();
 
-        return redirect()->route('produits.index')->with('status', __('Produit créé avec succès.'));
+        $produit = DB::transaction(function () use ($validated) {
+            $produit = Produit::create($validated);
+
+            $lot = Lot::create([
+                'produit_id' => $produit->id,
+                'numero_lot' => $validated['numero_lot'],
+                'date_fabrication' => $validated['date_fabrication'] ?? null,
+                'date_peremption' => $validated['date_peremption'],
+            ]);
+
+            StockBoutique::create([
+                'boutique_id' => $validated['boutique_id'],
+                'produit_id' => $produit->id,
+                'lot_id' => $lot->id,
+                'quantite' => $validated['quantite_initiale'],
+            ]);
+
+            Journal::enregistrer('produit.cree', __(
+                ':produit ajouté au catalogue — stock initial :quantite (lot :lot, péremption :peremption).',
+                [
+                    'produit' => $produit->nom,
+                    'quantite' => $validated['quantite_initiale'],
+                    'lot' => $lot->numero_lot,
+                    'peremption' => $lot->date_peremption->format('d/m/Y'),
+                ]
+            ), (int) $validated['boutique_id']);
+
+            return $produit;
+        });
+
+        return redirect()->route('produits.show', $produit)->with('status', __('Produit créé et stock initial enregistré.'));
     }
 
     public function show(Produit $produit): View

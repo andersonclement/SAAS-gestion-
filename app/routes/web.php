@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AbonnementController;
+use App\Http\Controllers\AccesPrivilegieController;
 use App\Http\Controllers\AlerteController;
+use App\Http\Controllers\ApprovisionnementController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\BoutiqueContexteController;
 use App\Http\Controllers\BoutiqueController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CodeAccesController;
 use App\Http\Controllers\ComparatifController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
@@ -92,6 +95,9 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
 
     Route::prefix('stock')->name('stock.')->group(function () {
         Route::get('/', [StockController::class, 'index'])->name('index');
+        // Entrée de stock en ajout seul : ni édition ni suppression exposées.
+        Route::get('/approvisionnements/creer', [ApprovisionnementController::class, 'create'])->name('approvisionnements.create');
+        Route::post('/approvisionnements', [ApprovisionnementController::class, 'store'])->name('approvisionnements.store');
         Route::resource('transferts', TransfertStockController::class)->only(['index', 'create', 'store']);
         Route::resource('inventaires', InventaireController::class)->only(['index', 'create', 'store', 'show']);
     });
@@ -111,6 +117,21 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::get('/tresorerie', [TresorerieController::class, 'index'])->name('tresorerie.index');
     Route::resource('depenses', DepenseController::class)->only(['index', 'create', 'store']);
     Route::resource('versements', VersementCaisseController::class)->only(['index', 'create', 'store']);
+
+    // Codes d'accès : délivrance et suivi par le patron…
+    Route::get('/codes-acces', [CodeAccesController::class, 'index'])->name('codes-acces.index');
+    Route::get('/codes-acces/creer', [CodeAccesController::class, 'create'])->name('codes-acces.create');
+    Route::post('/codes-acces', [CodeAccesController::class, 'store'])->name('codes-acces.store');
+    Route::get('/codes-acces/{code_acces}', [CodeAccesController::class, 'show'])->name('codes-acces.show');
+    Route::post('/codes-acces/{code_acces}/revoquer', [CodeAccesController::class, 'revoquer'])->name('codes-acces.revoquer');
+
+    // …et saisie par le gérant. Comme pour l'abonnement, la limite de débit
+    // empêche de balayer les codes possibles.
+    Route::get('/acces-privilegie', [AccesPrivilegieController::class, 'create'])->name('acces-privilegie.create');
+    Route::post('/acces-privilegie', [AccesPrivilegieController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('acces-privilegie.store');
+    Route::delete('/acces-privilegie', [AccesPrivilegieController::class, 'destroy'])->name('acces-privilegie.destroy');
 
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
 

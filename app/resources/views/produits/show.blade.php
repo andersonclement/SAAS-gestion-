@@ -16,7 +16,8 @@
         <p><strong>{{ __('Code-barres') }} :</strong> {{ $produit->code_barres ?? '—' }}</p>
         <p><strong>{{ __("Prix d'achat") }} :</strong> {{ number_format($produit->prix_achat, 0, ',', ' ') }} FCFA</p>
         <p><strong>{{ __('Prix de vente') }} :</strong> {{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA</p>
-        <p><strong>{{ __("Seuil d'alerte") }} :</strong> {{ $produit->seuil_alerte }}</p>
+        <p><strong>{{ __('Stock minimum') }} :</strong> {{ $produit->stock_min }}</p>
+        <p><strong>{{ __('Stock maximum') }} :</strong> {{ $produit->stock_max ?: '—' }}</p>
         @if ($produit->type->tracabiliteObligatoire())
             <p style="color:#7a1f1f;"><strong>⚠ {{ __('Traçabilité par lot obligatoire') }}</strong> ({{ __('produit phytosanitaire') }}) — {{ __("suivie lors des réceptions d'achat.") }}</p>
         @endif

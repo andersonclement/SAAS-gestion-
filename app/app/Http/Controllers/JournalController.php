@@ -17,7 +17,7 @@ class JournalController extends Controller
     {
         $user = Auth::user();
 
-        $activites = JournalActivite::with(['user', 'boutique'])
+        $activites = JournalActivite::with(['user', 'boutique', 'codeAcces'])
             ->when($user->effectiveBoutiqueId(), fn ($query) => $query->where(fn ($q) => $q
                 ->where('boutique_id', $user->effectiveBoutiqueId())
                 ->orWhere('user_id', $user->id)))

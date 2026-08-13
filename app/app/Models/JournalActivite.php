@@ -17,6 +17,7 @@ class JournalActivite extends Model
         'user_id',
         'utilisateur_nom',
         'boutique_id',
+        'code_acces_id',
         'action',
         'description',
     ];
@@ -29,5 +30,15 @@ class JournalActivite extends Model
     public function boutique(): BelongsTo
     {
         return $this->belongsTo(Boutique::class);
+    }
+
+    /**
+     * Code d'accès sous couvert duquel l'opération a été réalisée, le cas
+     * échéant : renseigné quand un gérant agit grâce à une délégation du
+     * patron, nul pour les opérations ordinaires.
+     */
+    public function codeAcces(): BelongsTo
+    {
+        return $this->belongsTo(CodeAcces::class);
     }
 }

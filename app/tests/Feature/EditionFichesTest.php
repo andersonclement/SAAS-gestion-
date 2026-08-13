@@ -30,7 +30,8 @@ class EditionFichesTest extends TestCase
             'unite_mesure' => $produit->unite_mesure->value,
             'prix_achat' => $produit->prix_achat,
             'prix_vente' => $produit->prix_vente,
-            'seuil_alerte' => $produit->seuil_alerte,
+            'stock_min' => $produit->stock_min,
+            'stock_max' => $produit->stock_max,
             'actif' => 1,
         ], $remplacements);
     }

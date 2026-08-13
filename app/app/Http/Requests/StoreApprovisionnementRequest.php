@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\StockBoutique;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
+
+class StoreApprovisionnementRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', StockBoutique::class);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'boutique_id' => [
+                'required',
+                Rule::exists('boutiques', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
+            'produit_id' => [
+                'required',
+                Rule::exists('produits', 'id')->where('tenant_id', $this->user()->tenant_id),
+            ],
+            'quantite' => ['required', 'integer', 'min:1'],
+            'numero_lot' => ['required', 'string', 'max:64'],
+            'date_fabrication' => ['nullable', 'date', 'before_or_equal:today'],
+            // Comme à la création d'un produit : pas d'entrée en stock sans
+            // date de péremption connue, c'est elle qui déclenche les alertes.
+            'date_peremption' => ['required', 'date', 'after:today'],
+        ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $boutiqueUtilisateur = $this->user()->boutique_id;
+
+            if ($boutiqueUtilisateur !== null && (int) $this->input('boutique_id') !== $boutiqueUtilisateur) {
+                $validator->errors()->add('boutique_id', __('Vous ne pouvez approvisionner que votre boutique.'));
+            }
+
+            $fabrication = $this->input('date_fabrication');
+            $peremption = $this->input('date_peremption');
+
+            if ($fabrication && $peremption && $fabrication >= $peremption) {
+                $validator->errors()->add('date_peremption', __('La date de péremption doit suivre la date de fabrication.'));
+            }
+        });
+    }
+}

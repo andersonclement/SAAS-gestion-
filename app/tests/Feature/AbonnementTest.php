@@ -81,7 +81,10 @@ class AbonnementTest extends TestCase
         Boutique::factory()->count(5)->create(['tenant_id' => $tenant->id]);
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
 
-        $response = $this->actingAs($patron)->post('/boutiques', ['nom' => 'Boutique en trop']);
+        $response = $this->actingAs($patron)->post('/boutiques', [
+            'nom' => 'Boutique en trop',
+            'adresse' => 'Douala',
+        ]);
 
         $response->assertSessionHasErrors('nom');
         $this->assertSame(5, $tenant->boutiques()->count());

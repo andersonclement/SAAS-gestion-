@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Boutique;
+use App\Support\AccesPrivilegie;
 use App\Support\CentreAlertes;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -51,6 +52,10 @@ class AppServiceProvider extends ServiceProvider
             $view->with('boutiquesPourSelecteur', $user?->isPatron()
                 ? Boutique::orderBy('nom')->get()
                 : collect());
+
+            // Code d'accès éventuellement ouvert : la bannière et le menu s'y
+            // adaptent, et le gérant sait sous quelle délégation il travaille.
+            $view->with('accesPrivilegie', $user ? AccesPrivilegie::actif() : null);
 
             $view->with('abonnementActif', $user === null || $user->tenant->abonnementActif());
 

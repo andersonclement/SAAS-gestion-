@@ -47,6 +47,10 @@
                     </div>
                 @endif
                 @yield('content')
+
+                <footer class="pied-page">
+                    @include('partials.service-client')
+                </footer>
             </div>
         </div>
     </div>

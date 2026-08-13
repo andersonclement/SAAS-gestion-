@@ -188,6 +188,39 @@ form.filtres .field { margin-bottom: 0; }
 
 .graphique { width: 100%; height: auto; display: block; }
 
+/* --------------------------------------------------- Blocs repliables */
+
+.bloc-repliable {
+    border: 1px solid #e2e4e8;
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.bloc-repliable > summary {
+    cursor: pointer;
+    font-weight: 600;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+.bloc-repliable[open] > summary { margin-bottom: .75rem; }
+
+/* ------------------------------------------------------- Pied de page */
+
+.pied-page {
+    max-width: 1100px;
+    margin: 2rem auto 1rem;
+    padding: 0 1rem 1.5rem;
+    text-align: center;
+    color: #56606b;
+    font-size: .9rem;
+}
+
+.service-client { margin: .35rem 0; }
+.service-client a { color: inherit; font-weight: 600; }
+
 /* ====================================================== Écrans moyens */
 
 @media (min-width: 700px) {
@@ -226,6 +259,6 @@ form.filtres .field { margin-bottom: 0; }
 /* ============================================== Confort d'impression */
 
 @media print {
-    .topbar, .btn, form.filtres { display: none; }
+    .topbar, .btn, form.filtres, .pied-page { display: none; }
     body { background: #fff; }
 }

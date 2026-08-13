@@ -27,6 +27,10 @@ class Journal
             'user_id' => $user->id,
             'utilisateur_nom' => $user->name,
             'boutique_id' => $boutiqueId,
+            // Quand l'action est faite sous couvert d'un code d'accès, elle est
+            // rattachée à ce code : le patron retrouve ainsi tout ce qu'a permis
+            // chaque délégation qu'il a accordée.
+            'code_acces_id' => AccesPrivilegie::actif()?->id,
             'action' => $action,
             'description' => $description,
         ]);

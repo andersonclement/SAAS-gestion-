@@ -37,6 +37,17 @@
                 @can('viewAny', App\Models\User::class)
                     <a href="{{ route('users.index') }}">{{ __('Équipe') }}</a>
                 @endcan
+                @can('viewAny', App\Models\CodeAcces::class)
+                    <a href="{{ route('codes-acces.index') }}">{{ __("Codes d'accès") }}</a>
+                @endcan
+                @if (auth()->user()->isGerant())
+                    <a href="{{ route('acces-privilegie.create') }}">
+                        {{ __("Code d'accès") }}
+                        @if ($accesPrivilegie ?? null)
+                            <span class="badge" style="background:#e6f4ea;color:#1e4620;">{{ __('ouvert') }}</span>
+                        @endif
+                    </a>
+                @endif
                 <a href="{{ route('journal.index') }}">{{ __('Journal') }}</a>
                 <a href="{{ route('rapports.index') }}">{{ __('Rapports') }}</a>
                 <a href="{{ route('abonnement.index') }}">
@@ -73,6 +84,21 @@
         </div>
     </div>
 
+    @if ($accesPrivilegie ?? null)
+        <div class="status" style="border-radius:0;margin-bottom:0;text-align:center;">
+            {{ __("Accès :portee ouvert avec le code :code jusqu'au :echeance.", [
+                'portee' => $accesPrivilegie->portee->label(),
+                'code' => $accesPrivilegie->code,
+                'echeance' => $accesPrivilegie->expire_le->format('d/m/Y H:i'),
+            ]) }}
+            <form method="POST" action="{{ route('acces-privilegie.destroy') }}" style="display:inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="background:none;border:none;color:#1e4620;text-decoration:underline;cursor:pointer;padding:0;font:inherit;">{{ __('Refermer') }}</button>
+            </form>
+        </div>
+    @endif
+
     @if (auth()->user()->isPatron() && ($boutiqueContexteId ?? null))
         <div class="status" style="border-radius:0;margin-bottom:0;text-align:center;">
             {{ __('Vous consultez la vue gérant.') }}
@@ -106,5 +132,9 @@
 
     @yield('content')
 </div>
+
+<footer class="pied-page">
+    @include('partials.service-client')
+</footer>
 </body>
 </html>

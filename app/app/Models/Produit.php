@@ -22,7 +22,8 @@ class Produit extends Model
         'code_barres',
         'prix_achat',
         'prix_vente',
-        'seuil_alerte',
+        'stock_min',
+        'stock_max',
         'actif',
     ];
 
@@ -33,7 +34,8 @@ class Produit extends Model
             'unite_mesure' => UniteMesure::class,
             'prix_achat' => 'integer',
             'prix_vente' => 'integer',
-            'seuil_alerte' => 'integer',
+            'stock_min' => 'integer',
+            'stock_max' => 'integer',
             'actif' => 'boolean',
         ];
     }

@@ -166,6 +166,20 @@ code.code-pill {
 
 .graphique { width: 100%; height: auto; display: block; }
 
+/* ------------------------------------------------------- Pied de page */
+
+.pied-page {
+    margin: 2rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e2e4e8;
+    text-align: center;
+    color: #56606b;
+    font-size: .9rem;
+}
+
+.service-client { margin: .35rem 0; }
+.service-client a { color: inherit; font-weight: 600; }
+
 /* ================================================== Écrans moyens/larges */
 
 @media (min-width: 900px) {

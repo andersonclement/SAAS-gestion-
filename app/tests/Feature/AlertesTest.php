@@ -37,7 +37,7 @@ class AlertesTest extends TestCase
         $tenant = Tenant::factory()->create();
         $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
-        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'Engrais rare', 'seuil_alerte' => 10]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'Engrais rare', 'stock_min' => 10]);
         $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
         StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 5]);
 
@@ -45,6 +45,48 @@ class AlertesTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Engrais rare');
+    }
+
+    public function test_a_product_reaching_exactly_its_minimum_is_flagged(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'Engrais pile au seuil', 'stock_min' => 10, 'stock_max' => 100]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
+        StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 10]);
+
+        $this->actingAs($patron)->get('/alertes')
+            ->assertOk()
+            ->assertSeeInOrder(['Stock au minimum', 'Engrais pile au seuil']);
+    }
+
+    public function test_a_product_above_its_maximum_is_flagged_as_overstock(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'Engrais en trop', 'stock_min' => 10, 'stock_max' => 50]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
+        StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 51]);
+
+        $this->actingAs($patron)->get('/alertes')
+            ->assertOk()
+            ->assertSeeInOrder(['Surstock', 'Engrais en trop']);
+    }
+
+    public function test_a_product_without_a_maximum_is_never_flagged_as_overstock(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'nom' => 'Ancien produit', 'stock_min' => 1, 'stock_max' => 0]);
+        $lot = Lot::factory()->create(['tenant_id' => $tenant->id, 'produit_id' => $produit->id]);
+        StockBoutique::factory()->create(['tenant_id' => $tenant->id, 'boutique_id' => $boutique->id, 'produit_id' => $produit->id, 'lot_id' => $lot->id, 'quantite' => 9999]);
+
+        $this->actingAs($patron)->get('/alertes')
+            ->assertOk()
+            ->assertSee(__('Aucun produit au-dessus de son maximum.'));
     }
 
     public function test_an_expired_lot_still_in_stock_is_flagged(): void

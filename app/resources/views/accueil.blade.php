@@ -97,6 +97,7 @@
 
 <footer class="pied">
     <p>{{ config('app.name') }} — {{ __('Gestion de stock pour boutiques d’intrants agricoles') }}</p>
+    @include('partials.service-client')
     <p><a href="{{ route('login') }}">{{ __('Se connecter') }}</a></p>
 </footer>
 

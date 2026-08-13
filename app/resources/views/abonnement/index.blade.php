@@ -8,6 +8,7 @@
     @if (! $tenant->abonnementActif())
         <div class="errors">
             {{ __("L'abonnement de votre espace a expiré. L'accès aux fonctionnalités est suspendu jusqu'au renouvellement.") }}
+            @include('partials.service-client')
         </div>
     @endif
 

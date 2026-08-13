@@ -17,8 +17,9 @@
             </div>
 
             <div class="field">
-                <label for="adresse">{{ __('Adresse') }}</label>
-                <input id="adresse" type="text" name="adresse" value="{{ old('adresse', $boutique->adresse) }}">
+                <label for="adresse">{{ __('Localisation') }}</label>
+                <input id="adresse" type="text" name="adresse" value="{{ old('adresse', $boutique->adresse) }}"
+                       placeholder="{{ __('Quartier, ville') }}" required>
             </div>
 
             <div class="field">

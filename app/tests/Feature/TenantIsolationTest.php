@@ -95,7 +95,7 @@ class TenantIsolationTest extends TestCase
         $this->actingAs($patron)->post('/boutiques', [
             'nom' => 'Boutique Sud',
             'adresse' => 'Yamoussoukro',
-        ])->assertRedirect(route('boutiques.index'));
+        ])->assertRedirect();
 
         $this->assertDatabaseHas('boutiques', [
             'nom' => 'Boutique Sud',

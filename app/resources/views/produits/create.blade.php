@@ -60,8 +60,55 @@
             </div>
 
             <div class="field">
-                <label for="seuil_alerte">{{ __("Seuil d'alerte de stock") }}</label>
-                <input id="seuil_alerte" type="number" min="0" name="seuil_alerte" value="{{ old('seuil_alerte', 0) }}" required>
+                <label for="stock_min">{{ __('Stock minimum') }}</label>
+                <input id="stock_min" type="number" min="0" name="stock_min" value="{{ old('stock_min', 0) }}" required>
+                <small style="color:#56606b;">{{ __("Une alerte s'affiche dès que le stock descend à ce niveau.") }}</small>
+            </div>
+
+            <div class="field">
+                <label for="stock_max">{{ __('Stock maximum') }}</label>
+                <input id="stock_max" type="number" min="1" name="stock_max" value="{{ old('stock_max') }}" required>
+                <small style="color:#56606b;">{{ __('Quantité à ne pas dépasser en boutique ; au-delà, le produit est signalé en surstock.') }}</small>
+            </div>
+
+            <h2 style="font-size:1.05rem;margin:1.75rem 0 .25rem;">{{ __('Stock initial') }}</h2>
+            <p style="color:#56606b;font-size:.9rem;margin-top:0;">
+                {{ __('Le produit entre au catalogue avec sa première quantité en boutique et la date de péremption de ce lot.') }}
+            </p>
+
+            <div class="field">
+                <label for="boutique_id">{{ __('Boutique') }}</label>
+                <select id="boutique_id" name="boutique_id" required>
+                    @if ($boutiques->count() !== 1)
+                        <option value="">— {{ __('Choisir') }} —</option>
+                    @endif
+                    @foreach ($boutiques as $boutique)
+                        <option value="{{ $boutique->id }}" @selected((string) old('boutique_id', $boutiques->count() === 1 ? $boutiques->first()->id : '') === (string) $boutique->id)>
+                            {{ $boutique->nom }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="quantite_initiale">{{ __('Quantité en stock') }}</label>
+                <input id="quantite_initiale" type="number" min="1" name="quantite_initiale" value="{{ old('quantite_initiale') }}" required>
+            </div>
+
+            <div class="field">
+                <label for="numero_lot">{{ __('Numéro de lot') }}</label>
+                <input id="numero_lot" type="text" name="numero_lot" value="{{ old('numero_lot') }}" required>
+            </div>
+
+            <div class="field">
+                <label for="date_fabrication">{{ __('Date de fabrication (optionnelle)') }}</label>
+                <input id="date_fabrication" type="date" name="date_fabrication" value="{{ old('date_fabrication') }}">
+            </div>
+
+            <div class="field">
+                <label for="date_peremption">{{ __('Date de péremption') }}</label>
+                <input id="date_peremption" type="date" name="date_peremption" value="{{ old('date_peremption') }}" required>
+                <small style="color:#56606b;">{{ __("Une alerte est levée à l'approche de cette date.") }}</small>
             </div>
 
             <button class="btn" type="submit">{{ __('Créer le produit') }}</button>

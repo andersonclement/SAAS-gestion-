@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\TypeProduit;
 use App\Enums\UniteMesure;
 use App\Enums\UserRole;
+use App\Models\Boutique;
 use App\Models\Categorie;
 use App\Models\Produit;
 use App\Models\Tenant;
@@ -16,65 +17,126 @@ class CatalogueProduitsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_a_patron_can_create_a_product(): void
+    /**
+     * Jeu de données complet pour créer un produit : depuis que le stock
+     * initial est saisi en même temps que la fiche, la boutique, le lot et la
+     * date de péremption font partie du formulaire.
+     *
+     * @param  array<string, mixed>  $remplacements
+     * @return array<string, mixed>
+     */
+    private function donneesProduit(Boutique $boutique, array $remplacements = []): array
+    {
+        return array_merge([
+            'nom' => 'Engrais NPK 15-15-15',
+            'type' => TypeProduit::IntrantAgricole->value,
+            'unite_mesure' => UniteMesure::Sac->value,
+            'prix_achat' => 12000,
+            'prix_vente' => 15000,
+            'stock_min' => 10,
+            'stock_max' => 200,
+            'boutique_id' => $boutique->id,
+            'quantite_initiale' => 40,
+            'numero_lot' => 'LOT-2026-01',
+            'date_peremption' => now()->addYear()->toDateString(),
+        ], $remplacements);
+    }
+
+    public function test_a_patron_can_create_a_product_with_its_initial_stock(): void
     {
         $tenant = Tenant::factory()->create();
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
         $categorie = Categorie::factory()->create(['tenant_id' => $tenant->id]);
 
-        $response = $this->actingAs($patron)->post('/produits', [
-            'nom' => 'Engrais NPK 15-15-15',
+        $this->actingAs($patron)->post('/produits', $this->donneesProduit($boutique, [
             'categorie_id' => $categorie->id,
-            'type' => TypeProduit::IntrantAgricole->value,
-            'unite_mesure' => UniteMesure::Sac->value,
             'code_barres' => '1234567890123',
-            'prix_achat' => 12000,
-            'prix_vente' => 15000,
-            'seuil_alerte' => 10,
-        ]);
+        ]))->assertRedirect();
 
-        $response->assertRedirect(route('produits.index'));
-        $this->assertDatabaseHas('produits', [
-            'nom' => 'Engrais NPK 15-15-15',
-            'tenant_id' => $tenant->id,
-            'type' => TypeProduit::IntrantAgricole->value,
+        $produit = Produit::where('nom', 'Engrais NPK 15-15-15')->firstOrFail();
+        $this->assertSame($tenant->id, $produit->tenant_id);
+        $this->assertSame(10, $produit->stock_min);
+        $this->assertSame(200, $produit->stock_max);
+
+        $this->assertDatabaseHas('lots', [
+            'produit_id' => $produit->id,
+            'numero_lot' => 'LOT-2026-01',
+        ]);
+        $this->assertDatabaseHas('stock_boutiques', [
+            'produit_id' => $produit->id,
+            'boutique_id' => $boutique->id,
+            'quantite' => 40,
         ]);
     }
 
-    public function test_a_gerant_can_create_a_product(): void
+    public function test_the_expiry_date_is_required(): void
     {
         $tenant = Tenant::factory()->create();
-        $gerant = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Gerant]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
 
-        $response = $this->actingAs($gerant)->post('/produits', [
-            'nom' => 'Glyphosate 1L',
-            'type' => TypeProduit::ProduitPhytosanitaire->value,
-            'unite_mesure' => UniteMesure::Litre->value,
-            'prix_achat' => 5000,
-            'prix_vente' => 6500,
-            'seuil_alerte' => 5,
-        ]);
+        $donnees = $this->donneesProduit($boutique);
+        unset($donnees['date_peremption']);
 
-        $response->assertRedirect(route('produits.index'));
-        $this->assertDatabaseHas('produits', ['nom' => 'Glyphosate 1L']);
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $donnees)
+            ->assertSessionHasErrors('date_peremption');
+
+        $this->assertDatabaseMissing('produits', ['nom' => 'Engrais NPK 15-15-15']);
+    }
+
+    public function test_an_already_expired_batch_is_rejected(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutique, [
+            'date_peremption' => now()->subDay()->toDateString(),
+        ]))->assertSessionHasErrors('date_peremption');
+    }
+
+    public function test_the_min_and_max_stock_are_required_and_ordered(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        $donnees = $this->donneesProduit($boutique);
+        unset($donnees['stock_max']);
+
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $donnees)
+            ->assertSessionHasErrors('stock_max');
+
+        // Un maximum sous le minimum n'a pas de sens.
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutique, [
+            'stock_min' => 50,
+            'stock_max' => 20,
+        ]))->assertSessionHasErrors('stock_max');
+    }
+
+    public function test_the_initial_stock_cannot_land_in_another_tenant_boutique(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutiqueEtrangere = Boutique::factory()->create(['tenant_id' => Tenant::factory()->create()->id]);
+
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutiqueEtrangere))
+            ->assertSessionHasErrors('boutique_id');
+
+        $this->assertDatabaseMissing('produits', ['nom' => 'Engrais NPK 15-15-15']);
     }
 
     public function test_a_vendeur_cannot_create_a_product(): void
     {
         $tenant = Tenant::factory()->create();
-        $vendeur = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Vendeur]);
-
-        $response = $this->actingAs($vendeur)->post('/produits', [
-            'nom' => 'Semence de maïs',
-            'type' => TypeProduit::IntrantAgricole->value,
-            'unite_mesure' => UniteMesure::Sac->value,
-            'prix_achat' => 3000,
-            'prix_vente' => 4000,
-            'seuil_alerte' => 5,
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $vendeur = User::factory()->create([
+            'tenant_id' => $tenant->id, 'role' => UserRole::Vendeur, 'boutique_id' => $boutique->id,
         ]);
 
-        $response->assertForbidden();
-        $this->assertDatabaseMissing('produits', ['nom' => 'Semence de maïs']);
+        $this->actingAs($vendeur)->post('/produits', $this->donneesProduit($boutique))->assertForbidden();
+        $this->assertDatabaseMissing('produits', ['nom' => 'Engrais NPK 15-15-15']);
     }
 
     public function test_products_are_scoped_to_the_tenant(): void
@@ -97,19 +159,13 @@ class CatalogueProduitsTest extends TestCase
     {
         $tenant = Tenant::factory()->create();
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
         Produit::factory()->create(['tenant_id' => $tenant->id, 'code_barres' => '1111111111111']);
 
-        $response = $this->actingAs($patron)->from('/produits/create')->post('/produits', [
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutique, [
             'nom' => 'Autre produit',
-            'type' => TypeProduit::IntrantAgricole->value,
-            'unite_mesure' => UniteMesure::Unite->value,
             'code_barres' => '1111111111111',
-            'prix_achat' => 100,
-            'prix_vente' => 150,
-            'seuil_alerte' => 1,
-        ]);
-
-        $response->assertSessionHasErrors('code_barres');
+        ]))->assertSessionHasErrors('code_barres');
     }
 
     public function test_a_patron_can_create_a_category(): void

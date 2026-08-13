@@ -110,7 +110,8 @@ class DatabaseSeeder extends Seeder
             'code_barres' => '3760000000011',
             'prix_achat' => 12000,
             'prix_vente' => 15000,
-            'seuil_alerte' => 10,
+            'stock_min' => 10,
+            'stock_max' => 120,
         ]);
 
         Produit::create([
@@ -122,7 +123,8 @@ class DatabaseSeeder extends Seeder
             'code_barres' => '3760000000028',
             'prix_achat' => 8000,
             'prix_vente' => 10000,
-            'seuil_alerte' => 15,
+            'stock_min' => 15,
+            'stock_max' => 180,
         ]);
 
         Produit::create([
@@ -134,7 +136,8 @@ class DatabaseSeeder extends Seeder
             'code_barres' => '3760000000035',
             'prix_achat' => 5000,
             'prix_vente' => 6500,
-            'seuil_alerte' => 5,
+            'stock_min' => 5,
+            'stock_max' => 60,
         ]);
 
         $this->command->info('Comptes de démonstration créés (mot de passe : "password") :');

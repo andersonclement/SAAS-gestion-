@@ -61,8 +61,13 @@
             </div>
 
             <div class="field">
-                <label for="seuil_alerte">{{ __("Seuil d'alerte") }}</label>
-                <input id="seuil_alerte" type="number" min="0" name="seuil_alerte" value="{{ old('seuil_alerte', $produit->seuil_alerte) }}" required>
+                <label for="stock_min">{{ __('Stock minimum') }}</label>
+                <input id="stock_min" type="number" min="0" name="stock_min" value="{{ old('stock_min', $produit->stock_min) }}" required>
+            </div>
+
+            <div class="field">
+                <label for="stock_max">{{ __('Stock maximum') }}</label>
+                <input id="stock_max" type="number" min="1" name="stock_max" value="{{ old('stock_max', $produit->stock_max ?: $produit->stock_min * 10 ?: 1) }}" required>
             </div>
 
             <div class="field">

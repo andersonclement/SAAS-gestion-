@@ -15,7 +15,8 @@ class UpdateBoutiqueRequest extends FormRequest
     {
         return [
             'nom' => ['required', 'string', 'max:255'],
-            'adresse' => ['nullable', 'string', 'max:255'],
+            // Voir StoreBoutiqueRequest : la localisation est structurante.
+            'adresse' => ['required', 'string', 'max:255'],
             'telephone' => ['nullable', 'string', 'max:30'],
         ];
     }

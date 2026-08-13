@@ -48,6 +48,21 @@
             @endif
         @endif
 
+        @if ($alertes['surstock']->isNotEmpty())
+            <h2 style="font-size:15px;margin:20px 0 6px;color:#283593;">{{ __('Surstock') }} ({{ $alertes['surstock']->count() }})</h2>
+            <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.6;">
+                @foreach ($alertes['surstock']->take(20) as $surstock)
+                    <li>
+                        {{ $surstock['produit']?->nom ?? __('Produit supprimé') }} — {{ $surstock['boutique']?->nom }}
+                        ({{ __(':quantite en stock, maximum :maximum', [
+                            'quantite' => $surstock['quantite'],
+                            'maximum' => $surstock['produit']?->stock_max,
+                        ]) }})
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+
         @if ($alertes['perimes']->isNotEmpty())
             <h2 style="font-size:15px;margin:20px 0 6px;color:#7a1f1f;">{{ __('Lots périmés') }} ({{ $alertes['perimes']->count() }})</h2>
             <ul style="margin:0;padding-left:20px;font-size:14px;line-height:1.6;">
