@@ -7,7 +7,7 @@
     <p style="color:#555;">{{ __("Activité de tous les clients de la plateforme, la plus récente en premier.") }}</p>
 
     <div class="card">
-        <form method="GET" style="display:flex;gap:.75rem;align-items:end;flex-wrap:wrap;margin-bottom:1rem;">
+        <form method="GET" class="filtres">
             <div class="field" style="margin-bottom:0;">
                 <label for="tenant_id">{{ __('Client') }}</label>
                 <select id="tenant_id" name="tenant_id" data-auto-submit>

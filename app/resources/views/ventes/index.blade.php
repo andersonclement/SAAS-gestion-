@@ -6,7 +6,7 @@
     <h1>{{ __('Ventes') }}</h1>
 
     <div class="card">
-        <form method="GET" style="display:flex;gap:.75rem;align-items:end;flex-wrap:wrap;">
+        <form method="GET" class="filtres">
             <div class="field" style="margin-bottom:0;min-width:200px;">
                 <label for="q">{{ __('Rechercher') }}</label>
                 <input id="q" type="text" name="q" value="{{ $recherche }}" placeholder="{{ __('Numéro ou client') }}">

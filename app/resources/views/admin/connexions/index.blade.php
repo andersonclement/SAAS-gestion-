@@ -7,7 +7,7 @@
     <p style="color:#555;">{{ __("Toutes les tentatives de connexion à la plateforme (patrons, gérants, vendeurs, comptables, superadmins), réussies ou non.") }}</p>
 
     <div class="card">
-        <form method="GET" style="display:flex;gap:.75rem;align-items:end;max-width:420px;margin-bottom:1rem;">
+        <form method="GET" class="filtres">
             <div class="field" style="margin-bottom:0;flex:1;">
                 <label for="q">{{ __('Rechercher') }}</label>
                 <input id="q" type="text" name="q" value="{{ $recherche }}" placeholder="{{ __('E-mail') }}">

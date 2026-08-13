@@ -60,7 +60,83 @@ class DashboardController extends Controller
             'margeTotale' => $margeTotale,
             'meilleuresVentes' => $meilleuresVentes,
             'stockDormant' => $stockDormant,
+            'evolutionMensuelle' => $this->evolutionMensuelle($boutiqueIds),
+            'chiffreParBoutique' => $this->chiffreParBoutique($boutiques),
         ]);
+    }
+
+    /**
+     * Chiffre d'affaires des 12 derniers mois, mois courant inclus.
+     *
+     * L'agrégation SQL se fait à la journée (DATE() existe aussi bien sur
+     * SQLite que sur MySQL) puis le regroupement par mois est fait en PHP :
+     * cela évite les fonctions de date propres à chaque moteur, tout en
+     * ramenant au plus 366 lignes.
+     *
+     * @return array<string, float> libellé de mois => chiffre d'affaires
+     */
+    private function evolutionMensuelle($boutiqueIds): array
+    {
+        $debut = Carbon::now()->startOfMonth()->subMonths(11);
+
+        $parJour = LigneVente::query()
+            ->join('ventes', 'ligne_ventes.vente_id', '=', 'ventes.id')
+            ->whereIn('ventes.boutique_id', $boutiqueIds)
+            ->where('ventes.created_at', '>=', $debut)
+            ->selectRaw('DATE(ventes.created_at) as jour, SUM(ligne_ventes.quantite * ligne_ventes.prix_unitaire) as total')
+            ->groupBy('jour')
+            ->pluck('total', 'jour');
+
+        // Les 12 mois sont initialisés à zéro : un mois sans vente doit
+        // apparaître comme un creux sur la courbe, pas comme un trou.
+        $mois = [];
+        for ($i = 0; $i < 12; $i++) {
+            $mois[$debut->copy()->addMonths($i)->format('Y-m')] = 0.0;
+        }
+
+        foreach ($parJour as $jour => $total) {
+            $cle = substr((string) $jour, 0, 7);
+
+            if (array_key_exists($cle, $mois)) {
+                $mois[$cle] += (float) $total;
+            }
+        }
+
+        $libelles = [];
+        foreach ($mois as $cle => $total) {
+            $libelles[Carbon::createFromFormat('Y-m-d', $cle.'-01')->translatedFormat('M')] = $total;
+        }
+
+        return $libelles;
+    }
+
+    /**
+     * Répartition du chiffre d'affaires par boutique, pour comparer les points
+     * de vente d'un coup d'œil. Sans objet quand l'utilisateur n'en voit qu'une.
+     *
+     * @return array<string, float> nom de boutique => chiffre d'affaires
+     */
+    private function chiffreParBoutique(Collection $boutiques): array
+    {
+        if ($boutiques->count() < 2) {
+            return [];
+        }
+
+        $totaux = LigneVente::query()
+            ->join('ventes', 'ligne_ventes.vente_id', '=', 'ventes.id')
+            ->whereIn('ventes.boutique_id', $boutiques->pluck('id'))
+            ->selectRaw('ventes.boutique_id, SUM(ligne_ventes.quantite * ligne_ventes.prix_unitaire) as total')
+            ->groupBy('ventes.boutique_id')
+            ->pluck('total', 'boutique_id');
+
+        $repartition = [];
+        foreach ($boutiques as $boutique) {
+            $repartition[$boutique->nom] = (float) ($totaux[$boutique->id] ?? 0);
+        }
+
+        arsort($repartition);
+
+        return $repartition;
     }
 
     /**

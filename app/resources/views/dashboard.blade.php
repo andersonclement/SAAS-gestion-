@@ -11,7 +11,7 @@
         @endif
     </h1>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;">
+    <div class="kpi-grid">
         <div class="card" style="margin-bottom:0;">
             <p style="margin:0;color:#555;">{{ __("Chiffre d'affaires (ce mois)") }}</p>
             <p style="font-size:1.6rem;margin:.2rem 0 0;font-weight:700;">{{ number_format($chiffreAffairesDuMois, 0, ',', ' ') }} FCFA</p>
@@ -29,6 +29,24 @@
             <p style="font-size:1.6rem;margin:.2rem 0 0;font-weight:700;">{{ $nombreBoutiques }}</p>
         </div>
     </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;">{{ __("Évolution du chiffre d'affaires") }}</h2>
+        <p style="color:#555;font-size:.9rem;margin-top:-.5rem;">{{ __('Sur les 12 derniers mois, en FCFA.') }}</p>
+        @if (array_sum($evolutionMensuelle) <= 0)
+            <p>{{ __('Aucune vente enregistrée sur cette période.') }}</p>
+        @else
+            {!! \App\Support\Graphique::courbe($evolutionMensuelle) !!}
+        @endif
+    </div>
+
+    @if ($chiffreParBoutique !== [])
+        <div class="card">
+            <h2 style="margin-top:0;">{{ __("Chiffre d'affaires par boutique") }}</h2>
+            <p style="color:#555;font-size:.9rem;margin-top:-.5rem;">{{ __('Depuis la création, en FCFA.') }}</p>
+            {!! \App\Support\Graphique::barres($chiffreParBoutique) !!}
+        </div>
+    @endif
 
     <div class="card">
         <h2 style="margin-top:0;">{{ __('Meilleures ventes') }}</h2>

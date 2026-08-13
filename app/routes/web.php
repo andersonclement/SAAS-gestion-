@@ -32,9 +32,13 @@ use App\Http\Controllers\VenteController;
 use App\Http\Controllers\VersementCaisseController;
 use Illuminate\Support\Facades\Route;
 
+// Page vitrine publique. Un utilisateur déjà connecté est renvoyé vers son
+// tableau de bord : lui présenter l'argumentaire commercial n'aurait pas de sens.
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : view('accueil');
+})->name('accueil');
 
 Route::put('/locale/{locale}', [LocaleController::class, 'update'])->name('locale.update');
 
@@ -73,7 +77,8 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
 
     Route::resource('boutiques', BoutiqueController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::post('/boutique-contexte', [BoutiqueContexteController::class, 'update'])->name('boutique-contexte.update');
-    Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::post('/users/{user}/activation', [UserController::class, 'basculerActivation'])->name('users.activation');
     Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::post('/categories', [CategorieController::class, 'store'])->name('categories.store');
 

@@ -29,6 +29,7 @@ class User extends Authenticatable
         'password',
         'role',
         'actif',
+        'alertes_email',
     ];
 
     /**
@@ -53,6 +54,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
             'actif' => 'boolean',
+            'alertes_email' => 'boolean',
+            'alerte_envoyee_le' => 'date',
         ];
     }
 

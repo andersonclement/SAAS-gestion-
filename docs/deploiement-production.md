@@ -156,6 +156,39 @@ périodiques et la purge des tokens expirés) :
 * * * * * cd /chemin/vers/app && php artisan schedule:run >> /dev/null 2>&1
 ```
 
+Sans cette ligne, **le récapitulatif quotidien des alertes de stock ne part
+pas** : c'est la seule fonctionnalité qui dépend aujourd'hui du planificateur.
+
+### Envoi des e-mails
+
+Le récapitulatif d'alertes (`alertes:envoyer`, planifié tous les jours à
+06 h 30) part par le transport configuré dans `.env`. En production,
+`MAIL_MAILER=log` ne suffit pas : il faut un vrai service SMTP.
+
+```dotenv
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.votre-fournisseur.com
+MAIL_PORT=587
+MAIL_SCHEME=tls
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_FROM_ADDRESS="alertes@votre-domaine.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+Faites pointer `MAIL_FROM_ADDRESS` sur une adresse de votre nom de domaine et
+publiez les enregistrements SPF/DKIM fournis par votre service d'envoi, faute
+de quoi les messages finiront en indésirables.
+
+Pour tester après déploiement, sans attendre 06 h 30 :
+
+```bash
+php artisan alertes:envoyer --force
+```
+
+Chaque responsable peut couper la réception depuis **Équipe → Modifier** ;
+seuls les patrons et les gérants sont destinataires.
+
 ## 5. Sauvegardes
 
 **À mettre en place avant la première vraie donnée client.** L'application

@@ -35,12 +35,22 @@ class UserPolicy
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Modification d'une fiche de compte. Réservée au patron, y compris pour
+     * sa propre fiche : un gérant qui pourrait éditer son compte pourrait
+     * aussi s'attribuer un autre rôle ou une autre boutique.
      */
     public function update(User $user, User $model): bool
     {
-        return $user->tenant_id === $model->tenant_id
-            && ($user->isPatron() || $user->id === $model->id);
+        return $user->isPatron() && $user->tenant_id === $model->tenant_id;
+    }
+
+    /**
+     * Activation/désactivation d'un compte. Le patron ne peut pas se
+     * désactiver lui-même : le tenant se retrouverait sans administrateur.
+     */
+    public function basculerActivation(User $user, User $model): bool
+    {
+        return $user->isPatron() && $user->tenant_id === $model->tenant_id && $user->id !== $model->id;
     }
 
     /**

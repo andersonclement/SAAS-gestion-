@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="card">
-        <form method="GET" style="display:flex;gap:.75rem;align-items:end;max-width:460px;">
+        <form method="GET" class="filtres">
             <div class="field" style="margin-bottom:0;flex:1;">
                 <label for="q">{{ __('Rechercher') }}</label>
                 <input id="q" type="text" name="q" value="{{ $recherche }}" placeholder="{{ __('Nom ou téléphone') }}">
