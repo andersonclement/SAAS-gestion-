@@ -11,6 +11,7 @@ use App\Models\Tenant;
 use App\Models\TentativeConnexion;
 use App\Models\Vente;
 use App\Models\VersementCaisse;
+use App\Support\CalculMarge;
 use App\Support\CentreAlertes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,7 +66,7 @@ class TenantController extends Controller
             ->selectRaw('SUM(quantite * prix_unitaire) as total')->value('total') ?? 0;
         $margeTotale = (clone $lignesVendues)
             ->join('produits', 'ligne_ventes.produit_id', '=', 'produits.id')
-            ->selectRaw('SUM(ligne_ventes.quantite * (ligne_ventes.prix_unitaire - produits.prix_achat)) as marge')
+            ->selectRaw(CalculMarge::expression())
             ->value('marge') ?? 0;
 
         $nombreVentes = Vente::where('tenant_id', $tenant->id)->count();

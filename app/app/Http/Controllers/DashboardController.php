@@ -6,6 +6,7 @@ use App\Models\Boutique;
 use App\Models\LigneVente;
 use App\Models\Produit;
 use App\Models\StockBoutique;
+use App\Support\CalculMarge;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +40,7 @@ class DashboardController extends Controller
 
         $margeTotale = (clone $lignesVendues)
             ->join('produits', 'ligne_ventes.produit_id', '=', 'produits.id')
-            ->selectRaw('SUM(ligne_ventes.quantite * (ligne_ventes.prix_unitaire - produits.prix_achat)) as marge')
+            ->selectRaw(CalculMarge::expression())
             ->value('marge') ?? 0;
 
         $meilleuresVentes = (clone $lignesVendues)

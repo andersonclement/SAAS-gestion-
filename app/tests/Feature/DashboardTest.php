@@ -54,6 +54,25 @@ class DashboardTest extends TestCase
         $response->assertSee('5 000 FCFA');
     }
 
+    public function test_a_sale_below_cost_price_yields_a_negative_margin(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $vendeur = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Vendeur, 'boutique_id' => $boutique->id]);
+
+        // Solde ou geste commercial : on vend en dessous du prix d'achat. Les
+        // prix étant stockés non signés, la soustraction doit être ramenée en
+        // entiers signés, sans quoi MySQL rejette la requête.
+        $produit = Produit::factory()->create(['tenant_id' => $tenant->id, 'prix_achat' => 2000, 'prix_vente' => 1500]);
+
+        $this->enregistrerVente($tenant, $boutique, $vendeur, $produit, 10);
+
+        $this->actingAs($patron)->get('/dashboard')
+            ->assertOk()
+            ->assertSee('-5 000 FCFA');
+    }
+
     public function test_the_dashboard_lists_best_selling_products(): void
     {
         $tenant = Tenant::factory()->create();

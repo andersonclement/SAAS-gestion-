@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Boutique;
 use App\Models\LigneVente;
 use App\Models\StockBoutique;
+use App\Support\CalculMarge;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -34,7 +35,7 @@ class ComparatifController extends Controller
 
             $marge = (clone $lignesDuMois)
                 ->join('produits', 'ligne_ventes.produit_id', '=', 'produits.id')
-                ->selectRaw('SUM(ligne_ventes.quantite * (ligne_ventes.prix_unitaire - produits.prix_achat)) as marge')
+                ->selectRaw(CalculMarge::expression())
                 ->value('marge') ?? 0;
 
             $quantiteVendue = (clone $lignesDuMois)->sum('quantite');

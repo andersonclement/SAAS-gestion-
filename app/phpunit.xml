@@ -22,10 +22,15 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
-        <!-- Base dédiée et éphémère : sans cela, la suite de tests écrase la
-             base de développement (et, pire, celle configurée en .env). -->
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <!-- La suite tourne sur le même moteur qu'en production. SQLite, plus
+             rapide, laissait passer des requêtes que MySQL refuse : arithmétique
+             sur colonnes non signées, types de dates, tri par défaut. Base
+             dédiée et distincte de celle de développement, que RefreshDatabase
+             vide entre chaque test.
+             Repli sans serveur MySQL sous la main :
+             DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="gestion_stock_test"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

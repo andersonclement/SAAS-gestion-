@@ -8,7 +8,7 @@ récurrentes à mettre en place. Il complète `app/.env.production.example`.
 | Composant | Version minimale | Remarque |
 |---|---|---|
 | PHP | 8.2 | extensions : `pdo_mysql`, `mbstring`, `openssl`, `bcmath`, `intl` |
-| MySQL | 8.0 | ou PostgreSQL 14+ |
+| MySQL | 8.0.3+ | ou MariaDB 10.5.2+ |
 | Serveur web | Nginx ou Apache | racine web sur `app/public`, **jamais** sur `app/` |
 | Certificat TLS | — | obligatoire : l'application force le HTTPS hors développement |
 
@@ -16,6 +16,15 @@ récurrentes à mettre en place. Il complète `app/.env.production.example`.
 > or la protection contre la survente (`lockForUpdate` dans
 > `VenteController::allouerStock`) en dépend : deux caisses vendant
 > simultanément le même produit pourraient sinon rendre le stock négatif.
+
+> **PostgreSQL n'est pas pris en charge.** Le calcul de marge repose sur
+> `CAST(... AS SIGNED)`, syntaxe propre à MySQL et MariaDB (voir
+> `App\Support\CalculMarge`). Les versions antérieures à MySQL 8.0.3 et
+> MariaDB 10.5.2 fonctionnent également, Laravel repliant le renommage de
+> colonne sur `CHANGE`, mais elles ne sont pas testées.
+
+La suite de tests tourne sur le même moteur que la production : voir
+`environnement-local.md`.
 
 ## 2. Première installation
 
