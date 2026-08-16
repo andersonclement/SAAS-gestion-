@@ -106,6 +106,20 @@ class StoreVenteRequest extends FormRequest
                 }
 
                 $produit = Produit::find($ligne['produit_id'] ?? null);
+
+                // Sans format retenu, la vente se fait à la mesure : elle exige
+                // que le produit ait un prix au détail. Un sac scellé n'a pas à
+                // pouvoir être ouvert au comptoir parce qu'un vendeur a oublié
+                // de choisir le format.
+                if ($produit && ! $produit->estDetaillable()) {
+                    $validator->errors()->add(
+                        "lignes.{$index}.conditionnement_id",
+                        __(':produit ne se vend pas au détail : choisissez un format.', ['produit' => $produit->nom])
+                    );
+
+                    continue;
+                }
+
                 $totalVente += $produit ? $produit->prix_vente * (int) $ligne['quantite'] : 0;
             }
 

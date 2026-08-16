@@ -50,6 +50,28 @@ class Produit extends Model
      * Formats de vente du produit (sac de 50 kg, bidon de 5 L...). Un produit
      * sans conditionnement se vend simplement à l'unité de base.
      */
+    /**
+     * Le produit peut-il être vendu à la mesure — au kilo, au litre — plutôt
+     * qu'en format entier ?
+     *
+     * Le prix au détail fait office de déclaration : renseigné, le produit
+     * s'ouvre au comptoir ; laissé vide, il ne se vend qu'en formats complets.
+     * Beaucoup d'intrants arrivent scellés et ne peuvent pas être détaillés.
+     */
+    public function estDetaillable(): bool
+    {
+        return $this->prix_vente !== null;
+    }
+
+    /**
+     * Un produit ni détaillable ni conditionné n'est vendable par aucun chemin :
+     * la fiche produit le signale, et la caisse le refuse.
+     */
+    public function estVendable(): bool
+    {
+        return $this->estDetaillable() || $this->conditionnements()->where('actif', true)->exists();
+    }
+
     public function conditionnements(): HasMany
     {
         return $this->hasMany(Conditionnement::class)->orderByDesc('par_defaut')->orderBy('facteur');

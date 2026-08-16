@@ -15,7 +15,15 @@
         <p><strong>{{ __('Unité de mesure') }} :</strong> {{ $produit->unite_mesure->label() }}</p>
         <p><strong>{{ __('Code-barres') }} :</strong> {{ $produit->code_barres ?? '—' }}</p>
         <p><strong>{{ __("Prix d'achat") }} :</strong> {{ number_format($produit->prix_achat, 0, ',', ' ') }} FCFA</p>
-        <p><strong>{{ __('Prix de vente') }} :</strong> {{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA</p>
+        <p>
+            <strong>{{ __('Prix de vente au détail') }} :</strong>
+            @if ($produit->estDetaillable())
+                {{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA / {{ $produit->unite_mesure->value }}
+            @else
+                <span style="color:#7a1f1f;">{{ __('non détaillable') }}</span>
+                <small style="color:#555;">— {{ __('ce produit ne se vend qu\'en formats entiers') }}</small>
+            @endif
+        </p>
         <p><strong>{{ __('Stock minimum') }} :</strong> {{ $produit->stock_min }}</p>
         <p><strong>{{ __('Stock maximum') }} :</strong> {{ $produit->stock_max ?: '—' }}</p>
         @if ($produit->type->tracabiliteObligatoire())
@@ -29,7 +37,16 @@
         </p>
 
         @if ($produit->conditionnements->where('actif', true)->isEmpty())
-            <p>{{ __('Aucun format défini : le produit se vend à l\'unité, à :prix FCFA.', ['prix' => number_format($produit->prix_vente, 0, ',', ' ')]) }}</p>
+            @if ($produit->estDetaillable())
+                <p>{{ __('Aucun format défini : le produit se vend à la mesure, à :prix FCFA le/la :unite.', ['prix' => number_format($produit->prix_vente, 0, ',', ' '), 'unite' => $produit->unite_mesure->value]) }}</p>
+            @else
+                {{-- Ni prix au détail, ni format : le produit n'est vendable par
+                     aucun chemin. Mieux vaut le dire ici que laisser le vendeur
+                     le découvrir au comptoir. --}}
+                <p style="color:#7a1f1f;font-weight:600;">
+                    {{ __("Ce produit n'est pas vendable en l'état : il n'a ni prix au détail, ni format. Ajoutez un format ci-dessous, ou renseignez un prix au détail dans la fiche.") }}
+                </p>
+            @endif
         @else
             <table>
                 <thead>

@@ -34,7 +34,13 @@
                             </td>
                             <td>{{ $produit->categorie?->nom ?? '—' }}</td>
                             <td>{{ $produit->unite_mesure->label() }}</td>
-                            <td>{{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA</td>
+                            <td>
+                                @if ($produit->estDetaillable())
+                                    {{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA
+                                @else
+                                    <span style="color:#555;">{{ __('formats uniquement') }}</span>
+                                @endif
+                            </td>
                             <td>{{ $produit->stock_min }} / {{ $produit->stock_max ?: '—' }}</td>
                             <td><a href="{{ route('produits.show', $produit) }}">{{ __('Voir') }}</a></td>
                         </tr>

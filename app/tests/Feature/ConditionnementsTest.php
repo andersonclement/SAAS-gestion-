@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ModePaiement;
 use App\Enums\PorteePromotion;
+use App\Enums\TypeProduit;
 use App\Enums\TypePromotion;
 use App\Enums\UniteMesure;
 use App\Enums\UserRole;
@@ -20,6 +21,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vente;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -369,5 +371,147 @@ class ConditionnementsTest extends TestCase
         ])->assertSessionHasErrors('lignes.0.prix_unitaire');
 
         $this->assertDatabaseCount('ligne_bon_commandes', 0);
+    }
+
+    // --- Produits non détaillables ----------------------------------------
+
+    public function test_un_produit_peut_etre_cree_sans_prix_au_detail(): void
+    {
+        $c = $this->contexte();
+
+        $this->actingAs($c['patron'])->post('/produits', [
+            'nom' => 'Semence de maïs traitée',
+            'type' => TypeProduit::IntrantAgricole->value,
+            'unite_mesure' => UniteMesure::Kilogramme->value,
+            'prix_achat' => 1200,
+            // Sachet scellé : il ne s'ouvre pas au comptoir.
+            'prix_vente' => null,
+            'stock_min' => 5,
+            'stock_max' => 500,
+            'boutique_id' => $c['boutique']->id,
+            'quantite_initiale' => 100,
+            'numero_lot' => 'LOT-SEM-1',
+            'date_peremption' => now()->addYear()->toDateString(),
+        ])->assertRedirect();
+
+        $produit = Produit::where('nom', 'Semence de maïs traitée')->firstOrFail();
+
+        $this->assertNull($produit->prix_vente);
+        $this->assertFalse($produit->estDetaillable());
+    }
+
+    public function test_un_produit_non_detaillable_ne_peut_pas_etre_vendu_a_la_mesure(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['prix_vente' => null]);
+        $this->sacDe50($c);
+
+        $this->actingAs($c['vendeur'])->post('/ventes', [
+            'boutique_id' => $c['boutique']->id,
+            'mode_paiement' => ModePaiement::Especes->value,
+            // Aucun format retenu : c'est une vente au kilo.
+            'lignes' => [['produit_id' => $c['produit']->id, 'quantite' => 3]],
+        ])->assertSessionHasErrors('lignes.0.conditionnement_id');
+
+        $this->assertDatabaseCount('ventes', 0);
+        $this->assertDatabaseHas('stock_boutiques', ['id' => $c['stock']->id, 'quantite' => 1000]);
+    }
+
+    public function test_un_produit_non_detaillable_se_vend_normalement_au_format(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['prix_vente' => null]);
+        $sac = $this->sacDe50($c, 28000);
+
+        $this->actingAs($c['vendeur'])->post('/ventes', [
+            'boutique_id' => $c['boutique']->id,
+            'mode_paiement' => ModePaiement::Especes->value,
+            'lignes' => [['produit_id' => $c['produit']->id, 'quantite' => 2, 'conditionnement_id' => $sac->id]],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('ligne_ventes', ['quantite' => 100, 'prix_unitaire' => 560]);
+        $this->assertSame(56000, Vente::with('lignes')->firstOrFail()->montantTotal());
+    }
+
+    public function test_une_promotion_s_applique_au_prix_du_format_quand_il_n_y_a_pas_de_prix_au_detail(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['prix_vente' => null]);
+        $sac = $this->sacDe50($c, 28000);   // 560 F le kilo
+
+        Promotion::factory()->create([
+            'tenant_id' => $c['tenant']->id,
+            'portee' => PorteePromotion::Produit,
+            'produit_id' => $c['produit']->id,
+            'type' => TypePromotion::Pourcentage,
+            'valeur' => 10,
+            'actif' => true,
+            'date_debut' => now()->subDay()->toDateString(),
+            'date_fin' => now()->addDay()->toDateString(),
+            'cree_par_id' => $c['patron']->id,
+        ]);
+
+        $this->actingAs($c['vendeur'])->post('/ventes', [
+            'boutique_id' => $c['boutique']->id,
+            'mode_paiement' => ModePaiement::Especes->value,
+            'lignes' => [['produit_id' => $c['produit']->id, 'quantite' => 1, 'conditionnement_id' => $sac->id]],
+        ])->assertRedirect();
+
+        // Faute de prix au détail, le barème part du prix unitaire du format :
+        // 10 % de 560 = 56, soit 504 F le kilo.
+        $this->assertDatabaseHas('ligne_ventes', ['quantite' => 50, 'prix_unitaire' => 504]);
+    }
+
+    public function test_la_fiche_signale_un_produit_ni_detaillable_ni_conditionne(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['prix_vente' => null]);
+
+        $this->assertFalse($c['produit']->fresh()->estVendable());
+
+        $this->actingAs($c['patron'])
+            ->get("/produits/{$c['produit']->id}")
+            ->assertOk()
+            // Fragment sans apostrophe : Blade les échappe en &#039; dans le HTML.
+            ->assertSee('ni prix au détail, ni format', false);
+    }
+
+    public function test_l_instantane_hors_ligne_indique_les_produits_non_detaillables(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['prix_vente' => null]);
+        $sac = $this->sacDe50($c, 28000);
+
+        $reponse = $this->actingAs($c['vendeur'])->getJson('/sync/catalogue');
+
+        $reponse->assertOk();
+        $reponse->assertJsonPath('produits.0.detaillable', false);
+        $reponse->assertJsonPath('produits.0.prix', null);
+        $reponse->assertJsonPath('produits.0.conditionnements.0.id', $sac->id);
+    }
+
+    public function test_la_synchronisation_refuse_une_vente_a_la_mesure_sans_prix_au_detail(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['prix_vente' => null]);
+
+        $reponse = $this->actingAs($c['vendeur'])->postJson('/sync/ventes', [
+            'ventes' => [[
+                'uuid_client' => (string) Str::uuid(),
+                'encaissee_le' => now()->subHour()->toIso8601String(),
+                'boutique_id' => $c['boutique']->id,
+                'client_id' => null,
+                'mode_paiement' => ModePaiement::Especes->value,
+                'montant_paye' => 1800,
+                'date_echeance' => null,
+                'lignes' => [['produit_id' => $c['produit']->id, 'quantite' => 3]],
+            ]],
+        ]);
+
+        // Sans prix, aucun montant véridique n'est établissable : la vente
+        // reste dans la file du vendeur plutôt que d'entrer à zéro franc.
+        $reponse->assertOk();
+        $reponse->assertJsonPath('resultats.0.statut', 'refusee');
+        $this->assertDatabaseCount('ventes', 0);
     }
 }

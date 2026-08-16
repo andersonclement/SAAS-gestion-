@@ -145,14 +145,18 @@ class AllocationStock
     {
         $jour = ($date ?? Carbon::today())->copy()->startOfDay();
 
+        // Un produit non détaillable n'a pas de prix au détail : le barème de
+        // remise se calcule alors sur le prix unitaire du format retenu.
+        $reference = $produit->prix_vente ?? $prixBase ?? 0;
+
         $meilleureRemise = Promotion::where('actif', true)
             ->where('date_debut', '<=', $jour)
             ->where('date_fin', '>=', $jour)
             ->get()
             ->filter(fn (Promotion $promotion) => $promotion->sApplique($produit, $client))
-            ->map(fn (Promotion $promotion) => $promotion->remisePour($produit->prix_vente))
+            ->map(fn (Promotion $promotion) => $promotion->remisePour($reference))
             ->max() ?? 0;
 
-        return max(0, ($prixBase ?? $produit->prix_vente) - $meilleureRemise);
+        return max(0, ($prixBase ?? $produit->prix_vente ?? 0) - $meilleureRemise);
     }
 }

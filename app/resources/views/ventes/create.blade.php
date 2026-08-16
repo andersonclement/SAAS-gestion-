@@ -83,7 +83,16 @@
                 <select name="lignes[__INDEX__][produit_id]" class="produit-select" required>
                     <option value="">— {{ __('Choisir') }} —</option>
                     @foreach ($produits as $produit)
-                        <option value="{{ $produit->id }}" data-prix="{{ $produit->prix_vente }}">{{ $produit->nom }} ({{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA)</option>
+                        <option value="{{ $produit->id }}"
+                                data-prix="{{ $produit->prix_vente }}"
+                                data-detaillable="{{ $produit->estDetaillable() ? '1' : '0' }}">
+                            {{ $produit->nom }}
+                            @if ($produit->estDetaillable())
+                                ({{ number_format($produit->prix_vente, 0, ',', ' ') }} FCFA / {{ $produit->unite_mesure->value }})
+                            @else
+                                ({{ __('formats uniquement') }})
+                            @endif
+                        </option>
                     @endforeach
                 </select>
             </td>
@@ -123,23 +132,35 @@
             // qui n'appartiennent pas au produit choisi, pour n'avoir qu'une
             // seule liste à maintenir côté serveur.
             function filtrerFormats(tr) {
+                const produit = tr.querySelector('.produit-select').selectedOptions[0];
                 const produitId = tr.querySelector('.produit-select').value;
                 const formats = tr.querySelector('.conditionnement-select');
+                // Un produit sans prix au détail ne s'ouvre pas au comptoir :
+                // l'option « Détail » n'est même pas proposée. Le serveur refuse
+                // de toute façon la ligne — ceci évite au vendeur de le
+                // découvrir après avoir tout saisi.
+                const detaillable = ! produit || produit.dataset.detaillable !== '0';
                 let selectionValide = false;
 
                 Array.from(formats.options).forEach(function (option) {
-                    const correspond = ! option.value || option.dataset.produit === produitId;
+                    const correspond = option.value
+                        ? option.dataset.produit === produitId
+                        : detaillable;
                     option.hidden = ! correspond;
+                    option.disabled = ! correspond;
                     if (correspond && option.selected) {
                         selectionValide = true;
                     }
                 });
 
                 if (! selectionValide) {
-                    const defaut = Array.from(formats.options).find(function (option) {
-                        return option.dataset.produit === produitId && option.defaultSelected;
+                    const disponibles = Array.from(formats.options).filter(function (option) {
+                        return ! option.disabled;
                     });
-                    formats.value = defaut ? defaut.value : '';
+                    const defaut = disponibles.find(function (option) {
+                        return option.defaultSelected;
+                    });
+                    formats.value = (defaut || disponibles[0] || { value: '' }).value;
                 }
             }
 

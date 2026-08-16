@@ -33,7 +33,9 @@ class StoreProduitRequest extends FormRequest
                 Rule::unique('produits', 'code_barres')->where('tenant_id', $this->user()->tenant_id),
             ],
             'prix_achat' => ['required', 'integer', 'min:0'],
-            'prix_vente' => ['required', 'integer', 'min:0'],
+            // Prix au détail (à l'unité de mesure). Vide = produit non
+            // détaillable : il ne se vendra qu'en formats entiers.
+            'prix_vente' => ['nullable', 'integer', 'min:0'],
 
             // Les deux bornes sont posées dès la création : c'est sur elles que
             // reposent l'alerte de seuil bas et le repérage des surstocks.

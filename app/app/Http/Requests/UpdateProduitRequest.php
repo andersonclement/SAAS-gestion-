@@ -35,7 +35,9 @@ class UpdateProduitRequest extends FormRequest
                     ->ignore($this->route('produit')),
             ],
             'prix_achat' => ['required', 'integer', 'min:0'],
-            'prix_vente' => ['required', 'integer', 'min:0'],
+            // Prix au détail (à l'unité de mesure). Vide = produit non
+            // détaillable : il ne se vendra qu'en formats entiers.
+            'prix_vente' => ['nullable', 'integer', 'min:0'],
             'stock_min' => ['required', 'integer', 'min:0'],
             'stock_max' => ['required', 'integer', 'min:1', 'gte:stock_min'],
             'actif' => ['boolean'],
