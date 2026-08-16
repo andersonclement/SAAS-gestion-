@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBonCommandeRequest;
 use App\Models\BonCommande;
 use App\Models\Boutique;
+use App\Models\Conditionnement;
 use App\Models\Fournisseur;
 use App\Models\Produit;
 use Illuminate\Http\RedirectResponse;
@@ -39,7 +40,8 @@ class BonCommandeController extends Controller
             : Boutique::orderBy('nom')->get();
 
         $fournisseurs = Fournisseur::orderBy('nom')->get();
-        $produits = Produit::where('actif', true)->orderBy('nom')->get();
+        $produits = Produit::with(['conditionnements' => fn ($q) => $q->where('actif', true)])
+            ->where('actif', true)->orderBy('nom')->get();
 
         return view('achats.create', compact('boutiques', 'fournisseurs', 'produits'));
     }
@@ -50,6 +52,17 @@ class BonCommandeController extends Controller
             $bonCommande = BonCommande::create($request->safe()->only(['boutique_id', 'fournisseur_id']));
 
             foreach ($request->validated('lignes') as $ligne) {
+                $conditionnement = ! empty($ligne['conditionnement_id'])
+                    ? Conditionnement::find($ligne['conditionnement_id'])
+                    : null;
+
+                // Le bon de commande est saisi en formats ; tout le reste du
+                // système — stock, réception, marges — compte en unités de base.
+                if ($conditionnement) {
+                    $ligne['prix_unitaire'] = intdiv((int) $ligne['prix_unitaire'], $conditionnement->facteur);
+                    $ligne['quantite'] = (int) $ligne['quantite'] * $conditionnement->facteur;
+                }
+
                 $bonCommande->lignes()->create($ligne);
             }
 

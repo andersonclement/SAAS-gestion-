@@ -34,6 +34,7 @@
                 <thead>
                     <tr>
                         <th>{{ __('Produit') }}</th>
+                        <th>{{ __('Format') }}</th>
                         <th>{{ __('Quantité') }}</th>
                         <th>{{ __('Sous-total') }}</th>
                         <th></th>
@@ -86,6 +87,25 @@
                     @endforeach
                 </select>
             </td>
+            <td>
+                {{-- Formats de vente. « Détail » vend à l'unité de base au prix
+                     catalogue ; les autres options portent leur propre prix et
+                     multiplient la quantité par leur contenu. --}}
+                <select name="lignes[__INDEX__][conditionnement_id]" class="conditionnement-select">
+                    <option value="" data-facteur="1" data-prix="">{{ __('Détail') }}</option>
+                    @foreach ($produits as $produit)
+                        @foreach ($produit->conditionnements as $conditionnement)
+                            <option value="{{ $conditionnement->id }}"
+                                    data-produit="{{ $produit->id }}"
+                                    data-facteur="{{ $conditionnement->facteur }}"
+                                    data-prix="{{ $conditionnement->prix_vente }}"
+                                    @selected($conditionnement->par_defaut)>
+                                {{ $conditionnement->libelle }}
+                            </option>
+                        @endforeach
+                    @endforeach
+                </select>
+            </td>
             <td><input type="number" min="1" class="quantite-input" name="lignes[__INDEX__][quantite]" value="1" required></td>
             <td class="sous-total-affiche">0</td>
             <td><button type="button" class="supprimer-ligne" style="background:none;border:none;color:#7a1f1f;cursor:pointer;">✕</button></td>
@@ -99,21 +119,60 @@
             const totalAffiche = document.getElementById('total-affiche');
             let index = 0;
 
-            function recalculerLigne(tr) {
-                const select = tr.querySelector('.produit-select');
+            // Les formats sont tous rendus dans le même <select> : on masque ceux
+            // qui n'appartiennent pas au produit choisi, pour n'avoir qu'une
+            // seule liste à maintenir côté serveur.
+            function filtrerFormats(tr) {
+                const produitId = tr.querySelector('.produit-select').value;
+                const formats = tr.querySelector('.conditionnement-select');
+                let selectionValide = false;
+
+                Array.from(formats.options).forEach(function (option) {
+                    const correspond = ! option.value || option.dataset.produit === produitId;
+                    option.hidden = ! correspond;
+                    if (correspond && option.selected) {
+                        selectionValide = true;
+                    }
+                });
+
+                if (! selectionValide) {
+                    const defaut = Array.from(formats.options).find(function (option) {
+                        return option.dataset.produit === produitId && option.defaultSelected;
+                    });
+                    formats.value = defaut ? defaut.value : '';
+                }
+            }
+
+            function prixEtFacteur(tr) {
+                const produit = tr.querySelector('.produit-select').selectedOptions[0];
+                const format = tr.querySelector('.conditionnement-select').selectedOptions[0];
+
+                if (format && format.value) {
+                    return {
+                        prix: parseInt(format.dataset.prix || '0', 10),
+                        facteur: parseInt(format.dataset.facteur || '1', 10),
+                    };
+                }
+
+                return { prix: parseInt(produit?.dataset.prix || '0', 10), facteur: 1 };
+            }
+
+            function sousTotalDe(tr) {
                 const quantite = parseInt(tr.querySelector('.quantite-input').value, 10) || 0;
-                const prix = parseInt(select.selectedOptions[0]?.dataset.prix || '0', 10);
-                tr.querySelector('.sous-total-affiche').textContent = (quantite * prix).toLocaleString('fr-FR');
+
+                return quantite * prixEtFacteur(tr).prix;
+            }
+
+            function recalculerLigne(tr) {
+                filtrerFormats(tr);
+                tr.querySelector('.sous-total-affiche').textContent = sousTotalDe(tr).toLocaleString('fr-FR');
                 recalculerTotal();
             }
 
             function recalculerTotal() {
                 let total = 0;
                 body.querySelectorAll('tr').forEach(function (tr) {
-                    const select = tr.querySelector('.produit-select');
-                    const quantite = parseInt(tr.querySelector('.quantite-input').value, 10) || 0;
-                    const prix = parseInt(select.selectedOptions[0]?.dataset.prix || '0', 10);
-                    total += quantite * prix;
+                    total += sousTotalDe(tr);
                 });
                 totalAffiche.textContent = total.toLocaleString('fr-FR');
             }
@@ -211,10 +270,17 @@
                     const quantite = parseInt(tr.querySelector('.quantite-input').value, 10) || 0;
 
                     if (select.value && quantite > 0) {
+                        const format = tr.querySelector('.conditionnement-select');
+                        const optionFormat = format.selectedOptions[0];
+
                         lignes.push({
                             produit_id: parseInt(select.value, 10),
+                            conditionnement_id: format.value ? parseInt(format.value, 10) : null,
                             quantite: quantite,
-                            prix: prixDe(select),
+                            facteur: optionFormat && format.value ? parseInt(optionFormat.dataset.facteur || '1', 10) : 1,
+                            prix: format.value
+                                ? parseInt(optionFormat.dataset.prix || '0', 10)
+                                : prixDe(select),
                         });
                     }
                 });
@@ -261,7 +327,7 @@
 
                 const depassements = lignes.filter(function (ligne) {
                     return stockCatalogue[ligne.produit_id] !== undefined
-                        && ligne.quantite > stockCatalogue[ligne.produit_id];
+                        && (ligne.quantite * ligne.facteur) > stockCatalogue[ligne.produit_id];
                 });
 
                 if (depassements.length > 0
@@ -278,7 +344,11 @@
                         : total,
                     date_echeance: aCredit ? (document.getElementById('date_echeance').value || null) : null,
                     lignes: lignes.map(function (ligne) {
-                        return { produit_id: ligne.produit_id, quantite: ligne.quantite };
+                        return {
+                            produit_id: ligne.produit_id,
+                            conditionnement_id: ligne.conditionnement_id,
+                            quantite: ligne.quantite,
+                        };
                     }),
                 }).then(function () {
                     formulaire.reset();

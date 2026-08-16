@@ -34,8 +34,9 @@
                 <thead>
                     <tr>
                         <th>{{ __('Produit') }}</th>
+                        <th>{{ __('Format') }}</th>
                         <th>{{ __('Quantité') }}</th>
-                        <th>{{ __("Prix unitaire (FCFA)") }}</th>
+                        <th>{{ __("Prix par format (FCFA)") }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -55,6 +56,19 @@
                     <option value="">— {{ __('Choisir') }} —</option>
                     @foreach ($produits as $produit)
                         <option value="{{ $produit->id }}">{{ $produit->nom }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                {{-- Format acheté : « Détail » commande à l'unité de base. --}}
+                <select name="lignes[__INDEX__][conditionnement_id]" class="conditionnement-select">
+                    <option value="">{{ __('Détail') }}</option>
+                    @foreach ($produits as $produit)
+                        @foreach ($produit->conditionnements as $conditionnement)
+                            <option value="{{ $conditionnement->id }}" data-produit="{{ $produit->id }}">
+                                {{ $conditionnement->libelle }} ({{ $conditionnement->facteur }} {{ $produit->unite_mesure->value }})
+                            </option>
+                        @endforeach
                     @endforeach
                 </select>
             </td>

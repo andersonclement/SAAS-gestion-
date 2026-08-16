@@ -4,9 +4,11 @@ namespace App\Http\Requests;
 
 use App\Enums\ModePaiement;
 use App\Models\Client;
+use App\Models\Conditionnement;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Models\Vente;
+use App\Services\AllocationStock;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -40,6 +42,12 @@ class StoreVenteRequest extends FormRequest
                 Rule::exists('produits', 'id')->where('tenant_id', $tenantId),
             ],
             'lignes.*.quantite' => ['required', 'integer', 'min:1'],
+            // Format de vente retenu. Absent = vente à l'unité de base, au prix
+            // catalogue : c'est le comportement historique.
+            'lignes.*.conditionnement_id' => [
+                'nullable',
+                Rule::exists('conditionnements', 'id')->where('tenant_id', $tenantId)->where('actif', true),
+            ],
         ];
     }
 
@@ -58,15 +66,41 @@ class StoreVenteRequest extends FormRequest
             $totalVente = 0;
 
             foreach ($this->input('lignes', []) as $index => $ligne) {
+                $conditionnement = ! empty($ligne['conditionnement_id'])
+                    ? Conditionnement::find($ligne['conditionnement_id'])
+                    : null;
+
+                // Un format appartient à un produit précis : le laisser passer
+                // sur un autre produit fausserait à la fois le prix et la
+                // conversion de quantité.
+                if ($conditionnement && (int) $conditionnement->produit_id !== (int) ($ligne['produit_id'] ?? 0)) {
+                    $validator->errors()->add(
+                        "lignes.{$index}.conditionnement_id",
+                        __('Ce format de vente ne correspond pas au produit choisi.')
+                    );
+
+                    continue;
+                }
+
+                // Le stock est compté en unités de base : 2 sacs de 50 kg en
+                // consomment 100.
+                $quantiteBase = AllocationStock::quantiteBase((int) ($ligne['quantite'] ?? 0), $conditionnement);
+
                 $disponible = StockBoutique::where('boutique_id', $boutiqueId)
                     ->where('produit_id', $ligne['produit_id'] ?? null)
                     ->sum('quantite');
 
-                if ((int) ($ligne['quantite'] ?? 0) > $disponible) {
+                if ($quantiteBase > $disponible) {
                     $validator->errors()->add(
                         "lignes.{$index}.quantite",
                         __('Stock insuffisant dans la boutique source (:disponible disponible).', ['disponible' => $disponible])
                     );
+
+                    continue;
+                }
+
+                if ($conditionnement) {
+                    $totalVente += $conditionnement->prix_vente * (int) $ligne['quantite'];
 
                     continue;
                 }

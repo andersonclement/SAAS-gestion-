@@ -15,6 +15,7 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CodeAccesController;
 use App\Http\Controllers\ComparatifController;
+use App\Http\Controllers\ConditionnementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
 use App\Http\Controllers\EcartSynchronisationController;
@@ -85,6 +86,12 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/users/{user}/activation', [UserController::class, 'basculerActivation'])->name('users.activation');
     Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+
+    // Formats de vente d'un produit : sac de 50 kg, bidon de 5 L, détail au kilo.
+    Route::post('/produits/{produit}/conditionnements', [ConditionnementController::class, 'store'])
+        ->name('conditionnements.store');
+    Route::delete('/conditionnements/{conditionnement}', [ConditionnementController::class, 'destroy'])
+        ->name('conditionnements.destroy');
     Route::post('/categories', [CategorieController::class, 'store'])->name('categories.store');
 
     Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'create', 'store', 'edit', 'update']);

@@ -51,6 +51,10 @@ class SyncVentesRequest extends FormRequest
                 Rule::exists('produits', 'id')->where('tenant_id', $tenantId),
             ],
             'ventes.*.lignes.*.quantite' => ['required', 'integer', 'min:1'],
+            'ventes.*.lignes.*.conditionnement_id' => [
+                'nullable',
+                Rule::exists('conditionnements', 'id')->where('tenant_id', $tenantId),
+            ],
         ];
     }
 }

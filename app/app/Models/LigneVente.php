@@ -12,6 +12,7 @@ class LigneVente extends Model
         'vente_id',
         'produit_id',
         'lot_id',
+        'conditionnement_id',
         'quantite',
         'prix_unitaire',
     ];
@@ -37,6 +38,32 @@ class LigneVente extends Model
     public function lot(): BelongsTo
     {
         return $this->belongsTo(Lot::class);
+    }
+
+    public function conditionnement(): BelongsTo
+    {
+        return $this->belongsTo(Conditionnement::class);
+    }
+
+    /**
+     * Quantité telle qu'elle parle au client : « 2 sac de 50 kg » plutôt que
+     * « 100 kg ». Une vente répartie sur plusieurs lots peut donner une ligne
+     * qui ne fait pas un compte entier de conditionnements — on s'en tient
+     * alors à la quantité brute, qui reste exacte.
+     */
+    public function quantiteLisible(): string
+    {
+        $unite = $this->produit->unite_mesure->value;
+
+        if (! $this->conditionnement) {
+            return "{$this->quantite} {$unite}";
+        }
+
+        $nombre = $this->conditionnement->nombrePour($this->quantite);
+
+        return $nombre === null
+            ? "{$this->quantite} {$unite} ({$this->conditionnement->libelle})"
+            : "{$nombre} × {$this->conditionnement->libelle} = {$this->quantite} {$unite}";
     }
 
     public function retours(): HasMany

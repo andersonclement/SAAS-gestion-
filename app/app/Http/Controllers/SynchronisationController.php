@@ -6,6 +6,7 @@ use App\Enums\ModePaiement;
 use App\Http\Requests\SyncVentesRequest;
 use App\Models\Boutique;
 use App\Models\Client;
+use App\Models\Conditionnement;
 use App\Models\EcartSynchronisation;
 use App\Models\Paiement;
 use App\Models\Produit;
@@ -66,7 +67,7 @@ class SynchronisationController extends Controller
             ->groupBy('produit_id')
             ->pluck('quantite_totale', 'produit_id');
 
-        $produits = Produit::where('actif', true)->orderBy('nom')->get()
+        $produits = Produit::with('conditionnements')->where('actif', true)->orderBy('nom')->get()
             ->map(fn (Produit $produit) => [
                 'id' => $produit->id,
                 'nom' => $produit->nom,
@@ -74,6 +75,12 @@ class SynchronisationController extends Controller
                 // date réelle de l'encaissement : c'est lui qui fait foi.
                 'prix' => $this->allocation->prixApresPromotion($produit, null),
                 'stock' => (int) ($stocks[$produit->id] ?? 0),
+                'conditionnements' => $produit->conditionnements->where('actif', true)->map(fn ($c) => [
+                    'id' => $c->id,
+                    'libelle' => $c->libelle,
+                    'facteur' => $c->facteur,
+                    'prix' => $c->prix_vente,
+                ])->values(),
             ])
             ->values();
 
@@ -164,14 +171,28 @@ class SynchronisationController extends Controller
                 foreach ($donnees['lignes'] as $ligne) {
                     $demandee = (int) $ligne['quantite'];
 
+                    $conditionnement = ! empty($ligne['conditionnement_id'])
+                        ? Conditionnement::find($ligne['conditionnement_id'])
+                        : null;
+
+                    // Un format appartient à un produit précis : appliqué à un
+                    // autre, il fausserait le prix et la conversion de quantité.
+                    if ($conditionnement && $conditionnement->produit_id !== (int) $ligne['produit_id']) {
+                        $conditionnement = null;
+                    }
+
+                    // L'écart se compte en unités de base, comme le stock.
+                    $demandee = AllocationStock::quantiteBase($demandee, $conditionnement);
+
                     $allouee = $this->allocation->allouer(
                         $vente,
                         (int) $ligne['produit_id'],
-                        $demandee,
+                        (int) $ligne['quantite'],
                         (int) $donnees['boutique_id'],
                         $client,
                         $encaisseeLe,
                         tolererPenurie: true,
+                        conditionnement: $conditionnement,
                     );
 
                     if ($allouee >= $demandee) {
