@@ -44,6 +44,12 @@ class EnTetesSecurite
             // peut pas s'appliquer (limitation de la spécification CSP).
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data:",
+            // Le service worker de la caisse hors-ligne (§5) et le manifeste
+            // d'installation. connect-src borne les appels fetch de
+            // synchronisation à notre propre domaine.
+            "worker-src 'self'",
+            "manifest-src 'self'",
+            "connect-src 'self'",
             "font-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",

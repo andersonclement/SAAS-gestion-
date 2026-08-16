@@ -17,6 +17,7 @@ use App\Http\Controllers\CodeAccesController;
 use App\Http\Controllers\ComparatifController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
+use App\Http\Controllers\EcartSynchronisationController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\JournalController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\ReglementController;
 use App\Http\Controllers\RetourController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\SynchronisationController;
 use App\Http\Controllers\TransfertStockController;
 use App\Http\Controllers\TresorerieController;
 use App\Http\Controllers\UserController;
@@ -107,6 +109,13 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::resource('ventes', VenteController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/ventes/{vente}/facture', [VenteController::class, 'facture'])->name('ventes.facture');
+
+    // Caisse hors-ligne (§5) : instantané du catalogue, puis remontée des
+    // ventes encaissées pendant la coupure réseau.
+    Route::get('/sync/catalogue', [SynchronisationController::class, 'catalogue'])->name('sync.catalogue');
+    Route::post('/sync/ventes', [SynchronisationController::class, 'ventes'])
+        ->middleware('throttle:60,1')
+        ->name('sync.ventes');
     Route::post('/ventes/{vente}/reglements', [ReglementController::class, 'store'])->name('ventes.reglements.store');
 
     Route::get('/retours', [RetourController::class, 'index'])->name('retours.index');
@@ -134,6 +143,8 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::delete('/acces-privilegie', [AccesPrivilegieController::class, 'destroy'])->name('acces-privilegie.destroy');
 
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
+    Route::post('/ecarts-synchronisation/{ecart}/resoudre', [EcartSynchronisationController::class, 'resoudre'])
+        ->name('ecarts-synchronisation.resoudre');
 
     Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
 

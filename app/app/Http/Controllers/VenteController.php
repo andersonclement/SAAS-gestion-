@@ -7,19 +7,18 @@ use App\Models\Boutique;
 use App\Models\Client;
 use App\Models\Paiement;
 use App\Models\Produit;
-use App\Models\Promotion;
-use App\Models\StockBoutique;
 use App\Models\Vente;
+use App\Services\AllocationStock;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class VenteController extends Controller
 {
+    public function __construct(private readonly AllocationStock $allocation) {}
+
     public function index(): View
     {
         $this->authorize('viewAny', Vente::class);
@@ -68,7 +67,7 @@ class VenteController extends Controller
             $client = $request->validated('client_id') ? Client::find($request->validated('client_id')) : null;
 
             foreach ($request->validated('lignes') as $ligne) {
-                $this->allouerStock(
+                $this->allocation->allouer(
                     $vente,
                     (int) $ligne['produit_id'],
                     (int) $ligne['quantite'],
@@ -124,77 +123,5 @@ class VenteController extends Controller
         $vente->load(['boutique', 'client', 'vendeur', 'lignes.produit', 'lignes.lot', 'paiements']);
 
         return view('ventes.facture', compact('vente'));
-    }
-
-    /**
-     * Alloue la quantité vendue sur les lots disponibles de la boutique en
-     * épuisant en priorité ceux dont la péremption est la plus proche
-     * (FEFO — first-expired, first-out), et décrémente le stock en
-     * conséquence. Le prix appliqué tient compte de la meilleure
-     * promotion active pour ce produit/client (§4.16).
-     *
-     * Les lignes de stock sont verrouillées (SELECT ... FOR UPDATE) et la
-     * disponibilité est re-vérifiée à l'intérieur du verrou : la validation
-     * de StoreVenteRequest a lieu avant la transaction, donc deux ventes
-     * simultanées du même produit pourraient sinon passer toutes les deux
-     * ce contrôle et rendre le stock négatif (survente).
-     */
-    private function allouerStock(Vente $vente, int $produitId, int $quantiteDemandee, int $boutiqueId, ?Client $client): void
-    {
-        $produit = Produit::findOrFail($produitId);
-        $prixUnitaire = $this->prixApresPromotion($produit, $client);
-
-        $stocks = StockBoutique::query()
-            ->where('boutique_id', $boutiqueId)
-            ->where('produit_id', $produitId)
-            ->where('quantite', '>', 0)
-            ->lockForUpdate()
-            ->get()
-            ->load('lot')
-            ->sortBy(fn (StockBoutique $stock) => $stock->lot->date_peremption ?? '9999-12-31')
-            ->values();
-
-        if ($stocks->sum('quantite') < $quantiteDemandee) {
-            throw ValidationException::withMessages([
-                'lignes' => __('Stock insuffisant dans la boutique source (:disponible disponible).', [
-                    'disponible' => $stocks->sum('quantite'),
-                ]),
-            ]);
-        }
-
-        $restant = $quantiteDemandee;
-
-        foreach ($stocks as $stock) {
-            if ($restant <= 0) {
-                break;
-            }
-
-            $prelevement = min($restant, $stock->quantite);
-            $stock->decrement('quantite', $prelevement);
-
-            $vente->lignes()->create([
-                'produit_id' => $produitId,
-                'lot_id' => $stock->lot_id,
-                'quantite' => $prelevement,
-                'prix_unitaire' => $prixUnitaire,
-            ]);
-
-            $restant -= $prelevement;
-        }
-    }
-
-    private function prixApresPromotion(Produit $produit, ?Client $client): int
-    {
-        $aujourdhui = Carbon::today();
-
-        $meilleureRemise = Promotion::where('actif', true)
-            ->where('date_debut', '<=', $aujourdhui)
-            ->where('date_fin', '>=', $aujourdhui)
-            ->get()
-            ->filter(fn (Promotion $promotion) => $promotion->sApplique($produit, $client))
-            ->map(fn (Promotion $promotion) => $promotion->remisePour($produit->prix_vente))
-            ->max() ?? 0;
-
-        return $produit->prix_vente - $meilleureRemise;
     }
 }
