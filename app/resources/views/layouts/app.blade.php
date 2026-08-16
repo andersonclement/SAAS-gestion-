@@ -35,6 +35,9 @@
                 @if (auth()->user()->isPatron() || auth()->user()->isComptable())
                     <a href="{{ route('comparatif.index') }}">{{ __('Comparatif') }}</a>
                 @endif
+                @can('prevoir')
+                    <a href="{{ route('previsions.index') }}">{{ __('Prévisions') }}</a>
+                @endcan
                 <a href="{{ route('alertes.index') }}">
                     {{ __('Alertes') }}
                     @if (($nombreAlertes ?? 0) > 0)
