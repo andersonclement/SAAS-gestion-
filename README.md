@@ -14,5 +14,6 @@ produits phytosanitaires). Le code de l'application Laravel se trouve dans
 - [Mode dégradé hors-ligne (§5)](docs/mode-hors-ligne.md)
 - [Conditionnements multiples](docs/conditionnements.md)
 - [Prévisions de réapprovisionnement (§4.6)](docs/previsions.md)
+- [Centre de notifications](docs/notifications.md)
 - [Audit de sécurité](docs/audit-securite.md)
 - [Déploiement en production](docs/deploiement-production.md)

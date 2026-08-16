@@ -15,3 +15,12 @@ Schedule::command('alertes:envoyer')
     ->dailyAt('06:30')
     ->withoutOverlapping()
     ->onOneServer();
+
+// Centre de notifications : rafraîchi plusieurs fois par jour. Une rupture
+// constatée le matin ne doit pas attendre le lendemain pour être signalée.
+// La déduplication par situation rend ces passages sans effet tant que rien
+// ne change — pas de risque de saturer la pastille.
+Schedule::command('notifications:generer')
+    ->everyThreeHours()
+    ->withoutOverlapping()
+    ->onOneServer();

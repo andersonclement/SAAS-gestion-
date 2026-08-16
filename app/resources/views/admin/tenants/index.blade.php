@@ -38,6 +38,7 @@
                         <th>{{ __('Formule') }}</th>
                         <th>{{ __('Boutiques') }}</th>
                         <th>{{ __('Équipe') }}</th>
+                        <th>{{ __('Alertes non traitées') }}</th>
                         <th>{{ __('Abonnement') }}</th>
                         <th>{{ __('Compte') }}</th>
                         <th></th>
@@ -51,6 +52,18 @@
                             <td>{{ $tenant->plan?->label() ?? __('Aucun') }}</td>
                             <td>{{ $tenant->boutiques_count }}{{ $tenant->boutiquesMax() ? ' / '.$tenant->boutiquesMax() : '' }}</td>
                             <td>{{ $tenant->users_count }}</td>
+                            <td>
+                                @if ($tenant->alertes_non_traitees_count > 0)
+                                    <span class="badge" style="background:{{ $tenant->alertes_critiques_count > 0 ? '#c0392b' : '#b45309' }};color:#fff;">
+                                        {{ $tenant->alertes_non_traitees_count }}
+                                    </span>
+                                    @if ($tenant->alertes_critiques_count > 0)
+                                        <small style="color:#7a1f1f;">{{ __(':nombre critique(s)', ['nombre' => $tenant->alertes_critiques_count]) }}</small>
+                                    @endif
+                                @else
+                                    <span style="color:#555;">—</span>
+                                @endif
+                            </td>
                             <td>
                                 @if ($tenant->abonnementActif())
                                     <span class="badge" style="background:#e6f4ea;color:#1e4620;">{{ $tenant->abonnement_expire_le->format('d/m/Y') }}</span>

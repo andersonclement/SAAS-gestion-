@@ -72,6 +72,15 @@
         </details>
 
         <div class="topbar-compte">
+            {{-- Bouton d'accès permanent : le vendeur au comptoir doit voir la
+                 pastille sans dérouler le menu. --}}
+            <a href="{{ route('notifications.index') }}" class="btn"
+               style="background:{{ ($nombreNotifications ?? 0) > 0 ? '#c0392b' : 'transparent' }};color:#fff;padding:.35rem .7rem;min-height:0;text-decoration:none;">
+                {{ __('Notifications') }}
+                @if (($nombreNotifications ?? 0) > 0)
+                    <span class="badge" style="background:#fff;color:#c0392b;">{{ $nombreNotifications }}</span>
+                @endif
+            </a>
             @if (auth()->user()->isPatron())
                 <form method="POST" action="{{ route('boutique-contexte.update') }}">
                     @csrf

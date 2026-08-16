@@ -42,9 +42,50 @@
             <p class="label">{{ __('Connexions échouées (24h)') }}</p>
             <p class="value" style="color:{{ $connexionsEchouees24h > 0 ? '#b91c1c' : '#1e4620' }};">{{ $connexionsEchouees24h }}</p>
         </a>
+        <div class="kpi-card">
+            <p class="label">{{ __('Alertes ouvertes, tous clients') }}</p>
+            <p class="value">{{ $alertesOuvertes }}</p>
+        </div>
     </div>
 
     <p><a class="btn" href="{{ route('admin.codes.create') }}">+ {{ __("Générer un code d'activation") }}</a></p>
+
+    {{-- Signal avancé du décrochage : un client qui laisse s'accumuler des
+         alertes critiques et ignore les rappels arrête souvent d'utiliser
+         l'outil bien avant de ne pas renouveler. C'est le moment de l'appeler. --}}
+    <div class="card">
+        <h2 style="margin-top:0;font-size:1.05rem;">{{ __('Clients à rappeler') }}</h2>
+        @if ($clientsEnDifficulte->isEmpty())
+            <p style="margin:0;">{{ __("Aucun client n'accumule d'alertes critiques non traitées.") }}</p>
+        @else
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ __('Client') }}</th>
+                        <th>{{ __('Alertes critiques ouvertes') }}</th>
+                        <th>{{ __('Signalées au moins deux fois') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($clientsEnDifficulte as $tenant)
+                        <tr>
+                            <td>{{ $tenant->nom }}</td>
+                            <td><span class="badge" style="background:#c0392b;color:#fff;">{{ $tenant->alertes_critiques_count }}</span></td>
+                            <td>
+                                @if ($tenant->rappels_ignores_count > 0)
+                                    <span class="badge" style="background:#7a1f1f;color:#fff;">{{ $tenant->rappels_ignores_count }}</span>
+                                @else
+                                    —
+                                @endif
+                            </td>
+                            <td><a href="{{ route('admin.tenants.show', $tenant) }}">{{ __('Voir') }}</a></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
 
     <div class="card">
         <h2 style="margin-top:0;font-size:1.05rem;">{{ __('Derniers clients') }}</h2>
