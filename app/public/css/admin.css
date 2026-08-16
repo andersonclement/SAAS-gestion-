@@ -1,0 +1,205 @@
+/**
+ * Feuille de style de l'espace superadmin, également « mobile d'abord » :
+ * la supervision se fait souvent depuis un téléphone.
+ */
+
+:root {
+    color-scheme: light;
+    --indigo: #4338ca;
+    --indigo-fonce: #3730a3;
+    --ardoise: #111827;
+    --bordure: #e2e4e8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f1f2f6;
+    color: #1a1d23;
+    -webkit-text-size-adjust: 100%;
+}
+
+.admin-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ------------------------------------------------------- Navigation */
+
+.admin-sidebar { background: var(--ardoise); color: #cbd5e1; padding: .75rem 0; }
+
+.admin-sidebar .brand {
+    padding: 0 1.25rem .75rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+}
+.admin-sidebar .brand small {
+    display: block;
+    font-weight: 400;
+    font-size: .75rem;
+    color: #818cf8;
+    margin-top: .15rem;
+}
+
+.admin-sidebar .nav-repliable { list-style: none; }
+.admin-sidebar .nav-repliable > summary {
+    cursor: pointer;
+    padding: .6rem 1.25rem;
+    color: #fff;
+    font-weight: 600;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.admin-sidebar .nav-repliable > summary::-webkit-details-marker { display: none; }
+.admin-sidebar .nav-repliable > summary::before { content: "☰"; }
+.admin-sidebar .nav-repliable[open] > summary::before { content: "✕"; }
+
+.admin-sidebar a {
+    display: flex;
+    align-items: center;
+    padding: .7rem 1.25rem;
+    min-height: 44px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: .95rem;
+    border-left: 3px solid transparent;
+}
+.admin-sidebar a:hover { background: #1f2937; color: #fff; }
+.admin-sidebar a.active { background: #1f2937; color: #fff; border-left-color: #6366f1; font-weight: 600; }
+
+.admin-main { flex: 1; min-width: 0; }
+
+.admin-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--bordure);
+    padding: .75rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+.admin-topbar form { display: inline; }
+
+.admin-content { padding: 1rem; max-width: 1200px; }
+
+/* ---------------------------------------------------------- Contenu */
+
+.card {
+    background: #fff;
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.05rem; }
+
+.card table {
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+th, td { text-align: left; padding: .65rem .6rem; border-bottom: 1px solid #eee; font-size: .92rem; }
+th { color: #555; font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--indigo);
+    color: #fff;
+    padding: .65rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    min-height: 44px;
+}
+.btn:hover { background: var(--indigo-fonce); }
+.btn-muted { background: #6b7280; }
+.btn-danger { background: #b91c1c; }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-weight: 600; margin-bottom: .3rem; font-size: .9rem; }
+.field input, .field select, .field textarea {
+    width: 100%;
+    padding: .65rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 16px;
+    min-height: 44px;
+}
+
+form.filtres { display: flex; flex-direction: column; gap: .75rem; }
+form.filtres .field { margin-bottom: 0; }
+
+.errors, .status { padding: .75rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
+.errors { background: #fdecea; color: #611a15; border: 1px solid #f5c6cb; }
+.status { background: #e6f4ea; color: #1e4620; border: 1px solid #b7dfc0; }
+
+.badge { display: inline-block; padding: .15rem .55rem; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+
+.kpi-grid { display: grid; grid-template-columns: 1fr; gap: .75rem; margin-bottom: 1rem; }
+.kpi-card { background: #fff; border: 1px solid var(--bordure); border-radius: 10px; padding: 1rem; }
+.kpi-card .label { color: #6b7280; font-size: .82rem; margin: 0 0 .3rem; }
+.kpi-card .value { font-size: 1.5rem; font-weight: 700; margin: 0; }
+
+code.code-pill {
+    background: #eef2ff;
+    color: var(--indigo-fonce);
+    padding: .2rem .5rem;
+    border-radius: 5px;
+    font-weight: 600;
+    /* Le code peut être long : il doit pouvoir se couper sur téléphone. */
+    word-break: break-all;
+}
+
+.graphique { width: 100%; height: auto; display: block; }
+
+/* ------------------------------------------------------- Pied de page */
+
+.pied-page {
+    margin: 2rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e2e4e8;
+    text-align: center;
+    color: #56606b;
+    font-size: .9rem;
+}
+
+.service-client { margin: .35rem 0; }
+.service-client a { color: inherit; font-weight: 600; }
+
+/* ================================================== Écrans moyens/larges */
+
+@media (min-width: 900px) {
+    .admin-shell { flex-direction: row; }
+
+    .admin-sidebar { width: 230px; flex-shrink: 0; padding: 1.5rem 0; }
+    .admin-sidebar .brand { padding: 0 1.25rem 1.5rem; border-bottom: 1px solid #1f2937; margin-bottom: 1rem; }
+    .admin-sidebar .nav-repliable > summary { display: none; }
+
+    .admin-topbar { padding: .9rem 2rem; }
+    .admin-content { padding: 2rem; }
+
+    .card { padding: 1.5rem; margin-bottom: 1.5rem; }
+    h1 { font-size: 1.8rem; }
+
+    .card table { display: table; white-space: normal; }
+
+    form.filtres { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
+
+    .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .kpi-card { padding: 1.25rem; }
+    .kpi-card .value { font-size: 1.6rem; }
+}

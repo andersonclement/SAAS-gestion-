@@ -1,0 +1,264 @@
+/**
+ * Feuille de style de l'espace tenant.
+ *
+ * Conçue « mobile d'abord » : les règles de base visent le téléphone, qui
+ * est l'appareil principal des gérants et vendeurs en boutique. Les écrans
+ * plus larges sont traités ensuite par des media queries.
+ */
+
+:root {
+    color-scheme: light;
+    --vert: #14532d;
+    --vert-fonce: #0f3f22;
+    --bordure: #e2e4e8;
+    --fond: #f4f5f7;
+    --texte: #1f2328;
+    --gris: #555;
+    --rouge: #7a1f1f;
+    --rouge-fond: #fdecea;
+    --vert-fond: #e6f4ea;
+    --vert-texte: #1e4620;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--fond);
+    color: var(--texte);
+    /* Empêche l'agrandissement automatique du texte en paysage sur iOS. */
+    -webkit-text-size-adjust: 100%;
+}
+
+/* ---------------------------------------------------------------- Barre */
+
+.topbar {
+    background: var(--vert);
+    color: #fff;
+    padding: .6rem 1rem;
+}
+
+.topbar a { color: #fff; text-decoration: none; }
+.topbar a:hover { text-decoration: underline; }
+
+/* Menu repliable en CSS pur : pas de JavaScript, donc rien à autoriser
+   dans la politique de sécurité de contenu. */
+.nav-repliable { list-style: none; }
+.nav-repliable > summary {
+    cursor: pointer;
+    padding: .5rem 0;
+    font-weight: 600;
+    /* Cible tactile confortable. */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.nav-repliable > summary::-webkit-details-marker { display: none; }
+.nav-repliable > summary::before { content: "☰"; font-size: 1.2rem; }
+.nav-repliable[open] > summary::before { content: "✕"; }
+
+.nav-liens { display: flex; flex-direction: column; padding: .5rem 0; }
+.nav-liens a {
+    padding: .7rem .25rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+}
+
+.topbar-compte {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    padding-top: .6rem;
+    font-size: .9rem;
+}
+
+/* ------------------------------------------------------------- Contenu */
+
+.container {
+    max-width: 960px;
+    margin: 1rem auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; }
+
+/* -------------------------------------------------------------- Tables */
+
+/* Sur téléphone, une table large déborde et casse la mise en page : on la
+   rend défilable horizontalement plutôt que de la laisser déformer l'écran. */
+.card table {
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+th, td {
+    text-align: left;
+    padding: .6rem .5rem;
+    border-bottom: 1px solid #eee;
+}
+
+th { font-size: .85rem; color: var(--gris); }
+
+/* ------------------------------------------------------- Boutons/champs */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--vert);
+    color: #fff;
+    padding: .65rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    /* Recommandation d'accessibilité tactile. */
+    min-height: 44px;
+}
+.btn:hover { background: var(--vert-fonce); }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-weight: 600; margin-bottom: .3rem; font-size: .9rem; }
+.field input, .field select, .field textarea {
+    width: 100%;
+    padding: .65rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    /* Sous 16px, iOS zoome automatiquement à la mise au point du champ. */
+    font-size: 16px;
+    font-family: inherit;
+    min-height: 44px;
+}
+
+/* Les formulaires de filtre passent en colonne sur téléphone. */
+form.filtres {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+form.filtres .field { margin-bottom: 0; }
+
+/* ------------------------------------------------------------ Messages */
+
+.errors, .status {
+    padding: .75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+.errors { background: var(--rouge-fond); color: #611a15; border: 1px solid #f5c6cb; }
+.status { background: var(--vert-fond); color: var(--vert-texte); border: 1px solid #b7dfc0; }
+
+.badge {
+    display: inline-block;
+    padding: .15rem .5rem;
+    border-radius: 4px;
+    background: #eef1f4;
+    font-size: .8rem;
+}
+
+/* Grille de cartes indicateurs : une colonne sur téléphone. */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+/* --------------------------------------------------------- Graphiques */
+
+.graphique { width: 100%; height: auto; display: block; }
+
+/* --------------------------------------------------- Blocs repliables */
+
+.bloc-repliable {
+    border: 1px solid #e2e4e8;
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.bloc-repliable > summary {
+    cursor: pointer;
+    font-weight: 600;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+.bloc-repliable[open] > summary { margin-bottom: .75rem; }
+
+/* ------------------------------------------------------- Pied de page */
+
+.pied-page {
+    max-width: 1100px;
+    margin: 2rem auto 1rem;
+    padding: 0 1rem 1.5rem;
+    text-align: center;
+    color: #56606b;
+    font-size: .9rem;
+}
+
+.service-client { margin: .35rem 0; }
+.service-client a { color: inherit; font-weight: 600; }
+
+/* ====================================================== Écrans moyens */
+
+@media (min-width: 700px) {
+    .topbar {
+        padding: .75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* Au-delà du téléphone, le menu est toujours déployé : on neutralise
+       le repli et on masque le bouton. */
+    .nav-repliable > summary { display: none; }
+    .nav-liens {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: .25rem 1rem;
+        padding: 0;
+    }
+    .nav-liens a { border-bottom: none; padding: .2rem 0; min-height: 0; }
+
+    .topbar-compte { padding-top: 0; justify-content: flex-end; }
+
+    .container { margin: 2rem auto; padding: 0 1.5rem; }
+    .card { padding: 1.5rem; margin-bottom: 1.5rem; }
+    h1 { font-size: 1.8rem; }
+
+    .card table { display: table; white-space: normal; }
+
+    form.filtres { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
+
+    .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+}
+
+/* ============================================== Confort d'impression */
+
+@media print {
+    .topbar, .btn, form.filtres, .pied-page { display: none; }
+    body { background: #fff; }
+}

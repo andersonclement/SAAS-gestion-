@@ -1,0 +1,133 @@
+/**
+ * Page d'accueil publique — mobile d'abord.
+ * Aucune police ni script externe : la politique de sécurité de contenu
+ * n'autorise que les ressources du domaine.
+ */
+
+:root {
+    color-scheme: light;
+    --vert: #14532d;
+    --vert-clair: #e6f4ea;
+    --texte: #1f2328;
+    --gris: #56606b;
+    --bordure: #e2e4e8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--texte);
+    background: #fff;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+}
+
+a { color: var(--vert); }
+
+/* ------------------------------------------------------------- En-tête */
+
+.entete { background: var(--vert); color: #fff; padding-bottom: 2.5rem; }
+
+.bandeau {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+}
+
+.marque { color: #fff; text-decoration: none; font-weight: 700; font-size: 1.15rem; }
+
+.entete-actions { display: flex; align-items: center; gap: 1rem; }
+.entete-actions a { color: #fff; }
+.lien-connexion { text-decoration: underline; }
+
+.heros { padding: 1rem 1rem 0; max-width: 760px; margin: 0 auto; text-align: center; }
+.heros h1 { font-size: 1.75rem; line-height: 1.25; margin: .5rem 0 1rem; }
+.accroche { font-size: 1.05rem; color: #d7e6dc; margin-bottom: 1.75rem; }
+
+.heros-actions { display: flex; flex-direction: column; gap: .75rem; margin: 0 0 1rem; }
+.mention { font-size: .85rem; color: #b8d0c1; margin: 0; }
+
+/* ------------------------------------------------------------ Boutons */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    min-height: 48px;
+}
+.btn-principal { background: #fff; color: var(--vert); }
+.btn-principal:hover { background: #f0f0f0; }
+.btn-secondaire { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, .6); }
+.btn-secondaire:hover { background: rgba(255, 255, 255, .1); }
+
+/* ----------------------------------------------------------- Sections */
+
+.section { padding: 2.5rem 1rem; max-width: 1080px; margin: 0 auto; }
+.section h2 { font-size: 1.4rem; text-align: center; margin: 0 0 .5rem; }
+.sous-titre { text-align: center; color: var(--gris); margin: 0 auto 2rem; max-width: 560px; }
+.section-grise { background: #f7f8f9; max-width: none; }
+.section-grise > * { max-width: 1080px; margin-left: auto; margin-right: auto; }
+
+.grille { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem; }
+
+.bloc {
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    padding: 1.25rem;
+    background: #fff;
+}
+.bloc h3 { margin: 0 0 .4rem; font-size: 1.05rem; color: var(--vert); }
+.bloc p { margin: 0; color: var(--gris); font-size: .95rem; }
+
+/* -------------------------------------------------------------- Tarifs */
+
+.bloc-tarif { display: flex; flex-direction: column; }
+.prix { font-size: 1.75rem; font-weight: 700; color: var(--texte); margin: .25rem 0 .1rem; }
+.prix span { font-size: .9rem; font-weight: 400; color: var(--gris); }
+.detail { margin-bottom: .75rem !important; }
+.bloc-tarif ul { margin: 0; padding-left: 1.1rem; color: var(--gris); font-size: .9rem; }
+.bloc-tarif li { margin-bottom: .3rem; }
+
+/* ---------------------------------------------------------- Appel final */
+
+.section-appel { text-align: center; background: var(--vert-clair); max-width: none; }
+.section-appel .btn-principal { background: var(--vert); color: #fff; }
+.section-appel .btn-principal:hover { background: #0f3f22; }
+
+/* ----------------------------------------------------------------- Pied */
+
+.pied {
+    background: #111827;
+    color: #cbd5e1;
+    padding: 2rem 1rem;
+    text-align: center;
+    font-size: .9rem;
+}
+.pied a { color: #fff; }
+.pied p { margin: .35rem 0; }
+
+/* ==================================================== Écrans moyens */
+
+@media (min-width: 700px) {
+    .bandeau { padding: 1.25rem 2rem; }
+    .heros { padding: 2rem 2rem 0; }
+    .heros h1 { font-size: 2.4rem; }
+    .accroche { font-size: 1.15rem; }
+    .heros-actions { flex-direction: row; justify-content: center; }
+
+    .section { padding: 4rem 2rem; }
+    .section h2 { font-size: 1.8rem; }
+
+    .grille { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+    .grille-tarifs { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+}
