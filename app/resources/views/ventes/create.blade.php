@@ -156,4 +156,138 @@
             basculerChampsCredit();
         })();
     </script>
+    {{-- Caisse hors-ligne (§5) : si le réseau est tombé, la vente est mise en
+         file sur l'appareil au lieu d'être perdue, puis remontée au retour du
+         réseau. Le reste du formulaire est inchangé : le vendeur travaille de
+         la même façon, connecté ou non. --}}
+    <script nonce="{{ $cspNonce }}">
+        // `hors-ligne.js` est chargé en differé (defer) : il s'exécute après
+        // l'analyse du document, donc après ce bloc en ligne. On attend donc
+        // DOMContentLoaded, qui suit les scripts différés, sans quoi
+        // window.CaisseHorsLigne n'existerait pas encore ici.
+        document.addEventListener('DOMContentLoaded', function () {
+            if (! window.CaisseHorsLigne) {
+                return;
+            }
+
+            const formulaire = document.querySelector('form[action="{{ route('ventes.store') }}"]');
+            const body = document.getElementById('lignes-body');
+            let prixCatalogue = {};
+            let stockCatalogue = {};
+
+            // L'instantané sert à deux choses hors réseau : facturer au bon prix
+            // (promotions comprises) et prévenir le vendeur quand il dépasse le
+            // stock connu — sans l'en empêcher, car c'est le rayon qui fait foi.
+            window.CaisseHorsLigne.rafraichirCatalogue()
+                .then(function (donnees) {
+                    return donnees || window.CaisseHorsLigne.catalogue();
+                })
+                .then(function (donnees) {
+                    if (! donnees || ! donnees.produits) {
+                        return;
+                    }
+
+                    donnees.produits.forEach(function (produit) {
+                        prixCatalogue[produit.id] = produit.prix;
+                        stockCatalogue[produit.id] = produit.stock;
+                    });
+                });
+
+            function prixDe(select) {
+                const id = select.value;
+
+                if (prixCatalogue[id] !== undefined) {
+                    return prixCatalogue[id];
+                }
+
+                return parseInt(select.selectedOptions[0]?.dataset.prix || '0', 10);
+            }
+
+            function lignesSaisies() {
+                const lignes = [];
+
+                body.querySelectorAll('tr').forEach(function (tr) {
+                    const select = tr.querySelector('.produit-select');
+                    const quantite = parseInt(tr.querySelector('.quantite-input').value, 10) || 0;
+
+                    if (select.value && quantite > 0) {
+                        lignes.push({
+                            produit_id: parseInt(select.value, 10),
+                            quantite: quantite,
+                            prix: prixDe(select),
+                        });
+                    }
+                });
+
+                return lignes;
+            }
+
+            formulaire.addEventListener('submit', function (evenement) {
+                if (navigator.onLine) {
+                    return;
+                }
+
+                evenement.preventDefault();
+
+                const lignes = lignesSaisies();
+
+                if (lignes.length === 0) {
+                    window.alert("{{ __('Ajoutez au moins un article avant d\'enregistrer.') }}");
+
+                    return;
+                }
+
+                const boutiqueId = parseInt(document.getElementById('boutique_id').value, 10);
+                const modePaiement = document.getElementById('mode_paiement').value;
+
+                if (! boutiqueId || ! modePaiement) {
+                    window.alert("{{ __('Choisissez la boutique et le mode de paiement.') }}");
+
+                    return;
+                }
+
+                const total = lignes.reduce(function (somme, ligne) {
+                    return somme + (ligne.prix * ligne.quantite);
+                }, 0);
+
+                const aCredit = document.getElementById('vente-a-credit').checked;
+                const clientId = document.getElementById('client_id').value;
+
+                if (aCredit && ! clientId) {
+                    window.alert("{{ __('Une vente à crédit exige un client identifié.') }}");
+
+                    return;
+                }
+
+                const depassements = lignes.filter(function (ligne) {
+                    return stockCatalogue[ligne.produit_id] !== undefined
+                        && ligne.quantite > stockCatalogue[ligne.produit_id];
+                });
+
+                if (depassements.length > 0
+                    && ! window.confirm("{{ __('La quantité saisie dépasse le stock connu de cet appareil. Enregistrer quand même ?') }}")) {
+                    return;
+                }
+
+                window.CaisseHorsLigne.enregistrer({
+                    boutique_id: boutiqueId,
+                    client_id: clientId ? parseInt(clientId, 10) : null,
+                    mode_paiement: modePaiement,
+                    montant_paye: aCredit
+                        ? (parseInt(document.getElementById('montant_paye').value, 10) || 0)
+                        : total,
+                    date_echeance: aCredit ? (document.getElementById('date_echeance').value || null) : null,
+                    lignes: lignes.map(function (ligne) {
+                        return { produit_id: ligne.produit_id, quantite: ligne.quantite };
+                    }),
+                }).then(function () {
+                    formulaire.reset();
+                    body.innerHTML = '';
+                    document.getElementById('ajouter-ligne').click();
+                    document.getElementById('total-affiche').textContent = '0';
+                    window.alert("{{ __('Vente enregistrée sur cet appareil. Elle sera envoyée dès le retour du réseau.') }}");
+                });
+            });
+        });
+    </script>
 @endsection

@@ -20,12 +20,15 @@ class Vente extends Model
         'vendeur_id',
         'numero',
         'date_echeance',
+        'uuid_client',
+        'encaissee_le',
     ];
 
     protected function casts(): array
     {
         return [
             'date_echeance' => 'date',
+            'encaissee_le' => 'datetime',
         ];
     }
 
@@ -92,6 +95,14 @@ class Vente extends Model
     public function estSoldee(): bool
     {
         return $this->montantDu() === 0;
+    }
+
+    /**
+     * Vente encaissée sans réseau puis remontée par la caisse hors-ligne (§5).
+     */
+    public function vientDuHorsLigne(): bool
+    {
+        return $this->uuid_client !== null;
     }
 
     public function estEnRetard(): bool

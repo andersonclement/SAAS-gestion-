@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Boutique;
+use App\Models\EcartSynchronisation;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Models\Vente;
@@ -18,7 +19,7 @@ use Illuminate\Support\Collection;
 class CentreAlertes
 {
     /**
-     * @return array{ruptures: Collection, stockFaible: Collection, surstock: Collection, peremptionProche: Collection, perimes: Collection, creancesEnRetard: Collection}
+     * @return array{ruptures: Collection, stockFaible: Collection, surstock: Collection, peremptionProche: Collection, perimes: Collection, creancesEnRetard: Collection, ecartsSynchronisation: Collection}
      */
     public static function pour(Collection $boutiqueIds): array
     {
@@ -86,6 +87,15 @@ class CentreAlertes
             ->filter(fn (Vente $vente) => ! $vente->estSoldee())
             ->values();
 
+        // Ventes hors-ligne qui n'ont pas pu prélever tout leur stock à la
+        // synchronisation (§5) : le stock théorique dépasse le stock réel tant
+        // que le gérant n'a pas tranché.
+        $ecartsSynchronisation = EcartSynchronisation::nonResolus()
+            ->with(['produit', 'boutique', 'vente'])
+            ->whereIn('boutique_id', $boutiqueIds)
+            ->latest()
+            ->get();
+
         return [
             'ruptures' => $ruptures,
             'stockFaible' => $stockFaible,
@@ -93,6 +103,7 @@ class CentreAlertes
             'peremptionProche' => $peremptionProche,
             'perimes' => $perimes,
             'creancesEnRetard' => $creancesEnRetard,
+            'ecartsSynchronisation' => $ecartsSynchronisation,
         ];
     }
 

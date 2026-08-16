@@ -133,4 +133,37 @@
             </table>
         @endif
     </div>
+    <div class="card">
+        <h2 style="margin-top:0;">{{ __('Écarts de stock à la synchronisation') }} ({{ $ecartsSynchronisation->count() }})</h2>
+        <p style="color:#555;font-size:.9rem;margin-top:0;">
+            {{ __("Ces ventes ont été encaissées sans réseau. Au moment de la synchronisation, le stock enregistré ne suffisait plus à couvrir la quantité vendue : le stock théorique dépasse donc le stock réel de la quantité manquante.") }}
+        </p>
+        @if ($ecartsSynchronisation->isEmpty())
+            <p>{{ __('Aucun écart à traiter.') }}</p>
+        @else
+            <table>
+                <thead><tr><th>{{ __('Vente') }}</th><th>{{ __('Boutique') }}</th><th>{{ __('Produit') }}</th><th>{{ __('Vendu') }}</th><th>{{ __('Servi') }}</th><th>{{ __('Manquant') }}</th><th></th></tr></thead>
+                <tbody>
+                    @foreach ($ecartsSynchronisation as $ecart)
+                        <tr>
+                            <td><a href="{{ route('ventes.show', $ecart->vente) }}">{{ $ecart->vente->numero }}</a></td>
+                            <td>{{ $ecart->boutique->nom }}</td>
+                            <td>{{ $ecart->produit->nom }}</td>
+                            <td>{{ $ecart->quantite_demandee }}</td>
+                            <td>{{ $ecart->quantite_allouee }}</td>
+                            <td style="color:#c0392b;font-weight:700;">{{ $ecart->quantite_manquante }}</td>
+                            <td>
+                                @can('resoudre', $ecart)
+                                    <form method="POST" action="{{ route('ecarts-synchronisation.resoudre', $ecart) }}">
+                                        @csrf
+                                        <button class="btn" type="submit" style="background:#555;">{{ __('Marquer traité') }}</button>
+                                    </form>
+                                @endcan
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
 @endsection

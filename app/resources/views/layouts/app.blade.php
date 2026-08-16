@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', __('Tableau de bord')) — {{ config('app.name') }}</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    {{-- Application installable et utilisable sans réseau (§5). --}}
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <meta name="theme-color" content="#1e4620">
+    <link rel="apple-touch-icon" href="{{ asset('icones/icone-192.png') }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
+    @auth
+        <script src="{{ asset('js/hors-ligne.js') }}" defer></script>
+    @endauth
 </head>
 <body>
 @auth
@@ -136,5 +143,21 @@
 <footer class="pied-page">
     @include('partials.service-client')
 </footer>
+
+@auth
+    <script nonce="{{ $cspNonce }}">
+        // Le service worker n'est utile qu'à un utilisateur connecté : il met en
+        // cache des écrans de travail. Il est enregistré après le chargement pour
+        // ne pas concurrencer l'affichage de la page.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function () {
+                    // Contexte non sécurisé (http://) ou navigateur sans support :
+                    // l'application reste pleinement fonctionnelle en ligne.
+                });
+            });
+        }
+    </script>
+@endauth
 </body>
 </html>
