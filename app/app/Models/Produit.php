@@ -8,6 +8,7 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Produit extends Model
 {
@@ -43,5 +44,41 @@ class Produit extends Model
     public function categorie(): BelongsTo
     {
         return $this->belongsTo(Categorie::class);
+    }
+
+    /**
+     * Formats de vente du produit (sac de 50 kg, bidon de 5 L...). Un produit
+     * sans conditionnement se vend simplement à l'unité de base.
+     */
+    /**
+     * Le produit peut-il être vendu à la mesure — au kilo, au litre — plutôt
+     * qu'en format entier ?
+     *
+     * Le prix au détail fait office de déclaration : renseigné, le produit
+     * s'ouvre au comptoir ; laissé vide, il ne se vend qu'en formats complets.
+     * Beaucoup d'intrants arrivent scellés et ne peuvent pas être détaillés.
+     */
+    public function estDetaillable(): bool
+    {
+        return $this->prix_vente !== null;
+    }
+
+    /**
+     * Un produit ni détaillable ni conditionné n'est vendable par aucun chemin :
+     * la fiche produit le signale, et la caisse le refuse.
+     */
+    public function estVendable(): bool
+    {
+        return $this->estDetaillable() || $this->conditionnements()->where('actif', true)->exists();
+    }
+
+    public function conditionnements(): HasMany
+    {
+        return $this->hasMany(Conditionnement::class)->orderByDesc('par_defaut')->orderBy('facteur');
+    }
+
+    public function conditionnementParDefaut(): ?Conditionnement
+    {
+        return $this->conditionnements->firstWhere('par_defaut', true);
     }
 }

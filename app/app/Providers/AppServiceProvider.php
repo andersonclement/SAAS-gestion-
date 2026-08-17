@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Models\Boutique;
+use App\Models\User;
 use App\Support\AccesPrivilegie;
 use App\Support\CentreAlertes;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->personnaliserEmailReinitialisation();
+
+        // Les prévisions exposent les volumes d'achat et le rythme de vente de
+        // la boutique : elles s'adressent à qui commande ou pilote, pas au
+        // vendeur au comptoir.
+        Gate::define('prevoir', fn (User $user) => $user->isPatron() || $user->isGerant() || $user->isComptable());
 
         View::composer('layouts.app', function ($view): void {
             $user = Auth::user();

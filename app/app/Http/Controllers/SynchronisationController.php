@@ -6,6 +6,7 @@ use App\Enums\ModePaiement;
 use App\Http\Requests\SyncVentesRequest;
 use App\Models\Boutique;
 use App\Models\Client;
+use App\Models\Conditionnement;
 use App\Models\EcartSynchronisation;
 use App\Models\Paiement;
 use App\Models\Produit;
@@ -66,14 +67,21 @@ class SynchronisationController extends Controller
             ->groupBy('produit_id')
             ->pluck('quantite_totale', 'produit_id');
 
-        $produits = Produit::where('actif', true)->orderBy('nom')->get()
+        $produits = Produit::with('conditionnements')->where('actif', true)->orderBy('nom')->get()
             ->map(fn (Produit $produit) => [
                 'id' => $produit->id,
                 'nom' => $produit->nom,
                 // Prix promotionnel du jour. Le serveur le recalculera à la
                 // date réelle de l'encaissement : c'est lui qui fait foi.
-                'prix' => $this->allocation->prixApresPromotion($produit, null),
+                'prix' => $produit->estDetaillable() ? $this->allocation->prixApresPromotion($produit, null) : null,
+                'detaillable' => $produit->estDetaillable(),
                 'stock' => (int) ($stocks[$produit->id] ?? 0),
+                'conditionnements' => $produit->conditionnements->where('actif', true)->map(fn ($c) => [
+                    'id' => $c->id,
+                    'libelle' => $c->libelle,
+                    'facteur' => $c->facteur,
+                    'prix' => $c->prix_vente,
+                ])->values(),
             ])
             ->values();
 
@@ -146,6 +154,25 @@ class SynchronisationController extends Controller
             return $this->resultat($uuid, 'refusee', null, [], __('Vous ne pouvez vendre que depuis votre propre boutique.'));
         }
 
+        // Une ligne sans format sur un produit non détaillable n'a aucun prix :
+        // contrairement à un stock devenu insuffisant, ce n'est pas un écart
+        // rattrapable, c'est un montant impossible à établir. La vente est
+        // refusée et reste dans la file du vendeur, où il la voit.
+        foreach ($donnees['lignes'] as $ligne) {
+            if (! empty($ligne['conditionnement_id'])) {
+                continue;
+            }
+
+            $produit = Produit::find($ligne['produit_id']);
+
+            if ($produit && ! $produit->estDetaillable()) {
+                return $this->resultat($uuid, 'refusee', null, [], __(
+                    ':produit ne se vend pas au détail : cette vente doit préciser un format.',
+                    ['produit' => $produit->nom]
+                ));
+            }
+        }
+
         $encaisseeLe = Carbon::parse($donnees['encaissee_le']);
         $client = ! empty($donnees['client_id']) ? Client::find($donnees['client_id']) : null;
 
@@ -164,14 +191,28 @@ class SynchronisationController extends Controller
                 foreach ($donnees['lignes'] as $ligne) {
                     $demandee = (int) $ligne['quantite'];
 
+                    $conditionnement = ! empty($ligne['conditionnement_id'])
+                        ? Conditionnement::find($ligne['conditionnement_id'])
+                        : null;
+
+                    // Un format appartient à un produit précis : appliqué à un
+                    // autre, il fausserait le prix et la conversion de quantité.
+                    if ($conditionnement && $conditionnement->produit_id !== (int) $ligne['produit_id']) {
+                        $conditionnement = null;
+                    }
+
+                    // L'écart se compte en unités de base, comme le stock.
+                    $demandee = AllocationStock::quantiteBase($demandee, $conditionnement);
+
                     $allouee = $this->allocation->allouer(
                         $vente,
                         (int) $ligne['produit_id'],
-                        $demandee,
+                        (int) $ligne['quantite'],
                         (int) $donnees['boutique_id'],
                         $client,
                         $encaisseeLe,
                         tolererPenurie: true,
+                        conditionnement: $conditionnement,
                     );
 
                     if ($allouee >= $demandee) {

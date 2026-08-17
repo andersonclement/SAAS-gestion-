@@ -15,6 +15,7 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CodeAccesController;
 use App\Http\Controllers\ComparatifController;
+use App\Http\Controllers\ConditionnementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
 use App\Http\Controllers\EcartSynchronisationController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\PrevisionController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\RapportController;
@@ -85,6 +87,12 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/users/{user}/activation', [UserController::class, 'basculerActivation'])->name('users.activation');
     Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+
+    // Formats de vente d'un produit : sac de 50 kg, bidon de 5 L, détail au kilo.
+    Route::post('/produits/{produit}/conditionnements', [ConditionnementController::class, 'store'])
+        ->name('conditionnements.store');
+    Route::delete('/conditionnements/{conditionnement}', [ConditionnementController::class, 'destroy'])
+        ->name('conditionnements.destroy');
     Route::post('/categories', [CategorieController::class, 'store'])->name('categories.store');
 
     Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'create', 'store', 'edit', 'update']);
@@ -141,6 +149,13 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
         ->middleware('throttle:10,1')
         ->name('acces-privilegie.store');
     Route::delete('/acces-privilegie', [AccesPrivilegieController::class, 'destroy'])->name('acces-privilegie.destroy');
+
+    // Prévisions de réapprovisionnement (§4.6). Réservées à ceux qui commandent
+    // ou pilotent : un vendeur n'a pas à connaître les volumes d'achat.
+    Route::middleware('can:prevoir')->group(function () {
+        Route::get('/previsions', [PrevisionController::class, 'index'])->name('previsions.index');
+        Route::get('/previsions.csv', [PrevisionController::class, 'export'])->name('previsions.export');
+    });
 
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
     Route::post('/ecarts-synchronisation/{ecart}/resoudre', [EcartSynchronisationController::class, 'resoudre'])

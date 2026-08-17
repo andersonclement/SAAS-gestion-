@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVenteRequest;
 use App\Models\Boutique;
 use App\Models\Client;
+use App\Models\Conditionnement;
 use App\Models\Paiement;
 use App\Models\Produit;
 use App\Models\Vente;
@@ -54,7 +55,8 @@ class VenteController extends Controller
             : Boutique::orderBy('nom')->get();
 
         $clients = Client::orderBy('nom')->get();
-        $produits = Produit::where('actif', true)->orderBy('nom')->get();
+        $produits = Produit::with(['conditionnements' => fn ($q) => $q->where('actif', true)])
+            ->where('actif', true)->orderBy('nom')->get();
 
         return view('ventes.create', compact('boutiques', 'clients', 'produits'));
     }
@@ -72,7 +74,10 @@ class VenteController extends Controller
                     (int) $ligne['produit_id'],
                     (int) $ligne['quantite'],
                     (int) $request->validated('boutique_id'),
-                    $client
+                    $client,
+                    conditionnement: ! empty($ligne['conditionnement_id'])
+                        ? Conditionnement::find($ligne['conditionnement_id'])
+                        : null,
                 );
             }
 

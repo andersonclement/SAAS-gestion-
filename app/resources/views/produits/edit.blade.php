@@ -55,8 +55,11 @@
             </div>
 
             <div class="field">
-                <label for="prix_vente">{{ __('Prix de vente (FCFA)') }}</label>
-                <input id="prix_vente" type="number" min="0" name="prix_vente" value="{{ old('prix_vente', $produit->prix_vente) }}" required>
+                <label for="prix_vente">{{ __('Prix de vente au détail (FCFA par unité de mesure)') }}</label>
+                <input id="prix_vente" type="number" min="0" name="prix_vente" value="{{ old('prix_vente', $produit->prix_vente) }}">
+                <small style="color:#555;display:block;">
+                    {{ __("Laisser vide si le produit ne se vend pas au détail : il ne sera alors vendable qu'en formats entiers (sac, bidon...), définis sur sa fiche.") }}
+                </small>
                 <p style="color:#555;font-size:.8rem;margin:.3rem 0 0;">{{ __('Le nouveau prix ne s’applique qu’aux ventes futures ; les ventes déjà enregistrées gardent leur prix.') }}</p>
             </div>
 

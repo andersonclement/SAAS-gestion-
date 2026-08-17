@@ -43,7 +43,7 @@
                     <tr>
                         <td>{{ $ligne->produit->nom }}</td>
                         <td>{{ $ligne->lot->numero_lot }}</td>
-                        <td>{{ $ligne->quantite }}</td>
+                        <td>{{ $ligne->quantiteLisible() }}</td>
                         <td>{{ number_format($ligne->prix_unitaire, 0, ',', ' ') }}</td>
                         <td>{{ number_format($ligne->sousTotal(), 0, ',', ' ') }}</td>
                     </tr>
