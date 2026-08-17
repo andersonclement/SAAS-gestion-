@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\PorteeCodeAcces;
+use App\Enums\TypeProduit;
 use App\Enums\UserRole;
 use App\Models\Boutique;
 use App\Models\CodeAcces;
@@ -96,7 +97,14 @@ class ApprovisionnementTest extends TestCase
         $tenant = Tenant::factory()->create();
         $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
-        $produit = Produit::factory()->create(['tenant_id' => $tenant->id]);
+
+        // Le type est fixé, pas tiré par la fabrique : depuis que la date n'est
+        // exigée que sur les produits à traçabilité obligatoire, un produit au
+        // type aléatoire ferait passer ce test une fois sur deux.
+        $produit = Produit::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => TypeProduit::ProduitPhytosanitaire,
+        ]);
 
         $donnees = $this->donnees($boutique, $produit);
         unset($donnees['date_peremption']);
@@ -111,6 +119,27 @@ class ApprovisionnementTest extends TestCase
             ]))->assertSessionHasErrors('date_peremption');
 
         $this->assertDatabaseCount('stock_boutiques', 0);
+    }
+
+    public function test_restocking_a_product_without_mandatory_traceability_needs_no_date(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $produit = Produit::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => TypeProduit::IntrantAgricole,
+        ]);
+
+        $donnees = $this->donnees($boutique, $produit);
+        unset($donnees['date_peremption']);
+
+        $this->actingAs($patron)->from('/stock/approvisionnements/creer')
+            ->post('/stock/approvisionnements', $donnees)
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseCount('stock_boutiques', 1);
+        $this->assertNull(Lot::where('produit_id', $produit->id)->firstOrFail()->date_peremption);
     }
 
     public function test_a_gerant_needs_a_code_and_can_only_fill_his_own_boutique(): void

@@ -32,7 +32,10 @@ class EnTetesSecurite
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'same-origin');
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
-        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        // La caméra est ouverte à nos propres pages, et à elles seules : la
+        // caisse s'en sert pour lire un code-barres quand l'appareil sait le
+        // faire. Le micro, la position et le paiement restent fermés.
+        $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=()');
 
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",

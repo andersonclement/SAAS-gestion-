@@ -12,9 +12,20 @@
             <div class="field">
                 <label for="boutique_id">{{ __('Boutique') }}</label>
                 <select id="boutique_id" name="boutique_id" required>
-                    <option value="">— {{ __('Choisir') }} —</option>
+                    {{-- Un vendeur n'a qu'une boutique : lui demander de la
+                         choisir dans une liste d'un seul élément ajoute un
+                         geste à chaque vente, et le formulaire refuse de
+                         partir sans autre explication qu'une bulle du
+                         navigateur — juste après un scan, on ne voit pas
+                         pourquoi. --}}
+                    @if ($boutiques->count() > 1)
+                        <option value="">— {{ __('Choisir') }} —</option>
+                    @endif
                     @foreach ($boutiques as $boutique)
-                        <option value="{{ $boutique->id }}" @selected((string) old('boutique_id') === (string) $boutique->id)>{{ $boutique->nom }}</option>
+                        <option value="{{ $boutique->id }}"
+                                @selected($boutiques->count() === 1 || (string) old('boutique_id') === (string) $boutique->id)>
+                            {{ $boutique->nom }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -30,6 +41,26 @@
             </div>
 
             <h2 style="font-size:1.1rem;">{{ __('Articles') }}</h2>
+
+            {{-- Scan du code-barres. Un lecteur USB se comporte comme un
+                 clavier : il tape les chiffres puis Entrée. Le champ n'a pas
+                 de « name » — il ne part pas avec le formulaire, il ne sert
+                 qu'à remplir le tableau ci-dessous. --}}
+            <div class="field">
+                <label for="scan">{{ __('Code-barres') }}</label>
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                    <input id="scan" type="text" inputmode="numeric" autocomplete="off" autofocus
+                           style="flex:1;min-width:12rem;"
+                           placeholder="{{ __('Scannez, ou tapez le code puis Entrée') }}">
+                    <button type="button" id="scan-camera" class="btn" style="background:#555;" hidden>
+                        {{ __('Caméra') }}
+                    </button>
+                </div>
+                <small id="scan-message" style="color:#56606b;"></small>
+                <video id="scan-video" playsinline muted hidden
+                       style="width:100%;max-width:320px;margin-top:.5rem;border-radius:4px;background:#000;"></video>
+            </div>
+
             <table id="lignes-table">
                 <thead>
                     <tr>
@@ -85,6 +116,7 @@
                     @foreach ($produits as $produit)
                         <option value="{{ $produit->id }}"
                                 data-prix="{{ $produit->prix_vente }}"
+                                data-code-barres="{{ $produit->code_barres }}"
                                 data-detaillable="{{ $produit->estDetaillable() ? '1' : '0' }}">
                             {{ $produit->nom }}
                             @if ($produit->estDetaillable())
@@ -220,6 +252,183 @@
 
             ajouterLigne();
 
+            // ── Scan du code-barres ────────────────────────────────────────
+            const champScan = document.getElementById('scan');
+            const messageScan = document.getElementById('scan-message');
+            const codesBarres = {};
+
+            // L'index se construit sur les options déjà rendues : le catalogue
+            // n'est donc écrit qu'une fois dans la page.
+            function indexer(source) {
+                source.forEach(function (entree) {
+                    if (entree.code_barres) {
+                        codesBarres[String(entree.code_barres)] = String(entree.id);
+                    }
+                });
+            }
+
+            indexer(Array.from(template.content.querySelectorAll('.produit-select option'))
+                .filter(function (option) { return option.value; })
+                .map(function (option) {
+                    return { id: option.value, code_barres: option.dataset.codeBarres };
+                }));
+
+            function annoncer(texte, erreur) {
+                messageScan.textContent = texte;
+                messageScan.style.color = erreur ? '#7a1f1f' : '#1f5f3a';
+            }
+
+            // Une ligne déjà ouverte sur ce produit, au format « Détail » :
+            // scanner deux fois le même article doit passer la quantité à 2,
+            // pas ouvrir une seconde ligne à côté de la première.
+            function ligneExistante(produitId) {
+                return Array.from(body.querySelectorAll('tr')).find(function (tr) {
+                    return tr.querySelector('.produit-select').value === produitId
+                        && ! tr.querySelector('.conditionnement-select').value;
+                });
+            }
+
+            function scanner(code) {
+                const produitId = codesBarres[String(code).trim()];
+
+                if (! produitId) {
+                    annoncer("{{ __('Code inconnu :') }} " + code, true);
+
+                    return;
+                }
+
+                let tr = ligneExistante(produitId);
+
+                if (tr) {
+                    const quantite = tr.querySelector('.quantite-input');
+                    quantite.value = (parseInt(quantite.value, 10) || 0) + 1;
+                } else {
+                    // Une première ligne vide est ouverte au chargement : on la
+                    // reprend plutôt que d'en empiler une seconde par-dessus.
+                    tr = Array.from(body.querySelectorAll('tr')).find(function (ligne) {
+                        return ! ligne.querySelector('.produit-select').value;
+                    });
+
+                    if (! tr) {
+                        ajouterLigne();
+                        tr = body.lastElementChild;
+                    }
+
+                    const select = tr.querySelector('.produit-select');
+                    select.value = produitId;
+
+                    // L'instantané hors-ligne peut connaître un produit que
+                    // cette page, mise en cache plus tôt, ne propose pas encore.
+                    // Affecter une valeur absente vide silencieusement le
+                    // <select> : mieux vaut le dire que vendre au hasard.
+                    if (select.value !== produitId) {
+                        annoncer("{{ __('Produit absent de cette page. Rechargez la caisse.') }}", true);
+
+                        return;
+                    }
+                }
+
+                recalculerLigne(tr);
+
+                // Le libellé de l'option porte le prix sur une seconde ligne :
+                // on n'annonce que le nom, pour que le vendeur vérifie d'un
+                // coup d'œil qu'il a scanné le bon article.
+                const libelle = tr.querySelector('.produit-select').selectedOptions[0].textContent.trim().split('\n')[0];
+                annoncer(libelle.trim(), false);
+            }
+
+            champScan.addEventListener('keydown', function (evenement) {
+                if (evenement.key !== 'Enter') {
+                    return;
+                }
+
+                // Sans cela, la touche Entrée du lecteur enverrait la vente
+                // dès le premier article scanné.
+                evenement.preventDefault();
+
+                if (champScan.value.trim() !== '') {
+                    scanner(champScan.value);
+                    champScan.value = '';
+                }
+            });
+
+            // Lecture par la caméra, là où le navigateur sait décoder lui-même.
+            // Pas de bibliothèque tierce : la politique de sécurité de contenu
+            // interdit tout script externe, et embarquer un décodeur alourdirait
+            // une page qui doit rester utilisable hors réseau.
+            const boutonCamera = document.getElementById('scan-camera');
+            const video = document.getElementById('scan-video');
+            let flux = null;
+
+            function arreterCamera() {
+                if (flux) {
+                    flux.getTracks().forEach(function (piste) { piste.stop(); });
+                    flux = null;
+                }
+
+                video.hidden = true;
+                boutonCamera.textContent = "{{ __('Caméra') }}";
+            }
+
+            if ('BarcodeDetector' in window && navigator.mediaDevices) {
+                boutonCamera.hidden = false;
+
+                boutonCamera.addEventListener('click', function () {
+                    if (flux) {
+                        arreterCamera();
+
+                        return;
+                    }
+
+                    const detecteur = new window.BarcodeDetector({
+                        formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'],
+                    });
+
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                        .then(function (obtenu) {
+                            flux = obtenu;
+                            video.srcObject = flux;
+                            video.hidden = false;
+                            boutonCamera.textContent = "{{ __('Arrêter') }}";
+
+                            return video.play();
+                        })
+                        .then(function () {
+                            function lire() {
+                                if (! flux) {
+                                    return;
+                                }
+
+                                detecteur.detect(video)
+                                    .then(function (codes) {
+                                        if (codes.length > 0) {
+                                            scanner(codes[0].rawValue);
+                                            // La caméra s'arrête dès qu'un code
+                                            // est lu : la laisser tourner vide
+                                            // la batterie du téléphone.
+                                            arreterCamera();
+
+                                            return;
+                                        }
+
+                                        window.requestAnimationFrame(lire);
+                                    })
+                                    .catch(function () { window.requestAnimationFrame(lire); });
+                            }
+
+                            lire();
+                        })
+                        .catch(function () {
+                            arreterCamera();
+                            annoncer("{{ __('Caméra indisponible. Utilisez le lecteur ou la liste.') }}", true);
+                        });
+                });
+            }
+
+            // La caisse hors-ligne rafraîchit l'index avec son instantané : le
+            // scan doit tenir même quand la page vient du cache.
+            window.CaisseScan = { indexer: indexer };
+
             const caseACredit = document.getElementById('vente-a-credit');
             const champsCredit = document.getElementById('champs-credit');
             const montantPaye = document.getElementById('montant_paye');
@@ -271,6 +480,13 @@
                         prixCatalogue[produit.id] = produit.prix;
                         stockCatalogue[produit.id] = produit.stock;
                     });
+
+                    // Un produit ajouté au catalogue depuis la mise en cache de
+                    // cette page ne figure pas dans ses options : l'instantané
+                    // remet l'index du scan à jour.
+                    if (window.CaisseScan) {
+                        window.CaisseScan.indexer(donnees.produits);
+                    }
                 });
 
             function prixDe(select) {

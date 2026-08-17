@@ -42,9 +42,17 @@
             <div class="field">
                 <label for="boutique_id">{{ __('Boutique où entre le stock') }}</label>
                 <select id="boutique_id" name="boutique_id" required>
-                    <option value="">— {{ __('Choisir') }} —</option>
+                    {{-- Une seule boutique : la choisir n'apporte rien, et le
+                         formulaire refuserait de partir sans autre explication
+                         qu'une bulle du navigateur. --}}
+                    @if ($boutiques->count() > 1)
+                        <option value="">— {{ __('Choisir') }} —</option>
+                    @endif
                     @foreach ($boutiques as $boutique)
-                        <option value="{{ $boutique->id }}" @selected((string) old('boutique_id') === (string) $boutique->id)>{{ $boutique->nom }}</option>
+                        <option value="{{ $boutique->id }}"
+                                @selected($boutiques->count() === 1 || (string) old('boutique_id') === (string) $boutique->id)>
+                            {{ $boutique->nom }}
+                        </option>
                     @endforeach
                 </select>
                 @error('boutique_id')<small style="color:#7a1f1f;">{{ $message }}</small>@enderror
