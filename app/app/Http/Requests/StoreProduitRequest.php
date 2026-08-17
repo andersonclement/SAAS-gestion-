@@ -53,8 +53,29 @@ class StoreProduitRequest extends FormRequest
             'quantite_initiale' => ['required', 'integer', 'min:1'],
             'numero_lot' => ['required', 'string', 'max:64'],
             'date_fabrication' => ['nullable', 'date', 'before_or_equal:today'],
-            'date_peremption' => ['required', 'date', 'after:today'],
+
+            // Obligatoire pour les produits dont la traçabilité l'impose
+            // (phytosanitaires), facultative ailleurs. Exiger une date sur une
+            // houe ou un arrosoir pousserait à en inventer une, et les alertes
+            // de péremption se rempliraient d'échéances fictives — une alerte
+            // à laquelle on ne croit plus ne sert plus à rien.
+            'date_peremption' => [
+                Rule::requiredIf(fn () => $this->peremptionObligatoire()),
+                'nullable',
+                'date',
+                'after:today',
+            ],
         ];
+    }
+
+    /**
+     * Le type de produit décide : voir TypeProduit::tracabiliteObligatoire().
+     */
+    private function peremptionObligatoire(): bool
+    {
+        $type = TypeProduit::tryFrom((string) $this->input('type'));
+
+        return $type?->tracabiliteObligatoire() ?? false;
     }
 
     public function withValidator(Validator $validator): void

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Lot;
+use App\Models\Produit;
 use App\Models\StockBoutique;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,10 +30,25 @@ class StoreApprovisionnementRequest extends FormRequest
             'quantite' => ['required', 'integer', 'min:1'],
             'numero_lot' => ['required', 'string', 'max:64'],
             'date_fabrication' => ['nullable', 'date', 'before_or_equal:today'],
-            // Comme à la création d'un produit : pas d'entrée en stock sans
-            // date de péremption connue, c'est elle qui déclenche les alertes.
-            'date_peremption' => ['required', 'date', 'after:today'],
+            // Comme à la création d'un produit : exigée seulement quand la
+            // traçabilité l'impose, d'après le type du produit approvisionné.
+            'date_peremption' => [
+                Rule::requiredIf(fn () => $this->peremptionObligatoire()),
+                'nullable',
+                'date',
+                'after:today',
+            ],
         ];
+    }
+
+    /**
+     * Le type du produit approvisionné décide, comme à sa création.
+     */
+    private function peremptionObligatoire(): bool
+    {
+        $produit = Produit::find($this->input('produit_id'));
+
+        return $produit?->type->tracabiliteObligatoire() ?? false;
     }
 
     public function withValidator(Validator $validator): void

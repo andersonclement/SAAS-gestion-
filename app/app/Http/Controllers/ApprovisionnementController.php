@@ -50,7 +50,7 @@ class ApprovisionnementController extends Controller
                 ['produit_id' => $produit->id, 'numero_lot' => $validated['numero_lot']],
                 [
                     'date_fabrication' => $validated['date_fabrication'] ?? null,
-                    'date_peremption' => $validated['date_peremption'],
+                    'date_peremption' => $validated['date_peremption'] ?? null,
                 ]
             );
 
