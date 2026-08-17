@@ -36,6 +36,15 @@ class Tenant extends Model
         return $this->hasMany(User::class);
     }
 
+    /**
+     * Notifications internes de tous les utilisateurs du client. Utilisée par
+     * l'espace superadmin pour repérer les comptes qui décrochent.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(NotificationInterne::class);
+    }
+
     public function boutiques(): HasMany
     {
         return $this->hasMany(Boutique::class);

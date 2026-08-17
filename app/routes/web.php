@@ -23,6 +23,7 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PrevisionController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\PromotionController;
@@ -156,6 +157,12 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
         Route::get('/previsions', [PrevisionController::class, 'index'])->name('previsions.index');
         Route::get('/previsions.csv', [PrevisionController::class, 'export'])->name('previsions.export');
     });
+
+    // Centre de notifications : la pile de ce qui reste à traiter, par
+    // opposition à /alertes qui recalcule un état instantané.
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/lire', [NotificationController::class, 'lire'])->name('notifications.lire');
+    Route::post('/notifications/tout-lire', [NotificationController::class, 'toutLire'])->name('notifications.tout-lire');
 
     Route::get('/alertes', [AlerteController::class, 'index'])->name('alertes.index');
     Route::post('/ecarts-synchronisation/{ecart}/resoudre', [EcartSynchronisationController::class, 'resoudre'])

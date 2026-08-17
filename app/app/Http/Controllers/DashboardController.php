@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Boutique;
 use App\Models\LigneVente;
+use App\Models\NotificationInterne;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Support\CalculMarge;
@@ -53,7 +54,19 @@ class DashboardController extends Controller
 
         $stockDormant = $this->produitsEnStockDormant($boutiqueIds);
 
+        // Ce qui demande une décision aujourd'hui passe avant les indicateurs :
+        // un gérant ouvre son tableau de bord pour savoir quoi faire, pas
+        // seulement pour contempler son chiffre d'affaires.
+        $notifications = NotificationInterne::pour($user)
+            ->ouvertes()
+            ->with('boutique')
+            ->parUrgence()
+            ->limit(6)
+            ->get();
+
         return view('dashboard', [
+            'notifications' => $notifications,
+            'nombreNotificationsOuvertes' => NotificationInterne::pour($user)->ouvertes()->count(),
             'boutiques' => $boutiques,
             'nombreBoutiques' => $boutiques->count(),
             'chiffreAffairesTotal' => $chiffreAffairesTotal,

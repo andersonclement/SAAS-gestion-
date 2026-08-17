@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ImportanceNotification;
 use App\Http\Controllers\Controller;
 use App\Models\BonCommande;
 use App\Models\Depense;
@@ -27,7 +28,20 @@ class TenantController extends Controller
         $statut = $request->query('statut');
         $aujourdhui = Carbon::today()->toDateString();
 
-        $tenants = Tenant::withCount(['boutiques', 'users'])
+        // Nombre d'alertes non traitées : c'est le meilleur signal avancé dont
+        // dispose le support. Un client qui laisse s'accumuler des ruptures et
+        // des créances en retard est un client qui décroche, bien avant que son
+        // abonnement n'arrive à échéance.
+        $tenants = Tenant::withCount([
+            'boutiques',
+            'users',
+            'notifications as alertes_non_traitees_count' => fn ($query) => $query
+                ->whereNull('resolue_le')
+                ->whereNull('lu_le'),
+            'notifications as alertes_critiques_count' => fn ($query) => $query
+                ->whereNull('resolue_le')
+                ->where('importance', ImportanceNotification::Critique->value),
+        ])
             ->when($recherche !== '', fn ($query) => $query->where(fn ($q) => $q
                 ->where('nom', 'like', "%{$recherche}%")
                 ->orWhere('email_contact', 'like', "%{$recherche}%")))
@@ -192,7 +206,20 @@ class TenantController extends Controller
      */
     public function exporter(): StreamedResponse
     {
-        $tenants = Tenant::withCount(['boutiques', 'users'])->orderBy('nom')->get();
+        // Nombre d'alertes non traitées : c'est le meilleur signal avancé dont
+        // dispose le support. Un client qui laisse s'accumuler des ruptures et
+        // des créances en retard est un client qui décroche, bien avant que son
+        // abonnement n'arrive à échéance.
+        $tenants = Tenant::withCount([
+            'boutiques',
+            'users',
+            'notifications as alertes_non_traitees_count' => fn ($query) => $query
+                ->whereNull('resolue_le')
+                ->whereNull('lu_le'),
+            'notifications as alertes_critiques_count' => fn ($query) => $query
+                ->whereNull('resolue_le')
+                ->where('importance', ImportanceNotification::Critique->value),
+        ])->orderBy('nom')->get();
 
         return response()->streamDownload(function () use ($tenants) {
             $flux = fopen('php://output', 'w');

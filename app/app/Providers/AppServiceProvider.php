@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Boutique;
+use App\Models\NotificationInterne;
 use App\Models\User;
 use App\Support\AccesPrivilegie;
 use App\Support\CentreAlertes;
@@ -55,6 +56,11 @@ class AppServiceProvider extends ServiceProvider
                 : 0);
 
             $view->with('boutiqueContexteId', $boutiqueId);
+
+            // Pastille du bouton « Notifications » : ce qui reste à traiter.
+            $view->with('nombreNotifications', $user
+                ? NotificationInterne::pour($user)->ouvertes()->nonLues()->count()
+                : 0);
 
             $view->with('boutiquesPourSelecteur', $user?->isPatron()
                 ? Boutique::orderBy('nom')->get()

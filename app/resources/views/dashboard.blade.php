@@ -11,6 +11,69 @@
         @endif
     </h1>
 
+    {{-- Ce qui demande une décision passe avant les indicateurs. Le gérant
+         ouvre son tableau de bord pour savoir quoi faire aujourd'hui. --}}
+    <div class="card" style="border-left:4px solid {{ $notifications->isEmpty() ? '#1e4620' : $notifications->first()->importance->couleur() }};">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;">
+            <h2 style="margin-top:0;">
+                {{ __('À traiter') }}
+                @if ($nombreNotificationsOuvertes > 0)
+                    <span class="badge" style="background:#c0392b;color:#fff;">{{ $nombreNotificationsOuvertes }}</span>
+                @endif
+            </h2>
+            <a href="{{ route('notifications.index') }}">{{ __('Toutes les notifications') }}</a>
+        </div>
+
+        @if ($notifications->isEmpty())
+            <p style="margin:0;">{{ __('Rien à signaler sur votre périmètre. Stocks, péremptions et créances sont en ordre.') }}</p>
+        @else
+            <table>
+                <tbody>
+                    @foreach ($notifications as $notification)
+                        <tr>
+                            <td style="width:1%;white-space:nowrap;">
+                                <span class="badge" style="background:{{ $notification->importance->couleur() }};color:#fff;">
+                                    {{ $notification->type->label() }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong>{{ $notification->titre }}</strong>
+                                @if ($notification->estRappel())
+                                    <span class="badge" style="background:#7a1f1f;color:#fff;">
+                                        {{ trans_choice('{1}rappelé 1 fois|[2,*]rappelé :count fois', $notification->nombre_rappels) }}
+                                    </span>
+                                @endif
+                                @if (! $notification->estLue())
+                                    <span class="badge" style="background:#fef3c7;color:#78350f;">{{ __('nouveau') }}</span>
+                                @endif
+                                <br><small style="color:#555;">{{ $notification->message }}</small>
+                            </td>
+                            @if (auth()->user()->isPatron() || auth()->user()->isComptable())
+                                {{-- Le patron voit plusieurs boutiques : sans cette
+                                     colonne, il ne saurait pas où agir. --}}
+                                <td style="white-space:nowrap;">{{ $notification->boutique?->nom ?? __('Compte') }}</td>
+                            @endif
+                            <td style="width:1%;">
+                                <form method="POST" action="{{ route('notifications.lire', $notification) }}">
+                                    @csrf
+                                    <button class="btn" type="submit" style="padding:.35rem .7rem;min-height:0;">{{ __('Traiter') }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            @if ($nombreNotificationsOuvertes > $notifications->count())
+                <p style="margin-bottom:0;">
+                    <a href="{{ route('notifications.index') }}">
+                        {{ __('+ :reste autre(s) à traiter', ['reste' => $nombreNotificationsOuvertes - $notifications->count()]) }}
+                    </a>
+                </p>
+            @endif
+        @endif
+    </div>
+
     <div class="kpi-grid">
         <div class="card" style="margin-bottom:0;">
             <p style="margin:0;color:#555;">{{ __("Chiffre d'affaires (ce mois)") }}</p>
