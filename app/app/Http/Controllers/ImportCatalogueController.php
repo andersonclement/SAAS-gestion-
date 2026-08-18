@@ -7,11 +7,13 @@ use App\Enums\UniteMesure;
 use App\Http\Requests\StoreProduitRequest;
 use App\Models\Boutique;
 use App\Models\Categorie;
+use App\Models\Conditionnement;
 use App\Models\Lot;
 use App\Models\Produit;
 use App\Models\StockBoutique;
 use App\Support\Csv;
 use App\Support\Journal;
+use App\Support\ReglesConditionnement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +41,16 @@ class ImportCatalogueController extends Controller
         'nom', 'type', 'unite_mesure', 'code_barres', 'categorie',
         'prix_achat', 'prix_vente', 'stock_min', 'stock_max',
         'quantite_initiale', 'numero_lot', 'date_fabrication', 'date_peremption',
+        'format1_libelle', 'format1_contenu', 'format1_prix',
+        'format2_libelle', 'format2_contenu', 'format2_prix',
+        'format3_libelle', 'format3_contenu', 'format3_prix',
     ];
+
+    /**
+     * Trois formats par produit : au-delà, le fichier devient illisible dans un
+     * tableur, et la fiche produit reste là pour les cas rares.
+     */
+    private const FORMATS_MAX = 3;
 
     /**
      * Intitulés que l'on rencontre quand le fichier n'a pas été construit à
@@ -95,10 +106,12 @@ class ImportCatalogueController extends Controller
                 'Glyphosate 1L', TypeProduit::ProduitPhytosanitaire->value, UniteMesure::Litre->value,
                 '5901234123457', 'Herbicides', 3500, 4500, 10, 200, 60,
                 'LOT-2026-04', '2026-01-10', now()->addYear()->toDateString(),
+                'Carton de 12', 12, 54000, '', '', '', '', '', '',
             ],
             [
                 'Houe manuelle', TypeProduit::IntrantAgricole->value, UniteMesure::Unite->value,
                 '', 'Outillage', 2000, 3000, 5, 50, 25, 'LOT-OUTIL-01', '', '',
+                '', '', '', '', '', '', '', '', '',
             ],
         ]);
     }
@@ -172,6 +185,14 @@ class ImportCatalogueController extends Controller
                 ]
             );
 
+            ReglesConditionnement::verifier($validateur, $donnees['conditionnements']);
+
+            if (! StoreProduitRequest::auMoinsUnPrix($donnees)) {
+                $validateur->errors()->add('prix_vente', __(
+                    'Indiquez un prix de vente, ou au moins un format avec son prix.'
+                ));
+            }
+
             foreach ($validateur->errors()->all() as $message) {
                 $erreurs[] = __('Ligne :numero : :message', ['numero' => $ligne['numero'], 'message' => $message]);
             }
@@ -238,6 +259,21 @@ class ImportCatalogueController extends Controller
             'numero_lot' => $lire('numero_lot'),
             'date_fabrication' => $lire('date_fabrication'),
             'date_peremption' => $lire('date_peremption'),
+
+            // Les colonnes format1_*, format2_*… sont repliées en la même
+            // structure que celle du formulaire, pour passer par les mêmes
+            // contrôles et le même code de création.
+            'conditionnements' => ReglesConditionnement::nettoyer(
+                array_map(fn (int $rang) => [
+                    'libelle' => $lire("format{$rang}_libelle"),
+                    'facteur' => $lire("format{$rang}_contenu"),
+                    'prix_vente' => $lire("format{$rang}_prix"),
+                ], range(1, self::FORMATS_MAX))
+            ),
+
+            // Le premier format déclaré fait le format par défaut : c'est
+            // presque toujours celui dans lequel la boutique vend le plus.
+            'conditionnement_par_defaut' => 0,
         ];
     }
 
@@ -286,6 +322,16 @@ class ImportCatalogueController extends Controller
                     'lot_id' => $lot->id,
                     'quantite' => (int) $donnees['quantite_initiale'],
                 ]);
+
+                foreach ($donnees['conditionnements'] as $rang => $format) {
+                    Conditionnement::create([
+                        'produit_id' => $produit->id,
+                        'libelle' => $format['libelle'],
+                        'facteur' => (int) $format['facteur'],
+                        'prix_vente' => (int) $format['prix_vente'],
+                        'par_defaut' => $rang === 0,
+                    ]);
+                }
             }
         });
     }

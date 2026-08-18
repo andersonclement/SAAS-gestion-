@@ -18,7 +18,8 @@ class ImportCatalogueTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const ENTETE = 'nom;type;unite_mesure;code_barres;categorie;prix_achat;prix_vente;stock_min;stock_max;quantite_initiale;numero_lot;date_fabrication;date_peremption';
+    private const ENTETE = 'nom;type;unite_mesure;code_barres;categorie;prix_achat;prix_vente;stock_min;stock_max;quantite_initiale;numero_lot;date_fabrication;date_peremption'
+        .';format1_libelle;format1_contenu;format1_prix;format2_libelle;format2_contenu;format2_prix;format3_libelle;format3_contenu;format3_prix';
 
     private function fichier(string $contenu, string $nom = 'catalogue.csv'): UploadedFile
     {
@@ -41,6 +42,15 @@ class ImportCatalogueTest extends TestCase
             'numero_lot' => 'LOT-'.substr(md5($nom), 0, 6),
             'date_fabrication' => '',
             'date_peremption' => '',
+            'format1_libelle' => '',
+            'format1_contenu' => '',
+            'format1_prix' => '',
+            'format2_libelle' => '',
+            'format2_contenu' => '',
+            'format2_prix' => '',
+            'format3_libelle' => '',
+            'format3_contenu' => '',
+            'format3_prix' => '',
         ], $remplacements);
 
         return implode(';', $colonnes);
@@ -196,7 +206,12 @@ class ImportCatalogueTest extends TestCase
 
         $csv = implode("\n", [
             self::ENTETE,
-            $this->ligne('Sac scellé', ['prix_vente' => '']),
+            $this->ligne('Sac scellé', [
+                'prix_vente' => '',
+                'format1_libelle' => 'Sac de 50 kg',
+                'format1_contenu' => '50',
+                'format1_prix' => '25000',
+            ]),
         ]);
 
         $this->actingAs($patron)
@@ -204,7 +219,87 @@ class ImportCatalogueTest extends TestCase
             ->assertRedirect(route('produits.index'));
 
         // Ramené à 0, le produit serait offert au comptoir.
-        $this->assertNull(Produit::where('nom', 'Sac scellé')->firstOrFail()->prix_vente);
+        $produit = Produit::where('nom', 'Sac scellé')->firstOrFail();
+        $this->assertNull($produit->prix_vente);
+        $this->assertTrue($produit->estVendable());
+    }
+
+    public function test_the_format_columns_create_the_sale_formats(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        $csv = implode("\n", [
+            self::ENTETE,
+            $this->ligne('Insecticide poudre', [
+                'unite_mesure' => 'sachet',
+                'prix_vente' => '500',
+                'format1_libelle' => 'Carton de 24',
+                'format1_contenu' => '24',
+                'format1_prix' => '12000',
+                'format2_libelle' => 'Boîte de 6',
+                'format2_contenu' => '6',
+                'format2_prix' => '3000',
+            ]),
+        ]);
+
+        $this->actingAs($patron)
+            ->post('/produits/import', ['boutique_id' => $boutique->id, 'fichier' => $this->fichier($csv)])
+            ->assertRedirect(route('produits.index'));
+
+        $produit = Produit::where('nom', 'Insecticide poudre')->firstOrFail();
+        $formats = $produit->conditionnements->keyBy('libelle');
+
+        $this->assertCount(2, $formats);
+        $this->assertSame(12000, $formats['Carton de 24']->prix_vente);
+        $this->assertSame(3000, $formats['Boîte de 6']->prix_vente);
+
+        // Le premier format déclaré est celui que la caisse propose d'emblée.
+        $this->assertTrue($formats['Carton de 24']->par_defaut);
+        $this->assertFalse($formats['Boîte de 6']->par_defaut);
+    }
+
+    public function test_a_format_price_that_does_not_divide_is_refused(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        // 11 000 / 24 ne tombe pas juste : le prix unitaire retenu par les
+        // lignes de vente perdrait de l'argent à chaque passage en caisse.
+        $csv = implode("\n", [
+            self::ENTETE,
+            $this->ligne('Poudre mal tarifée', [
+                'format1_libelle' => 'Carton de 24',
+                'format1_contenu' => '24',
+                'format1_prix' => '11001',
+            ]),
+        ]);
+
+        $this->actingAs($patron)->from('/produits/import')
+            ->post('/produits/import', ['boutique_id' => $boutique->id, 'fichier' => $this->fichier($csv)]);
+
+        $this->assertStringContainsString('multiple de 24', session('erreurs')[0]);
+        $this->assertSame(0, Produit::count());
+    }
+
+    public function test_a_line_without_any_price_is_refused(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        $csv = implode("\n", [
+            self::ENTETE,
+            $this->ligne('Sans aucun prix', ['prix_vente' => '']),
+        ]);
+
+        $this->actingAs($patron)->from('/produits/import')
+            ->post('/produits/import', ['boutique_id' => $boutique->id, 'fichier' => $this->fichier($csv)]);
+
+        $this->assertStringContainsString('au moins un format', session('erreurs')[0]);
+        $this->assertSame(0, Produit::count());
     }
 
     public function test_a_vendeur_cannot_import(): void

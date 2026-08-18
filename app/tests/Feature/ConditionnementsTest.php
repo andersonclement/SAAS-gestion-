@@ -384,8 +384,13 @@ class ConditionnementsTest extends TestCase
             'type' => TypeProduit::IntrantAgricole->value,
             'unite_mesure' => UniteMesure::Kilogramme->value,
             'prix_achat' => 1200,
-            // Sachet scellé : il ne s'ouvre pas au comptoir.
+            // Sachet scellé : il ne s'ouvre pas au comptoir. Son prix est donc
+            // porté par le format, déclaré dans le même formulaire.
             'prix_vente' => null,
+            'conditionnements' => [
+                ['libelle' => 'Sachet de 5 kg', 'facteur' => 5, 'prix_vente' => 9000],
+            ],
+            'conditionnement_par_defaut' => 0,
             'stock_min' => 5,
             'stock_max' => 500,
             'boutique_id' => $c['boutique']->id,
@@ -398,6 +403,37 @@ class ConditionnementsTest extends TestCase
 
         $this->assertNull($produit->prix_vente);
         $this->assertFalse($produit->estDetaillable());
+
+        // Mais vendable : c'est le format qui porte le prix.
+        $this->assertTrue($produit->estVendable());
+
+        $format = $produit->conditionnements()->sole();
+        $this->assertSame('Sachet de 5 kg', $format->libelle);
+        $this->assertSame(9000, $format->prix_vente);
+        $this->assertTrue($format->par_defaut);
+    }
+
+    public function test_un_produit_sans_aucun_prix_est_refuse(): void
+    {
+        $c = $this->contexte();
+
+        // Ni prix au détail, ni format : le produit entrerait au catalogue sans
+        // pouvoir être vendu, et le vendeur ne le découvrirait qu'au comptoir,
+        // client devant lui.
+        $this->actingAs($c['patron'])->from('/produits/create')->post('/produits', [
+            'nom' => 'Produit sans prix',
+            'type' => TypeProduit::IntrantAgricole->value,
+            'unite_mesure' => UniteMesure::Kilogramme->value,
+            'prix_achat' => 1200,
+            'prix_vente' => null,
+            'stock_min' => 5,
+            'stock_max' => 500,
+            'boutique_id' => $c['boutique']->id,
+            'quantite_initiale' => 100,
+            'numero_lot' => 'LOT-SANS-PRIX',
+        ])->assertSessionHasErrors('prix_vente');
+
+        $this->assertDatabaseMissing('produits', ['nom' => 'Produit sans prix']);
     }
 
     public function test_un_produit_non_detaillable_ne_peut_pas_etre_vendu_a_la_mesure(): void
