@@ -90,7 +90,7 @@
                 <tr><td>code_barres</td><td>{{ __('Facultatif, unique dans votre catalogue.') }}</td></tr>
                 <tr><td>categorie</td><td>{{ __('Facultatif. Créée si elle n\'existe pas encore.') }}</td></tr>
                 <tr><td>prix_achat</td><td>{{ __('Obligatoire, en FCFA, sans décimale ni espace.') }}</td></tr>
-                <tr><td>prix_vente</td><td>{{ __('Prix au détail. Vide = le produit ne se vend qu\'en formats entiers.') }}</td></tr>
+                <tr><td>prix_vente</td><td>{{ __('Prix au détail. Vide = le produit ne se vend qu\'en formats. Une ligne doit porter au moins un prix.') }}</td></tr>
                 <tr><td>stock_min</td><td>{{ __("Seuil sous lequel l'alerte se déclenche.") }}</td></tr>
                 <tr><td>stock_max</td><td>{{ __('Doit être supérieur ou égal au minimum.') }}</td></tr>
                 <tr><td>quantite_initiale</td><td>{{ __('Quantité physiquement présente, au moins 1.') }}</td></tr>
@@ -99,6 +99,14 @@
                 <tr>
                     <td>date_peremption</td>
                     <td>{{ __('Format AAAA-MM-JJ. Obligatoire pour les phytosanitaires, à laisser vide pour ce qui ne périme pas.') }}</td>
+                </tr>
+                <tr>
+                    <td>format1_libelle<br>format1_contenu<br>format1_prix</td>
+                    <td>
+                        {{ __('Format de vente : son nom (« Carton de 12 »), le nombre d\'unités de mesure qu\'il contient (12), et son prix pour le format entier.') }}
+                        <br>
+                        {{ __('Jusqu\'à trois formats par produit (format2_*, format3_*). Le premier devient le format proposé par défaut à la caisse.') }}
+                    </td>
                 </tr>
             </tbody>
         </table>

@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProduitRequest;
 use App\Http\Requests\UpdateProduitRequest;
 use App\Models\Boutique;
 use App\Models\Categorie;
+use App\Models\Conditionnement;
 use App\Models\Lot;
 use App\Models\Produit;
 use App\Models\StockBoutique;
@@ -75,13 +76,31 @@ class ProduitController extends Controller
                 'quantite' => $validated['quantite_initiale'],
             ]);
 
+            // Formats de vente déclarés dans le même formulaire : le produit
+            // est vendable dès sa création, sans passage obligé par sa fiche.
+            $parDefaut = $validated['conditionnement_par_defaut'] ?? null;
+
+            foreach ($validated['conditionnements'] ?? [] as $index => $format) {
+                Conditionnement::create([
+                    'produit_id' => $produit->id,
+                    'libelle' => $format['libelle'],
+                    'facteur' => $format['facteur'],
+                    'prix_vente' => $format['prix_vente'],
+                    'par_defaut' => (int) $parDefaut === $index,
+                ]);
+            }
+
             Journal::enregistrer('produit.cree', __(
-                ':produit ajouté au catalogue — stock initial :quantite (lot :lot, péremption :peremption).',
+                ':produit ajouté au catalogue — stock initial :quantite (lot :lot, péremption :peremption, :formats).',
                 [
                     'produit' => $produit->nom,
                     'quantite' => $validated['quantite_initiale'],
                     'lot' => $lot->numero_lot,
                     'peremption' => $lot->date_peremption?->format('d/m/Y') ?? __('sans objet'),
+                    'formats' => trans_choice(
+                        '{0}aucun format de vente|{1}1 format de vente|[2,*]:count formats de vente',
+                        count($validated['conditionnements'] ?? [])
+                    ),
                 ]
             ), (int) $validated['boutique_id']);
 

@@ -193,6 +193,90 @@ class CatalogueProduitsTest extends TestCase
         ]))->assertSessionHasErrors('code_barres');
     }
 
+    public function test_a_patron_declares_the_sale_formats_and_their_prices_at_creation(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        $this->actingAs($patron)->post('/produits', $this->donneesProduit($boutique, [
+            'nom' => 'Insecticide en sachet',
+            'unite_mesure' => UniteMesure::Sachet->value,
+            'prix_vente' => 500,
+            'conditionnements' => [
+                ['libelle' => 'Carton de 24', 'facteur' => 24, 'prix_vente' => 12000],
+                ['libelle' => 'Boîte de 6', 'facteur' => 6, 'prix_vente' => 3000],
+            ],
+            'conditionnement_par_defaut' => 1,
+        ]))->assertRedirect();
+
+        $produit = Produit::where('nom', 'Insecticide en sachet')->firstOrFail();
+        // La relation trie par défaut puis contenu : on repère les formats par
+        // leur libellé plutôt que par leur rang.
+        $formats = $produit->conditionnements->keyBy('libelle');
+
+        $this->assertCount(2, $formats);
+        $this->assertSame(12000, $formats['Carton de 24']->prix_vente);
+        $this->assertSame(500, $formats['Carton de 24']->prixUnitaire());
+        $this->assertSame(500, $formats['Boîte de 6']->prixUnitaire());
+
+        // Le format coché est bien celui retenu par défaut à la caisse.
+        $this->assertFalse($formats['Carton de 24']->par_defaut);
+        $this->assertTrue($formats['Boîte de 6']->par_defaut);
+    }
+
+    public function test_a_format_price_must_divide_by_its_contents(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        // 11 001 / 24 ne tombe pas juste : les lignes de vente retiennent un
+        // prix unitaire entier, et la boutique perdrait sur chaque passage.
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutique, [
+            'conditionnements' => [
+                ['libelle' => 'Carton de 24', 'facteur' => 24, 'prix_vente' => 11001],
+            ],
+        ]))->assertSessionHasErrors('conditionnements.0.prix_vente');
+
+        $this->assertDatabaseCount('conditionnements', 0);
+    }
+
+    public function test_the_same_format_cannot_be_declared_twice(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        // Rien n'est encore en base : sans contrôle sur le lot soumis, les deux
+        // lignes passeraient puis heurteraient l'index unique.
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutique, [
+            'conditionnements' => [
+                ['libelle' => 'Carton de 24', 'facteur' => 24, 'prix_vente' => 12000],
+                ['libelle' => 'carton de 24', 'facteur' => 24, 'prix_vente' => 12000],
+            ],
+        ]))->assertSessionHasErrors('conditionnements.1.libelle');
+
+        $this->assertDatabaseCount('conditionnements', 0);
+    }
+
+    public function test_empty_format_rows_are_ignored(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        // Le formulaire affiche une ligne vide en réserve : la laisser telle
+        // quelle ne doit pas déclencher « le libellé est obligatoire ».
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $this->donneesProduit($boutique, [
+            'conditionnements' => [
+                ['libelle' => '', 'facteur' => '', 'prix_vente' => ''],
+            ],
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseCount('conditionnements', 0);
+    }
+
     public function test_a_patron_can_create_a_category(): void
     {
         $tenant = Tenant::factory()->create();
