@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\TypeProduit;
 use App\Enums\UniteMesure;
 use App\Models\Produit;
+use App\Support\ReglesConditionnement;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -14,6 +15,19 @@ class StoreProduitRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user()->can('create', Produit::class);
+    }
+
+    /**
+     * Le formulaire affiche des lignes de format en réserve : celles qui sont
+     * restées vides ne doivent pas être validées comme des formats incomplets.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (is_array($this->input('conditionnements'))) {
+            $this->merge([
+                'conditionnements' => ReglesConditionnement::nettoyer($this->input('conditionnements')),
+            ]);
+        }
     }
 
     public function rules(): array
@@ -83,7 +97,26 @@ class StoreProduitRequest extends FormRequest
                 'date',
                 'after:today',
             ],
-        ];
+
+            // Formats de vente déclarés dès la création : carton, sachet,
+            // sac... Les définir plus tard obligerait à ouvrir la fiche produit
+            // juste après l'avoir créée, et laisserait le produit invendable
+            // dans l'intervalle.
+            'conditionnement_par_defaut' => ['nullable', 'integer', 'min:0'],
+        ] + ReglesConditionnement::regles();
+    }
+
+    /**
+     * Un produit doit avoir au moins un prix : au détail, ou porté par un
+     * format. Sans cela il entre au catalogue sans pouvoir être vendu, et le
+     * vendeur ne le découvre qu'au comptoir, client devant lui.
+     *
+     * @param  array<string, mixed>  $donnees
+     */
+    public static function auMoinsUnPrix(array $donnees): bool
+    {
+        return ($donnees['prix_vente'] ?? null) !== null && trim((string) $donnees['prix_vente']) !== ''
+            || ReglesConditionnement::nettoyer($donnees['conditionnements'] ?? []) !== [];
     }
 
     /**
@@ -113,6 +146,14 @@ class StoreProduitRequest extends FormRequest
 
             if ($fabrication && $peremption && $fabrication >= $peremption) {
                 $validator->errors()->add('date_peremption', __('La date de péremption doit suivre la date de fabrication.'));
+            }
+
+            ReglesConditionnement::verifier($validator, $this->input('conditionnements') ?? []);
+
+            if (! self::auMoinsUnPrix($this->all())) {
+                $validator->errors()->add('prix_vente', __(
+                    'Indiquez un prix : au détail, ou en déclarant au moins un format de vente (carton, sachet, sac...).'
+                ));
             }
         });
     }
