@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BonCommande;
 use App\Models\StockBoutique;
 use App\Models\Vente;
+use App\Support\Csv;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -86,15 +87,6 @@ class RapportController extends Controller
 
     private function telechargerCsv(string $nomFichier, array $entetes, iterable $lignes): StreamedResponse
     {
-        return response()->streamDownload(function () use ($entetes, $lignes) {
-            $flux = fopen('php://output', 'w');
-            fputcsv($flux, $entetes);
-
-            foreach ($lignes as $ligne) {
-                fputcsv($flux, $ligne);
-            }
-
-            fclose($flux);
-        }, $nomFichier, ['Content-Type' => 'text/csv']);
+        return Csv::telecharger($nomFichier, $entetes, $lignes);
     }
 }

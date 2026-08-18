@@ -20,6 +20,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseController;
 use App\Http\Controllers\EcartSynchronisationController;
 use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\ImportCatalogueController;
 use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LocaleController;
@@ -87,6 +88,13 @@ Route::middleware(['auth', 'abonnement.actif'])->group(function () {
     Route::post('/boutique-contexte', [BoutiqueContexteController::class, 'update'])->name('boutique-contexte.update');
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     Route::post('/users/{user}/activation', [UserController::class, 'basculerActivation'])->name('users.activation');
+    // Reprise d'un catalogue existant depuis un tableur. Déclaré avant la
+    // ressource : sans cela, /produits/import serait pris pour la fiche du
+    // produit « import » par la route produits.show.
+    Route::get('/produits/import', [ImportCatalogueController::class, 'create'])->name('produits.import.create');
+    Route::get('/produits/import/modele.csv', [ImportCatalogueController::class, 'modele'])->name('produits.import.modele');
+    Route::post('/produits/import', [ImportCatalogueController::class, 'store'])->name('produits.import.store');
+
     Route::resource('produits', ProduitController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
     // Formats de vente d'un produit : sac de 50 kg, bidon de 5 L, détail au kilo.

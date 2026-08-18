@@ -7,6 +7,7 @@ use App\Enums\UniteMesure;
 use App\Enums\UserRole;
 use App\Models\Boutique;
 use App\Models\Categorie;
+use App\Models\Lot;
 use App\Models\Produit;
 use App\Models\Tenant;
 use App\Models\User;
@@ -70,19 +71,43 @@ class CatalogueProduitsTest extends TestCase
         ]);
     }
 
-    public function test_the_expiry_date_is_required(): void
+    public function test_the_expiry_date_is_required_on_a_phytosanitary_product(): void
     {
         $tenant = Tenant::factory()->create();
         $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
         $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
 
-        $donnees = $this->donneesProduit($boutique);
+        $donnees = $this->donneesProduit($boutique, [
+            'nom' => 'Glyphosate 1L',
+            'type' => TypeProduit::ProduitPhytosanitaire->value,
+        ]);
         unset($donnees['date_peremption']);
 
         $this->actingAs($patron)->from('/produits/create')->post('/produits', $donnees)
             ->assertSessionHasErrors('date_peremption');
 
-        $this->assertDatabaseMissing('produits', ['nom' => 'Engrais NPK 15-15-15']);
+        $this->assertDatabaseMissing('produits', ['nom' => 'Glyphosate 1L']);
+    }
+
+    public function test_a_product_without_mandatory_traceability_needs_no_date(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $patron = User::factory()->create(['tenant_id' => $tenant->id, 'role' => UserRole::Patron]);
+        $boutique = Boutique::factory()->create(['tenant_id' => $tenant->id]);
+
+        // Hors phytosanitaires, exiger une date pousserait à en inventer une,
+        // et les alertes de péremption se rempliraient d'échéances fictives.
+        $donnees = $this->donneesProduit($boutique, [
+            'nom' => 'Houe manuelle',
+            'type' => TypeProduit::IntrantAgricole->value,
+        ]);
+        unset($donnees['date_peremption']);
+
+        $this->actingAs($patron)->from('/produits/create')->post('/produits', $donnees)
+            ->assertSessionHasNoErrors();
+
+        $produit = Produit::where('nom', 'Houe manuelle')->firstOrFail();
+        $this->assertNull(Lot::where('produit_id', $produit->id)->first()?->date_peremption);
     }
 
     public function test_an_already_expired_batch_is_rejected(): void

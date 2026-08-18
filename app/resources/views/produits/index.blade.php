@@ -52,7 +52,10 @@
         @endif
 
         @can('create', App\Models\Produit::class)
-            <p style="margin-top:1rem;"><a class="btn" href="{{ route('produits.create') }}">+ {{ __('Nouveau produit') }}</a></p>
+            <p style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+                <a class="btn" href="{{ route('produits.create') }}">+ {{ __('Nouveau produit') }}</a>
+                <a class="btn" style="background:#555;" href="{{ route('produits.import.create') }}">{{ __('Importer un fichier') }}</a>
+            </p>
         @endcan
     </div>
 @endsection

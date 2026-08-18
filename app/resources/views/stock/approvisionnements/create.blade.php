@@ -64,7 +64,8 @@
 
                 <div class="field">
                     <label for="date_peremption">{{ __('Date de péremption') }}</label>
-                    <input id="date_peremption" type="date" name="date_peremption" value="{{ old('date_peremption') }}" required>
+                    <input id="date_peremption" type="date" name="date_peremption" value="{{ old('date_peremption') }}">
+                    <small style="color:#56606b;">{{ __('Obligatoire pour les produits phytosanitaires ; à laisser vide pour un produit qui ne périme pas.') }}</small>
                 </div>
 
                 <button class="btn" type="submit">{{ __('Enregistrer le stock') }}</button>

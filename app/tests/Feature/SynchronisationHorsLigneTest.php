@@ -302,6 +302,18 @@ class SynchronisationHorsLigneTest extends TestCase
         $reponse->assertJsonPath('produits.0.stock', 12);
     }
 
+    public function test_le_catalogue_hors_ligne_porte_le_code_barres(): void
+    {
+        $c = $this->contexte();
+        $c['produit']->update(['code_barres' => '3760091721234']);
+
+        // Sans lui, le scan de la caisse retombe sur la liste déroulante
+        // pendant une coupure — au moment où il sert le plus.
+        $this->actingAs($c['vendeur'])->getJson('/sync/catalogue')
+            ->assertOk()
+            ->assertJsonPath('produits.0.code_barres', '3760091721234');
+    }
+
     public function test_le_catalogue_ne_fuit_pas_les_produits_d_un_autre_tenant(): void
     {
         $c = $this->contexte();

@@ -71,6 +71,10 @@ class SynchronisationController extends Controller
             ->map(fn (Produit $produit) => [
                 'id' => $produit->id,
                 'nom' => $produit->nom,
+                // Le scan doit continuer de fonctionner pendant une coupure :
+                // sans le code-barres ici, la caisse hors-ligne retombe sur la
+                // liste déroulante au pire moment.
+                'code_barres' => $produit->code_barres,
                 // Prix promotionnel du jour. Le serveur le recalculera à la
                 // date réelle de l'encaissement : c'est lui qui fait foi.
                 'prix' => $produit->estDetaillable() ? $this->allocation->prixApresPromotion($produit, null) : null,

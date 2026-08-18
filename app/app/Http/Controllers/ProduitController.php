@@ -65,7 +65,7 @@ class ProduitController extends Controller
                 'produit_id' => $produit->id,
                 'numero_lot' => $validated['numero_lot'],
                 'date_fabrication' => $validated['date_fabrication'] ?? null,
-                'date_peremption' => $validated['date_peremption'],
+                'date_peremption' => $validated['date_peremption'] ?? null,
             ]);
 
             StockBoutique::create([
@@ -81,7 +81,7 @@ class ProduitController extends Controller
                     'produit' => $produit->nom,
                     'quantite' => $validated['quantite_initiale'],
                     'lot' => $lot->numero_lot,
-                    'peremption' => $lot->date_peremption->format('d/m/Y'),
+                    'peremption' => $lot->date_peremption?->format('d/m/Y') ?? __('sans objet'),
                 ]
             ), (int) $validated['boutique_id']);
 

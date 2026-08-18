@@ -18,19 +18,37 @@ class StoreProduitRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'nom' => ['required', 'string', 'max:255'],
+        return self::reglesCommunes($this->user()->tenant_id, $this->all()) + [
             'categorie_id' => [
                 'nullable',
                 Rule::exists('categories', 'id')->where('tenant_id', $this->user()->tenant_id),
             ],
+        ];
+    }
+
+    /**
+     * Règles partagées entre la saisie manuelle et l'import CSV.
+     *
+     * Les deux chemins mènent au même catalogue : les faire diverger
+     * reviendrait à tolérer par fichier ce qu'on refuse au formulaire, et à
+     * peupler la base de fiches de qualités inégales. Seule la désignation de
+     * la catégorie change (identifiant au formulaire, nom dans le fichier) et
+     * reste donc à la charge de chaque appelant.
+     *
+     * @param  array<string, mixed>  $donnees
+     * @return array<string, array<int, mixed>>
+     */
+    public static function reglesCommunes(int $tenantId, array $donnees): array
+    {
+        return [
+            'nom' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(TypeProduit::class)],
             'unite_mesure' => ['required', Rule::enum(UniteMesure::class)],
             'code_barres' => [
                 'nullable',
                 'string',
                 'max:64',
-                Rule::unique('produits', 'code_barres')->where('tenant_id', $this->user()->tenant_id),
+                Rule::unique('produits', 'code_barres')->where('tenant_id', $tenantId),
             ],
             'prix_achat' => ['required', 'integer', 'min:0'],
             // Prix au détail (à l'unité de mesure). Vide = produit non
@@ -48,13 +66,36 @@ class StoreProduitRequest extends FormRequest
             // produits phytosanitaires.
             'boutique_id' => [
                 'required',
-                Rule::exists('boutiques', 'id')->where('tenant_id', $this->user()->tenant_id),
+                Rule::exists('boutiques', 'id')->where('tenant_id', $tenantId),
             ],
             'quantite_initiale' => ['required', 'integer', 'min:1'],
             'numero_lot' => ['required', 'string', 'max:64'],
             'date_fabrication' => ['nullable', 'date', 'before_or_equal:today'],
-            'date_peremption' => ['required', 'date', 'after:today'],
+
+            // Obligatoire pour les produits dont la traçabilité l'impose
+            // (phytosanitaires), facultative ailleurs. Exiger une date sur une
+            // houe ou un arrosoir pousserait à en inventer une, et les alertes
+            // de péremption se rempliraient d'échéances fictives — une alerte
+            // à laquelle on ne croit plus ne sert plus à rien.
+            'date_peremption' => [
+                Rule::requiredIf(fn () => self::peremptionObligatoire($donnees)),
+                'nullable',
+                'date',
+                'after:today',
+            ],
         ];
+    }
+
+    /**
+     * Le type de produit décide : voir TypeProduit::tracabiliteObligatoire().
+     *
+     * @param  array<string, mixed>  $donnees
+     */
+    private static function peremptionObligatoire(array $donnees): bool
+    {
+        $type = TypeProduit::tryFrom((string) ($donnees['type'] ?? ''));
+
+        return $type?->tracabiliteObligatoire() ?? false;
     }
 
     public function withValidator(Validator $validator): void
