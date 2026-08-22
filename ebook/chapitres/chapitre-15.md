@@ -1,93 +1,93 @@
 # Chapitre 15 — Dante
 
-*La distance necessaire*
+*La distance nécessaire*
 
 ---
 
-Je passe le week-end a me detester.
+Je passe le week-end à me détester.
 
-Pas pour avoir embrasse Camille — meme maintenant, meme avec tout ce qui suit, je ne parviens pas a regretter la sensation de sa bouche contre la mienne. Je me deteste pour ce que je m'apprete a faire ensuite, parce que je sais deja, avant meme de composer le numero de Viktor le lundi matin, que je vais choisir la froideur plutot que la verite.
+Pas pour avoir embrasse Camille — même maintenant, même avec tout ce qui suit, je ne parviens pas à regretter la sensation de sa bouche contre la mienne. Je me déteste pour ce que je m'apprête à faire ensuite, parce que je sais déjà, avant même de composer le numéro de Viktor le lundi matin, que je vais choisir la froideur plutôt que la vérité.
 
-— J'ai quelque chose, dit Viktor en entrant dans mon bureau, un dossier a la main. Sur Romain Renard.
+— J'ai quelque chose, dit Viktor en entrant dans mon bureau, un dossier à la main. Sur Romain Renard.
 
-Je pose ma tasse de cafe. Quatre ans de recherches culminent souvent dans des impasses. Cette fois, je sens immediatement que ce n'en est pas une.
+Je pose ma tasse de café. Quatre ans de recherches culminent souvent dans des impasses. Cette fois, je sens immédiatement que ce n'en est pas une.
 
 — Quoi ?
 
-— Il n'etait pas juste un comptable qui a assiste a quelque chose par hasard. Il travaillait pour la police. Informateur, depuis 2008. Il a temoigne, en secret, contre ton pere dans une enquete sur le trafic portuaire. C'est ce qui a declenche l'interet de Lorenzo Ferretti pour prendre le controle des routes — il pensait que Marco etait affaibli, expose, vulnerable a une enquete federale.
+— Il n'était pas juste un comptable qui a assisté à quelque chose par hasard. Il travaillait pour la police. Informateur, depuis 2008. Il a témoigné, en secret, contre ton père dans une enquête sur le trafic portuaire. C'est ce qui a déclenché l'intérêt de Lorenzo Ferretti pour prendre le contrôle des routes — il pensait que Marco était affaibli, exposé, vulnérable à une enquête fédérale.
 
-Le sol semble basculer legerement sous mes pieds.
+Le sol semble basculer légèrement sous mes pieds.
 
-— Renard a trahi mon pere.
+— Renard a trahi mon père.
 
-— Renard a trahi tout le monde, dit Viktor. Y compris, apparemment, les Ferretti, a qui il vendait aussi des informations. C'etait un homme qui jouait sur tous les tableaux a la fois. La nuit de la mort de ta mere, il etait present dans l'entrepot B7 pour livrer des documents a Lorenzo — des preuves contre ton pere, destinees a la police, mais que Lorenzo voulait intercepter pour faire chanter Marco et prendre le controle sans violence.
+— Renard a trahi tout le monde, dit Viktor. Y compris, apparemment, les Ferretti, à qui il vendait aussi des informations. C'était un homme qui jouait sur tous les tableaux à la fois. La nuit de la mort de ta mère, il était présent dans l'entrepôt B7 pour livrer des documents à Lorenzo — des preuves contre ton père, destinées à la police, mais que Lorenzo voulait intercepter pour faire chanter Marco et prendre le contrôle sans violence.
 
-— Et ma mere ?
+— Et ma mère ?
 
-Viktor hesite, ce qui, chez lui, equivaut a un hurlement d'alarme.
+Viktor hésite, ce qui, chez lui, équivaut à un hurlement d'alarme.
 
-— Elle est arrivee au mauvais moment. Elle cherchait ton pere pour une urgence familiale — toi, en fait. Tu avais une forte fievre cette nuit-la. Elle est tombee sur l'echange entre Lorenzo et Renard. Elle a vu les documents.
+— Elle est arrivée au mauvais moment. Elle cherchait ton père pour une urgence familiale — toi, en fait. Tu avais une forte fièvre cette nuit-là. Elle est tombée sur l'échange entre Lorenzo et Renard. Elle a vu les documents.
 
-Ma gorge se serre. J'avais quatorze ans, malade dans mon lit, pendant que ma mere mourait a cause de moi — a cause d'une fievre banale qui l'a poussee a sortir dans la nuit chercher mon pere.
+Ma gorge se serre. J'avais quatorze ans, malade dans mon lit, pendant que ma mère mourait à cause de moi — à cause d'une fièvre banale qui l'a poussée à sortir dans la nuit chercher mon père.
 
 — Renard savait que Lorenzo allait la faire tuer ?
 
-— On ne sait pas s'il savait avec certitude. Mais il l'a laisse faire. Il n'a rien dit. Il a continue a jouer son jeu double pendant encore des annees, encaissant l'argent des deux cotes, jusqu'a ce qu'il comprenne que le terrain devenait trop dangereux et qu'il disparaisse.
+— On ne sait pas s'il savait avec certitude. Mais il l'a laisse faire. Il n'a rien dit. Il a continué à jouer son jeu double pendant encore des années, encaissant l'argent des deux côtés, jusqu'à ce qu'il comprenne que le terrain devenait trop dangereux et qu'il disparaisse.
 
-Je reste silencieux longtemps, digérant chaque mot comme on digere du poison — lentement, douloureusement, avec la certitude que ca va faire mal pendant longtemps encore.
+Je reste silencieux longtemps, digérant chaque mot comme on digère du poison — lentement, douloureusement, avec la certitude que ça va faire mal pendant longtemps encore.
 
-— Camille sait tout ca ? demande enfin Viktor.
+— Camille sait tout ça ? demande enfin Viktor.
 
-— Non. Sa lettre suggere qu'elle ne sait presque rien.
+— Non. Sa lettre suggère qu'elle ne sait presque rien.
 
 — Alors qu'est-ce que tu vas faire ?
 
-C'est la question a laquelle je n'ai pas de reponse honnete. Parce que la verite, c'est que le pere de la femme que je viens d'embrasser dans une voiture, avec une intensite qui m'a effraye moi-meme, est directement responsable — par son silence, par sa lachete, par son avidite — de la mort de ma mere.
+C'est la question à laquelle je n'ai pas de réponse honnête. Parce que la vérité, c'est que le père de la femme que je viens d'embrasser dans une voiture, avec une intensité qui m'a effrayé moi-même, est directement responsable — par son silence, par sa lâcheté, par son avidité — de la mort de ma mère.
 
-Comment est-ce que je peux continuer a la toucher en sachant ca ?
+Comment est-ce que je peux continuer à la toucher en sachant ça ?
 
 Comment est-ce que je peux ne pas le faire ?
 
 ---
 
-Le lundi matin, je decide.
+Le lundi matin, je décide.
 
-Je redeviens l'homme que j'etais avant le gala. Distant. Professionnel. Froid.
+Je redeviens l'homme que j'étais avant le gala. Distant. Professionnel. Froid.
 
-Camille arrive a neuf heures, un sourire timide sur les levres, cette lueur d'anticipation dans ses yeux que je reconnais parce qu'elle refleite exactement ce que je ressens moi-meme et que je refuse desormais de m'autoriser.
+Camille arrive à neuf heures, un sourire timide sur les lèvres, cette lueur d'anticipation dans ses yeux que je reconnais parce qu'elle reflète exactement ce que je ressens moi-même et que je refuse désormais de m'autoriser.
 
 — Bonjour, dit-elle.
 
-— Le rapport Duval doit etre finalise avant midi, dis-je sans lever les yeux de mon ecran. J'ai besoin des chiffres actualises sur les trois derniers mois.
+— Le rapport Duval doit être finalisé avant midi, dis-je sans lever les yeux de mon écran. J'ai besoin des chiffres actualises sur les trois derniers mois.
 
-Le silence qui suit dure trop longtemps. Je sens son regard sur moi, cherchant une explication, une reconnaissance, n'importe quoi qui confirmerait que ce week-end n'etait pas un reve qu'elle a imagine seule.
+Le silence qui suit dure trop longtemps. Je sens son regard sur moi, cherchant une explication, une reconnaissance, n'importe quoi qui confirmerait que ce week-end n'était pas un rêve qu'elle a imaginé seule.
 
-— D'accord, dit-elle enfin, la voix plus petite qu'a l'accoutumee.
+— D'accord, dit-elle enfin, la voix plus petite qu'à l'accoutumée.
 
 Elle se retourne pour partir. Je devrais la laisser partir. Je le sais.
 
 — Camille.
 
-Elle s'arrete, se retourne, l'espoir visible sur son visage malgre ses efforts pour le masquer.
+Elle s'arrête, se retourne, l'espoir visible sur son visage malgré ses efforts pour le masquer.
 
 — Oui ?
 
-— Le gala. C'etait une erreur. Ca ne doit pas se reproduire.
+— Le gala. C'était une erreur. Ça ne doit pas se reproduire.
 
-Je vois quelque chose se briser dans ses yeux — pas de facon dramatique, pas de larmes, juste une petite fracture silencieuse, le genre qui fait le plus mal parce qu'elle est invisible a tout le monde sauf a ceux qui savent regarder.
+Je vois quelque chose se briser dans ses yeux — pas de façon dramatique, pas de larmes, juste une petite fracture silencieuse, le genre qui fait le plus mal parce qu'elle est invisible à tout le monde sauf à ceux qui savent regarder.
 
-— D'accord, dit-elle a nouveau, d'une voix parfaitement controlee. Le rapport Duval sera pret avant midi.
+— D'accord, dit-elle a nouveau, d'une voix parfaitement contrôlée. Le rapport Duval sera prêt avant midi.
 
-Elle sort de mon bureau avec une dignite qui me fait l'aimer encore plus, ce qui rend ma decision encore plus insupportable.
+Elle sort de mon bureau avec une dignité qui me fait l'aimer encore plus, ce qui rend ma décision encore plus insupportable.
 
-Je me dis que je fais ca pour la proteger — de moi, de la verite sur son pere, de tout ce que je ne peux pas encore lui reveler sans detruire ce qu'elle croit savoir sur elle-meme.
+Je me dis que je fais ça pour la protéger — de moi, de la vérité sur son père, de tout ce que je ne peux pas encore lui révéler sans détruire ce qu'elle croit savoir sur elle-même.
 
-Mais assis seul dans mon bureau, regardant par la baie vitree un port qui ne m'a jamais semble aussi vide, je sais que je mens.
+Mais assis seul dans mon bureau, regardant par la baie vitrée un port qui ne m'a jamais semble aussi vide, je sais que je mens.
 
-Je fais ca parce que j'ai peur. Peur de ce que je ressens. Peur de ce que ca signifie de vouloir quelqu'un dont le pere porte une part de responsabilite dans la mort de ma mere. Peur, surtout, que si je la laisse s'approcher encore plus pres, je ne serai plus jamais capable de la laisser partir — meme quand la verite finira, inevitablement, par tout detruire entre nous.
+Je fais ça parce que j'ai peur. Peur de ce que je ressens. Peur de ce que ça signifie de vouloir quelqu'un dont le père porte une part de responsabilité dans la mort de ma mère. Peur, surtout, que si je la laisse s'approcher encore plus près, je ne serai plus jamais capable de la laisser partir — même quand la vérité finira, inévitablement, par tout détruire entre nous.
 
-Marco Marchetti disait toujours que la faiblesse d'un homme se mesure a ce qu'il est pret a sacrifier pour la proteger.
+Marco Marchetti disait toujours que la faiblesse d'un homme se mesure à ce qu'il est prêt à sacrifier pour la protéger.
 
 Je suis en train de sacrifier la seule chose qui m'a fait sentir vivant depuis quinze ans.
 
-Et je ne sais meme plus si c'est de la force, ou la pire des lachetes.
+Et je ne sais même plus si c'est de la force, ou la pire des lâchetés.

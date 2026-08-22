@@ -1,89 +1,89 @@
 # Chapitre 21 — Dante
 
-*Le prix du controle*
+*Le prix du contrôle*
 
 ---
 
-Je ne dors pas cette nuit-la. Ni la suivante.
+Je ne dors pas cette nuit-là. Ni la suivante.
 
-Chaque heure qui passe sans nouvelle information sur l'homme qui a photographie Camille est une heure ou mon imagination construit des scenarios de plus en plus sombres. Viktor a triple la surveillance. J'ai fait installer des cameras supplementaires autour de son immeuble, de son universite, du Cafe des Epices ou elle retrouve Nadia chaque semaine.
+Chaque heure qui passe sans nouvelle information sur l'homme qui a photographié Camille est une heure ou mon imagination construit des scénarios de plus en plus sombres. Viktor a triplé la surveillance. J'ai fait installer des caméras supplémentaires autour de son immeuble, de son université, du Café des Épices ou elle retrouve Nadia chaque semaine.
 
-Elle ne sait rien de l'etendue de ce deploiement. C'est exactement le genre de trahison de confiance qu'elle m'a explicitement demande d'eviter.
+Elle ne sait rien de l'étendue de ce déploiement. C'est exactement le genre de trahison de confiance qu'elle m'a explicitement demande d'éviter.
 
-Je le fais quand meme.
+Je le fais quand même.
 
-— Tu es en train de refaire la meme erreur, dit Luca, installe dans mon bureau avec cette expression serieuse qu'il reserve desormais uniquement aux conversations concernant Camille.
+— Tu es en train de refaire la même erreur, dit Luca, installe dans mon bureau avec cette expression sérieuse qu'il réserve désormais uniquement aux conversations concernant Camille.
 
 — Quelle erreur ?
 
-— Celle de croire que le controle equivaut a la protection. Papa faisait pareil avec maman, tu sais. Plus il avait peur de la perdre, plus il essayait de controler chaque aspect de sa vie. Et elle est morte quand meme, Dante. Le controle ne l'a pas sauvee. Ca l'a juste rendue plus seule dans les annees qui ont precede sa mort.
+— Celle de croire que le contrôle équivaut à la protection. Papa faisait pareil avec maman, tu sais. Plus il avait peur de la perdre, plus il essayait de contrôler chaque aspect de sa vie. Et elle est morte quand même, Dante. Le contrôle ne l'a pas sauvée. Ça l'a juste rendue plus seule dans les années qui ont précédé sa mort.
 
 Les mots me frappent avec une force que je n'attendais pas.
 
-— Qu'est-ce que tu suggeres que je fasse ? La laisser se promener sans protection pendant que Greco et les Ferretti la traquent ?
+— Qu'est-ce que tu suggères que je fasse ? La laisser se promener sans protection pendant que Greco et les Ferretti la traquent ?
 
-— Je suggere que tu la laisses participer aux decisions qui la concernent, au lieu de decider seul de ce qui est bon pour elle. Il y a une difference entre proteger quelqu'un et l'emprisonner par peur.
+— Je suggère que tu la laisses participer aux décisions qui la concernent, au lieu de décider seul de ce qui est bon pour elle. Il y a une différence entre protéger quelqu'un et l'emprisonner par peur.
 
-Je regarde mon frere, cet homme que j'ai toujours considere comme le plus leger d'entre nous, et je me demande, une fois de plus, combien de sagesse il cache derriere sa facade d'insouciance.
+Je regarde mon frère, cet homme que j'ai toujours considère comme le plus léger d'entre nous, et je me demande, une fois de plus, combien de sagesse il cache derrière sa façade d'insouciance.
 
-— Depuis quand tu es devenu si perspicace sur les relations amoureuses ? demande-je, en partie pour detourner la conversation de la verite inconfortable qu'il vient de reveler.
+— Depuis quand tu es devenu si perspicace sur les relations amoureuses ? demande-je, en partie pour détourner la conversation de la vérité inconfortable qu'il vient de révéler.
 
-— Depuis que j'observe la tienne se former sous mes yeux et que je refuse de la voir echouer pour les memes raisons que celle de nos parents.
+— Depuis que j'observe la tienne se former sous mes yeux et que je refuse de la voir échouer pour les mémés raisons que celle de nos parents.
 
 ---
 
-Le soir meme, je confronte Camille avec une honnetete qui me coute plus que n'importe quelle negociation avec un rival dangereux.
+Le soir même, je confronte Camille avec une honnêteté qui me coûte plus que n'importe quelle négociation avec un rival dangereux.
 
-— J'ai installe des cameras supplementaires autour de chez toi, dis-je directement, sans preambule. Sans t'en parler avant.
+— J'ai installé des caméras supplémentaires autour de chez toi, dis-je directement, sans préambule. Sans t'en parler avant.
 
-Son visage se ferme immediatement, une froideur familiere remplacant la chaleur habituelle de nos soirees ensemble.
+Son visage se ferme immédiatement, une froideur familière remplaçant la chaleur habituelle de nos soirées ensemble.
 
-— Combien de cameras ?
+— Combien de caméras ?
 
-— Six. Peut-etre huit.
+— Six. Peut-être huit.
 
 — Ou exactement ?
 
-— Ton immeuble. Ton universite. Le cafe ou tu retrouves Nadia.
+— Ton immeuble. Ton université. Le café ou tu retrouves Nadia.
 
-Elle se leve du canape, marchant vers la fenetre, me tournant le dos pendant un moment qui s'etire douloureusement.
+Elle se levé du canapé, marchant vers la fenêtre, me tournant le dos pendant un moment qui s'étire douloureusement.
 
 — Tu m'espionnes, dit-elle enfin.
 
-— Je te protege.
+— Je te protège.
 
-— C'est la meme chose, dans ce cas precis, et tu le sais.
+— C'est la même chose, dans ce cas précis, et tu le sais.
 
-Je m'approche d'elle, resistant a l'envie de la toucher, sentant que ce moment exige des mots plutot que des gestes.
+Je m'approche d'elle, résistant à l'envie de la toucher, sentant que ce moment exige des mots plutôt que des gestes.
 
-— J'ai peur, Camille. Une peur que je n'ai pas ressentie depuis que j'ai quatorze ans et que j'ai appris que ma mere ne rentrerait jamais a la maison. Et cette peur me pousse a faire exactement ce que Luca vient de me reprocher — a essayer de tout controler pour compenser mon impuissance fondamentale face au danger reel.
+— J'ai peur, Camille. Une peur que je n'ai pas ressentie depuis que j'ai quatorze ans et que j'ai appris que ma mère ne rentrerait jamais à la maison. Et cette peur me pousse à faire exactement ce que Luca vient de me reprocher — à essayer de tout contrôler pour compenser mon impuissance fondamentale face au danger réel.
 
 Elle se retourne, ses yeux verts brillants de larmes contenues.
 
-— Tu crois que je n'ai pas peur, moi aussi ? Mais j'ai besoin de savoir que tu me fais confiance pour gerer ma propre vie, meme dans le danger. Sinon, ce que nous construisons ensemble n'est qu'une prison plus confortable que celle avec laquelle tout ceci a commence.
+— Tu crois que je n'ai pas peur, moi aussi ? Mais j'ai besoin de savoir que tu me fais confiance pour gérer ma propre vie, même dans le danger. Sinon, ce que nous construisons ensemble n'est qu'une prison plus confortable que celle avec laquelle tout ceci a commencé.
 
-Les mots me frappent avec la precision d'une lame bien aiguisee.
+Les mots me frappent avec la précision d'une lame bien aiguisée.
 
-— Alors dis-moi ce que tu veux que je fasse, dis-je, ma voix se brisant legerement sous le poids de ma propre vulnerabilite. Parce que je ne sais vraiment pas comment t'aimer sans te perdre a cause de ma peur ou sans te perdre a cause de mon incapacite a te controler suffisamment pour te garder en securite.
+— Alors dis-moi ce que tu veux que je fasse, dis-je, ma voix se brisant légèrement sous le poids de ma propre vulnérabilité. Parce que je ne sais vraiment pas comment t'aimer sans te perdre à cause de ma peur ou sans te perdre à cause de mon incapacité à te contrôler suffisamment pour te garder en sécurité.
 
-Elle s'approche, posant ses mains sur mon torse, son regard cherchant le mien avec une intensite qui desarme completement mes defenses habituelles.
+Elle s'approche, posant ses mains sur mon torse, son regard cherchant le mien avec une intensité qui désarme complètement mes défenses habituelles.
 
-— Inclus-moi, dit-elle doucement. Dis-moi ce que tu sais. Laisse-moi decider avec toi des mesures a prendre, au lieu de decider seul et de me presenter le resultat comme un fait accompli. C'est tout ce que je demande.
+— Inclus-moi, dit-elle doucement. Dis-moi ce que tu sais. Laisse-moi décider avec toi des mesures à prendre, au lieu de décider seul et de me présenter le résultat comme un fait accompli. C'est tout ce que je demande.
 
-— Et si je pense qu'une decision te met en danger ?
+— Et si je pense qu'une décision te met en danger ?
 
-— Alors on en discute. Comme des adultes qui s'aiment et se respectent mutuellement, pas comme un geolier et sa prisonniere.
+— Alors on en discute. Comme des adultes qui s'aiment et se respectent mutuellement, pas comme un geôlier et sa prisonnière.
 
-Le mot "geolier" resonne douloureusement, me rappelant nos tout premiers jours ensemble, cette dynamique de pouvoir que j'ai imposee sans y reflechir et que nous avons tous les deux essaye de transcender depuis.
+Le mot "geôlier" résonne douloureusement, me rappelant nos tout premiers jours ensemble, cette dynamique de pouvoir que j'ai imposée sans y réfléchir et que nous avons tous les deux essaye de transcender depuis.
 
-— D'accord, dis-je enfin. A partir de maintenant, on decide ensemble. Meme si chaque instinct en moi hurle le contraire.
+— D'accord, dis-je enfin. À partir de maintenant, on décide ensemble. Même si chaque instinct en moi hurle le contraire.
 
-— Surtout quand chaque instinct en toi hurle le contraire. C'est exactement dans ces moments-la que ma voix doit compter le plus.
+— Surtout quand chaque instinct en toi hurle le contraire. C'est exactement dans ces moments-là que ma voix doit compter le plus.
 
-Je l'embrasse, doucement d'abord, puis avec plus d'intensite a mesure que le soulagement de cette reconciliation fragile se transforme en quelque chose de plus urgent.
+Je l'embrasse, doucement d'abord, puis avec plus d'intensité à mesure que le soulagement de cette réconciliation fragile se transforme en quelque chose de plus urgent.
 
-Mais meme dans ses bras, une partie de moi reste en alerte, calculant chaque scenario possible, chaque menace potentielle que Salvatore Greco pourrait deployer contre la femme que j'aime plus que ma propre vie.
+Mais même dans ses bras, une partie de moi reste en alerte, calculant chaque scénario possible, chaque menace potentielle que Salvatore Greco pourrait déployer contre la femme que j'aime plus que ma propre vie.
 
-Je ne sais pas encore que, malgre toutes mes precautions, le danger va nous atteindre plus vite et plus violemment que je ne l'avais anticipe.
+Je ne sais pas encore que, malgré toutes mes précautions, le danger va nous atteindre plus vite et plus violemment que je ne l'avais anticipé.
 
-Et que cette fois, aucun controle, aussi absolu soit-il, n'aurait pu totalement l'empecher.
+Et que cette fois, aucun contrôle, aussi absolu soit-il, n'aurait pu totalement l'empêcher.
