@@ -1,0 +1,808 @@
+<title>Les Ombres de Marseille</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,500&family=Jost:wght@400;500;600&display=swap">
+<style>
+  /* Palette assumee : noir unique (roman noir / dark romance) — pas de bascule clair/sombre,
+     choix esthetique deliberatif, peint explicitement pour tenir sur tout fond hote. */
+  :root {
+    --ink: #0A0C10;
+    --ink-2: #12151C;
+    --ink-3: #1A1E27;
+    --paper: #EAE3D6;
+    --paper-dim: #9C9585;
+    --wine: #8A1F3B;
+    --wine-bright: #B23150;
+    --gold: #C6A15B;
+    --fog: #445466;
+    --line: #2A2E37;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Jost', 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 5rem;
+  }
+
+  /* Intro */
+  .intro {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .intro-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .intro h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    letter-spacing: 0.03em;
+    color: var(--paper);
+    margin: 0 0 1rem;
+    text-wrap: balance;
+  }
+  .intro p {
+    font-size: 0.92rem;
+    color: var(--paper-dim);
+    max-width: 46ch;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  /* Plates grid */
+  .plates {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.5rem;
+  }
+
+  .plate {
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .plate-frame {
+    position: relative;
+    border: 1px solid var(--gold);
+    outline: 1px solid var(--ink-3);
+    outline-offset: -6px;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 5 / 8;
+    overflow: hidden;
+  }
+
+  .scene {
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+  }
+  .scene svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .plate-text {
+    flex: 0 0 auto;
+    padding: 1.1rem 1.4rem 1.4rem;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--ink-2), var(--ink));
+  }
+  .eyebrow {
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+  .chapter-num {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 1.7rem;
+    color: var(--paper-dim);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+  }
+  .chapter-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--paper);
+    margin: 0 0 0.6rem;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+  .epigraph {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.02rem;
+    color: var(--paper-dim);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Ambient glow pulse — restrained, respects reduced motion */
+  .glow {
+    animation: glowPulse 6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.95; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glow { animation: none; opacity: 0.75; }
+  }
+
+  .footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--paper-dim);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 480px) {
+    .page { padding: 2.5rem 1rem 3.5rem; }
+    .plate { max-width: 340px; }
+  }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <div class="intro-eyebrow">Plaques d'ouverture — Sous ton Emprise</div>
+    <h1>Les Ombres de Marseille</h1>
+    <p>Dix-sept scenes gravees pour ouvrir les dix-sept premiers chapitres du roman. A capturer et inserer en tete de chapitre dans le manuscrit final.</p>
+  </header>
+
+  <!-- Shared SVG resources -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="rain" width="16" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(11)">
+        <line x1="2" y1="0" x2="2" y2="17" stroke="#9C9585" stroke-width="1.1" opacity="0.3"/>
+      </pattern>
+      <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise"/>
+        <feColorMatrix in="noise" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.4 0"/>
+      </filter>
+      <linearGradient id="skyNight" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0A0C10"/>
+        <stop offset="100%" stop-color="#1A1E27"/>
+      </linearGradient>
+      <linearGradient id="skyDusk" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0A0C10"/>
+        <stop offset="65%" stop-color="#1A1E27"/>
+        <stop offset="100%" stop-color="#2E3A46"/>
+      </linearGradient>
+      <radialGradient id="warmGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#C6A15B" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="#C6A15B" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <div class="plates">
+
+    <!-- PLATE 1 — Chapitre 1 — Camille — Cimetiere sous la pluie -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Silhouette d'une femme sous un parapluie parmi des pierres tombales, sous une pluie battante.">
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect width="600" height="460" fill="url(#rain)"/>
+            <rect x="0" y="350" width="600" height="110" fill="#12151C"/>
+            <!-- distant headstones -->
+            <rect x="70" y="380" width="34" height="70" rx="10" fill="#445466" opacity="0.45"/>
+            <rect x="130" y="395" width="28" height="55" rx="9" fill="#445466" opacity="0.4"/>
+            <rect x="440" y="390" width="30" height="60" rx="9" fill="#445466" opacity="0.4"/>
+            <rect x="500" y="375" width="34" height="75" rx="10" fill="#445466" opacity="0.45"/>
+            <!-- foreground tombstone -->
+            <rect x="228" y="330" width="76" height="120" rx="16" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <!-- umbrella + figure -->
+            <path d="M 340 210 Q 388 165 436 210" fill="none" stroke="#C6A15B" stroke-width="3"/>
+            <line x1="388" y1="210" x2="388" y2="285" stroke="#9C9585" stroke-width="2"/>
+            <path d="M 372 285 Q 388 297 404 285" fill="none" stroke="#9C9585" stroke-width="2"/>
+            <path d="M 368 230 L 408 230 L 398 300 L 378 300 Z" fill="#8A1F3B" opacity="0.88"/>
+            <circle cx="388" cy="218" r="10" fill="#8A1F3B"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Un — Camille</div>
+          <div class="chapter-num">I</div>
+          <h2 class="chapter-title">Un inconnu dans la terre</h2>
+          <p class="epigraph">« La pluie n'a pas la decence de s'arreter. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 2 — Chapitre 2 — Dante — Le port et l'empire -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Vue du port de Marseille de nuit avec des grues portuaires et une tour de bureaux dont une seule fenetre est allumee.">
+            <rect width="600" height="460" fill="url(#skyDusk)"/>
+            <!-- skyline -->
+            <polygon points="0,300 60,300 60,270 110,270 110,290 190,290 190,255 260,255 260,300 340,300 340,240 360,240 360,225 380,240 380,300 460,300 460,280 540,280 540,300 600,300 600,460 0,460" fill="#12151C"/>
+            <circle cx="368" cy="215" r="3" fill="#C6A15B" opacity="0.6"/>
+            <!-- water -->
+            <rect x="0" y="300" width="600" height="160" fill="#1A1E27"/>
+            <line x1="130" y1="330" x2="190" y2="330" stroke="#9C9585" stroke-width="1" opacity="0.25"/>
+            <line x1="300" y1="345" x2="380" y2="345" stroke="#9C9585" stroke-width="1" opacity="0.2"/>
+            <line x1="150" y1="365" x2="230" y2="365" stroke="#C6A15B" stroke-width="1" opacity="0.2"/>
+            <!-- containers -->
+            <g opacity="0.8">
+              <rect x="40" y="278" width="34" height="20" fill="#8A1F3B" opacity="0.5"/>
+              <rect x="76" y="278" width="34" height="20" fill="#445466" opacity="0.55"/>
+              <rect x="40" y="256" width="34" height="20" fill="#445466" opacity="0.5"/>
+              <rect x="460" y="278" width="34" height="20" fill="#8A1F3B" opacity="0.5"/>
+              <rect x="496" y="278" width="34" height="20" fill="#445466" opacity="0.55"/>
+            </g>
+            <!-- crane 1 -->
+            <line x1="150" y1="300" x2="150" y2="95" stroke="#C6A15B" stroke-width="2.5"/>
+            <line x1="150" y1="105" x2="235" y2="105" stroke="#C6A15B" stroke-width="2.5"/>
+            <line x1="150" y1="105" x2="115" y2="120" stroke="#C6A15B" stroke-width="1.5"/>
+            <line x1="150" y1="150" x2="200" y2="120" stroke="#C6A15B" stroke-width="1.5"/>
+            <rect x="112" y="112" width="16" height="14" fill="#C6A15B" opacity="0.7"/>
+            <!-- crane 2 -->
+            <line x1="440" y1="300" x2="440" y2="130" stroke="#C6A15B" stroke-width="2.5"/>
+            <line x1="440" y1="140" x2="510" y2="140" stroke="#C6A15B" stroke-width="2.5"/>
+            <line x1="440" y1="175" x2="480" y2="150" stroke="#C6A15B" stroke-width="1.5"/>
+            <!-- office tower with lit window -->
+            <rect x="470" y="140" width="60" height="140" fill="#1A1E27" stroke="#2A2E37" stroke-width="1"/>
+            <g opacity="0.35">
+              <rect x="478" y="152" width="10" height="10" fill="#9C9585"/>
+              <rect x="496" y="152" width="10" height="10" fill="#9C9585"/>
+              <rect x="514" y="152" width="10" height="10" fill="#9C9585"/>
+              <rect x="478" y="170" width="10" height="10" fill="#9C9585"/>
+              <rect x="514" y="170" width="10" height="10" fill="#9C9585"/>
+              <rect x="478" y="188" width="10" height="10" fill="#9C9585"/>
+              <rect x="496" y="188" width="10" height="10" fill="#9C9585"/>
+            </g>
+            <rect class="glow" x="496" y="170" width="10" height="10" fill="#C6A15B"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Deux — Dante</div>
+          <div class="chapter-num">II</div>
+          <h2 class="chapter-title">Le sang et les comptes</h2>
+          <p class="epigraph">« Elle a raccroche. Personne ne me raccroche au nez. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 3 — Chapitre 3 — Camille — La confrontation -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Deux silhouettes se faisant face de part et d'autre d'une voiture garee dans une rue sous la pluie." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <!-- facade row -->
+            <rect x="0" y="60" width="600" height="170" fill="#12151C"/>
+            <g opacity="0.5">
+              <rect x="40" y="90" width="26" height="34" fill="#9C9585" opacity="0.2"/>
+              <rect x="100" y="90" width="26" height="34" fill="#C6A15B" opacity="0.45"/>
+              <rect x="470" y="90" width="26" height="34" fill="#9C9585" opacity="0.2"/>
+              <rect x="530" y="90" width="26" height="34" fill="#C6A15B" opacity="0.4"/>
+            </g>
+            <rect width="600" height="460" fill="url(#rain)" opacity="0.7"/>
+            <!-- ground -->
+            <rect x="0" y="330" width="600" height="130" fill="#1A1E27"/>
+            <line x1="0" y1="330" x2="600" y2="330" stroke="#2A2E37" stroke-width="1"/>
+            <!-- wind lines -->
+            <path d="M 60 140 Q 140 130 210 150" stroke="#9C9585" stroke-width="1" fill="none" opacity="0.25"/>
+            <path d="M 380 120 Q 460 108 540 130" stroke="#9C9585" stroke-width="1" fill="none" opacity="0.22"/>
+            <!-- car -->
+            <path d="M 236 300 Q 300 268 364 300" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <rect x="218" y="298" width="164" height="46" rx="18" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <circle cx="252" cy="345" r="17" fill="#0A0C10" stroke="#C6A15B" stroke-width="1.5"/>
+            <circle cx="348" cy="345" r="17" fill="#0A0C10" stroke="#C6A15B" stroke-width="1.5"/>
+            <!-- Camille, left -->
+            <path d="M 108 380 L 140 380 L 148 440 L 100 440 Z" fill="#8A1F3B" opacity="0.85"/>
+            <circle cx="124" cy="368" r="10" fill="#8A1F3B" opacity="0.85"/>
+            <!-- Dante, right -->
+            <path d="M 470 355 L 508 355 L 518 440 L 460 440 Z" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <circle cx="489" cy="341" r="11" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Trois — Camille</div>
+          <div class="chapter-num">III</div>
+          <h2 class="chapter-title">Le diable a la porte</h2>
+          <p class="epigraph">« Vous avez douze minutes d'avance. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 4 — Chapitre 4 — Dante — Quarante-huit heures -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Une tour de bureaux vue en contre-plongee, superposee d'un grand cadran d'horloge, symbole du compte a rebours." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <!-- tower, perspective trapezoid -->
+            <polygon points="200,460 400,460 385,50 215,50" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <!-- window grid -->
+            <g>
+              <rect x="230" y="90" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="260" y="90" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="290" y="90" width="16" height="20" fill="#C6A15B" opacity="0.5"/>
+              <rect x="320" y="90" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="350" y="90" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="228" y="140" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="258" y="140" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="288" y="140" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="318" y="140" width="16" height="20" fill="#C6A15B" opacity="0.45"/>
+              <rect x="348" y="140" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="225" y="195" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="255" y="195" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="285" y="195" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="315" y="195" width="16" height="20" fill="#9C9585" opacity="0.18"/>
+              <rect x="345" y="195" width="16" height="20" fill="#C6A15B" opacity="0.4"/>
+            </g>
+            <!-- dial overlay -->
+            <circle cx="300" cy="250" r="150" fill="none" stroke="#C6A15B" stroke-width="1.4" opacity="0.55"/>
+            <g stroke="#C6A15B" stroke-width="1.2" opacity="0.4">
+              <line x1="300" y1="100" x2="300" y2="115"/>
+              <line x1="300" y1="385" x2="300" y2="400"/>
+              <line x1="150" y1="250" x2="165" y2="250"/>
+              <line x1="435" y1="250" x2="450" y2="250"/>
+              <line x1="406" y1="144" x2="396" y2="154"/>
+              <line x1="194" y1="356" x2="204" y2="346"/>
+              <line x1="194" y1="144" x2="204" y2="154"/>
+              <line x1="406" y1="356" x2="396" y2="346"/>
+            </g>
+            <line x1="300" y1="250" x2="300" y2="160" stroke="#C6A15B" stroke-width="2.2"/>
+            <line x1="300" y1="250" x2="220" y2="250" stroke="#C6A15B" stroke-width="1.6"/>
+            <circle class="glow" cx="300" cy="250" r="4" fill="#C6A15B"/>
+            <!-- city lights base -->
+            <g fill="#C6A15B" opacity="0.5">
+              <circle cx="60" cy="440" r="2"/>
+              <circle cx="90" cy="448" r="1.6"/>
+              <circle cx="130" cy="435" r="2.2"/>
+              <circle cx="470" cy="442" r="2"/>
+              <circle cx="510" cy="435" r="1.8"/>
+              <circle cx="550" cy="446" r="2.4"/>
+            </g>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Quatre — Dante</div>
+          <div class="chapter-num">IV</div>
+          <h2 class="chapter-title">Quarante-huit heures</h2>
+          <p class="epigraph">« La patience est un outil, et je sais l'utiliser. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 5 — Chapitre 5 — Camille — Le papillon et la flamme -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Une robe suspendue face a un miroir, avec un papillon de nuit attire par la flamme d'une bougie." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <radialGradient id="candleGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#C6A15B" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#C6A15B" stop-opacity="0"/>
+            </radialGradient>
+            <circle class="glow" cx="478" cy="360" r="80" fill="url(#candleGlow)"/>
+            <!-- mirror -->
+            <rect x="90" y="60" width="150" height="330" rx="60" fill="#1A1E27" opacity="0.4" stroke="#C6A15B" stroke-width="2"/>
+            <rect x="105" y="80" width="120" height="290" rx="50" fill="#0A0C10" opacity="0.5"/>
+            <!-- hanger + dress -->
+            <line x1="430" y1="85" x2="470" y2="85" stroke="#9C9585" stroke-width="2"/>
+            <path d="M 450 85 L 450 70 Q 450 60 460 65" fill="none" stroke="#9C9585" stroke-width="2"/>
+            <path d="M 432 92 L 468 92 L 490 250 L 410 250 Z" fill="#8A1F3B" opacity="0.85"/>
+            <!-- candle -->
+            <rect x="470" y="380" width="16" height="55" fill="#9C9585"/>
+            <path d="M 478 350 Q 470 368 478 380 Q 486 368 478 350 Z" fill="#C6A15B"/>
+            <path d="M 478 358 Q 474 368 478 375 Q 482 368 478 358 Z" fill="#EAE3D6"/>
+            <!-- moth -->
+            <ellipse cx="440" cy="320" rx="14" ry="8" fill="#12151C" opacity="0.8" transform="rotate(-20 440 320)"/>
+            <ellipse cx="452" cy="325" rx="14" ry="8" fill="#12151C" opacity="0.7" transform="rotate(20 452 325)"/>
+            <line x1="446" y1="322" x2="446" y2="330" stroke="#9C9585" stroke-width="2"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Cinq — Camille</div>
+          <div class="chapter-num">V</div>
+          <h2 class="chapter-title">L'avocate du diable</h2>
+          <p class="epigraph">« Deux jours. Dans deux jours, je rentre dans la cage. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 6 — Chapitre 6 — Camille — La signature -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Un stylo signant un contrat sur un bureau sombre, un badge relie par un ruban pose a cote, devant une fenetre donnant sur le port de nuit.">
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <polygon points="0,180 80,180 80,150 160,150 160,175 240,175 240,140 320,140 320,180 600,180 600,300 0,300" fill="#12151C" opacity="0.9"/>
+            <rect x="0" y="300" width="600" height="160" fill="#1A1E27"/>
+            <rect x="90" y="250" width="420" height="150" rx="6" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <rect x="130" y="280" width="260" height="8" fill="#9C9585" opacity="0.3"/>
+            <rect x="130" y="300" width="220" height="8" fill="#9C9585" opacity="0.25"/>
+            <rect x="130" y="320" width="240" height="8" fill="#9C9585" opacity="0.2"/>
+            <circle cx="150" cy="352" r="14" fill="none" stroke="#8A1F3B" stroke-width="1.5" opacity="0.8"/>
+            <line x1="200" y1="290" x2="330" y2="345" stroke="#C6A15B" stroke-width="3"/>
+            <polygon points="330,345 342,338 338,352" fill="#C6A15B"/>
+            <rect x="410" y="230" width="60" height="40" rx="4" fill="#1A1E27" stroke="#C6A15B" stroke-width="1.5"/>
+            <line x1="440" y1="230" x2="440" y2="200" stroke="#9C9585" stroke-width="1.5"/>
+            <circle class="glow" cx="440" cy="250" r="6" fill="#C6A15B" opacity="0.7"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Six — Camille</div>
+          <div class="chapter-num">VI</div>
+          <h2 class="chapter-title">La signature</h2>
+          <p class="epigraph">« Le stylo est plus lourd qu'il n'y parait. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 7 — Chapitre 7 — Dante — Le fantome dans le dossier -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Un dossier ouvert sur un bureau avec une photographie ancienne a demi eclairee et une loupe posee dessus." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect x="0" y="330" width="600" height="130" fill="#1A1E27"/>
+            <polygon points="150,300 450,300 470,330 130,330" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <rect x="200" y="220" width="120" height="150" rx="4" fill="#EAE3D6" opacity="0.12" stroke="#9C9585" stroke-width="1"/>
+            <circle cx="260" cy="270" r="22" fill="#445466" opacity="0.5"/>
+            <line x1="230" y1="320" x2="290" y2="320" stroke="#9C9585" stroke-width="1.5" opacity="0.4"/>
+            <line x1="230" y1="335" x2="280" y2="335" stroke="#9C9585" stroke-width="1.5" opacity="0.3"/>
+            <circle cx="380" cy="300" r="34" fill="none" stroke="#C6A15B" stroke-width="2.5" opacity="0.8"/>
+            <line x1="404" y1="324" x2="430" y2="350" stroke="#C6A15B" stroke-width="3" stroke-linecap="round"/>
+            <rect class="glow" x="360" y="280" width="40" height="40" fill="url(#warmGlow)"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Sept — Dante</div>
+          <div class="chapter-num">VII</div>
+          <h2 class="chapter-title">Le fantome dans le dossier</h2>
+          <p class="epigraph">« Un homme meurt, et avec lui, quinze ans de reponses. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 8 — Chapitre 8 — Camille — Les autres loups -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Quatre silhouettes de tetes autour d'une table ronde vue de dessus, sous un unique halo de lumiere." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <ellipse cx="300" cy="280" rx="200" ry="90" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <circle class="glow" cx="300" cy="280" r="140" fill="url(#warmGlow)" opacity="0.5"/>
+            <circle cx="300" cy="210" r="22" fill="#9C9585" opacity="0.7"/>
+            <circle cx="440" cy="280" r="20" fill="#445466" opacity="0.75"/>
+            <circle cx="160" cy="280" r="20" fill="#8A1F3B" opacity="0.7"/>
+            <circle cx="300" cy="350" r="21" fill="#C6A15B" opacity="0.55"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Huit — Camille</div>
+          <div class="chapter-num">VIII</div>
+          <h2 class="chapter-title">Les autres loups</h2>
+          <p class="epigraph">« La deuxieme semaine m'apprend le veritable visage de l'empire Marchetti. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 9 — Chapitre 9 — Dante — Le predateur au travail -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Un echiquier eclaire par l'ecran d'un telephone, devant une fenetre de bureau donnant sur la ville de nuit." >
+            <rect width="600" height="460" fill="url(#skyDusk)"/>
+            <rect x="0" y="60" width="600" height="220" fill="#12151C" opacity="0.6"/>
+            <g stroke="#2A2E37" stroke-width="1">
+              <line x1="180" y1="300" x2="420" y2="300"/>
+              <line x1="180" y1="340" x2="420" y2="340"/>
+              <line x1="180" y1="380" x2="420" y2="380"/>
+              <line x1="220" y1="280" x2="220" y2="400"/>
+              <line x1="260" y1="280" x2="260" y2="400"/>
+              <line x1="300" y1="280" x2="300" y2="400"/>
+              <line x1="340" y1="280" x2="340" y2="400"/>
+              <line x1="380" y1="280" x2="380" y2="400"/>
+            </g>
+            <rect x="180" y="280" width="240" height="120" fill="none" stroke="#C6A15B" stroke-width="1.5" opacity="0.6"/>
+            <polygon points="240,380 250,340 260,380" fill="#9C9585" opacity="0.7"/>
+            <polygon points="360,380 370,335 372,335 382,380" fill="#8A1F3B" opacity="0.8"/>
+            <circle cx="370" cy="328" r="6" fill="#8A1F3B" opacity="0.8"/>
+            <rect x="440" y="330" width="30" height="50" rx="4" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <rect class="glow" x="444" y="335" width="22" height="30" fill="#C6A15B" opacity="0.65"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Neuf — Dante</div>
+          <div class="chapter-num">IX</div>
+          <h2 class="chapter-title">Le predateur au travail</h2>
+          <p class="epigraph">« Elle gere l'appel avec Duval mieux que ne l'aurait fait la plupart de mes cadres. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 10 — Chapitre 10 — Camille — Les barreaux de la cage -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Deux silhouettes proches l'une de l'autre, prises dans les ombres verticales projetees par un store, comme des barreaux." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect x="0" y="80" width="600" height="300" fill="#1A1E27"/>
+            <g opacity="0.55">
+              <rect x="0" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="54" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="108" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="162" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="216" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="270" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="324" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="378" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="432" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="486" y="80" width="18" height="300" fill="#0A0C10"/>
+              <rect x="540" y="80" width="18" height="300" fill="#0A0C10"/>
+            </g>
+            <path d="M 262 260 L 292 260 L 300 380 L 254 380 Z" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <circle cx="277" cy="246" r="11" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <path d="M 304 268 L 332 268 L 340 380 L 296 380 Z" fill="#8A1F3B" opacity="0.85"/>
+            <circle cx="318" cy="255" r="10" fill="#8A1F3B" opacity="0.85"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Dix — Camille</div>
+          <div class="chapter-num">X</div>
+          <h2 class="chapter-title">Les barreaux de la cage</h2>
+          <p class="epigraph">« Si je suis dans votre cage, au moins dites-moi a quoi ressemblent les barreaux. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 11 — Chapitre 11 — Dante — Ce que les hommes deviennent -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Un entrepot avec des conteneurs empiles, un pistolet tombe au sol sous une seule ampoule suspendue." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect x="0" y="120" width="600" height="340" fill="#12151C"/>
+            <g opacity="0.75">
+              <rect x="30" y="150" width="90" height="60" fill="#445466" opacity="0.5"/>
+              <rect x="130" y="150" width="90" height="60" fill="#1A1E27"/>
+              <rect x="30" y="216" width="90" height="60" fill="#1A1E27"/>
+              <rect x="480" y="150" width="90" height="60" fill="#445466" opacity="0.5"/>
+              <rect x="480" y="216" width="90" height="60" fill="#1A1E27"/>
+            </g>
+            <line x1="300" y1="60" x2="300" y2="150" stroke="#9C9585" stroke-width="1.5"/>
+            <circle class="glow" cx="300" cy="165" r="70" fill="url(#warmGlow)"/>
+            <circle cx="300" cy="160" r="10" fill="#EAE3D6" opacity="0.85"/>
+            <rect x="330" y="400" width="46" height="14" rx="4" fill="#1A1E27" stroke="#C6A15B" stroke-width="1"/>
+            <rect x="368" y="404" width="18" height="6" fill="#C6A15B" opacity="0.7"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.06" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Onze — Dante</div>
+          <div class="chapter-num">XI</div>
+          <h2 class="chapter-title">Ce que les hommes deviennent</h2>
+          <p class="epigraph">« Vous auriez pu le tuer. — J'aurais pu. Je ne l'ai pas fait. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 12 — Chapitre 12 — Camille — Minuit et les aveux -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Deux verres de vin sur une table basse devant un canape, avec la ville qui scintille a travers une baie vitree." >
+            <rect width="600" height="460" fill="url(#skyDusk)"/>
+            <rect x="0" y="260" width="600" height="200" fill="#12151C"/>
+            <g fill="#C6A15B" opacity="0.4">
+              <circle cx="60" cy="140" r="2"/>
+              <circle cx="120" cy="180" r="1.6"/>
+              <circle cx="500" cy="150" r="2.2"/>
+              <circle cx="540" cy="190" r="1.8"/>
+            </g>
+            <rect x="120" y="330" width="360" height="60" rx="10" fill="#1A1E27" stroke="#2A2E37" stroke-width="1"/>
+            <path d="M 250 300 L 262 300 L 258 330 L 254 330 Z" fill="none" stroke="#8A1F3B" stroke-width="2"/>
+            <ellipse cx="256" cy="298" rx="9" ry="6" fill="#8A1F3B" opacity="0.7"/>
+            <path d="M 340 300 L 352 300 L 348 330 L 344 330 Z" fill="none" stroke="#8A1F3B" stroke-width="2"/>
+            <ellipse cx="346" cy="298" rx="9" ry="6" fill="#8A1F3B" opacity="0.7"/>
+            <circle class="glow" cx="300" cy="360" r="90" fill="url(#warmGlow)" opacity="0.4"/>
+            <path d="M 220 250 L 250 250 L 256 300 L 214 300 Z" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <circle cx="235" cy="238" r="10" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <path d="M 358 256 L 384 256 L 390 300 L 352 300 Z" fill="#8A1F3B" opacity="0.85"/>
+            <circle cx="371" cy="244" r="9" fill="#8A1F3B" opacity="0.85"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Douze — Camille</div>
+          <div class="chapter-num">XII</div>
+          <h2 class="chapter-title">Minuit et les aveux</h2>
+          <p class="epigraph">« Des choses que je ne suis pas encore pret a admettre. Surtout a moi-meme. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 13 — Chapitre 13 — Dante — Le bal des couteaux -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Un lustre de bal au plafond, deux silhouettes en robe se faisant face sur une piste de danse, l'une en rouge, l'autre en noir." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <circle cx="300" cy="70" r="6" fill="#C6A15B"/>
+            <g stroke="#C6A15B" stroke-width="1" opacity="0.6">
+              <line x1="300" y1="70" x2="230" y2="110"/>
+              <line x1="300" y1="70" x2="370" y2="110"/>
+              <line x1="300" y1="70" x2="260" y2="120"/>
+              <line x1="300" y1="70" x2="340" y2="120"/>
+              <line x1="300" y1="70" x2="300" y2="125"/>
+            </g>
+            <g fill="#C6A15B" opacity="0.7">
+              <circle cx="230" cy="112" r="3"/>
+              <circle cx="370" cy="112" r="3"/>
+              <circle cx="260" cy="122" r="3"/>
+              <circle cx="340" cy="122" r="3"/>
+              <circle cx="300" cy="127" r="3"/>
+            </g>
+            <rect x="0" y="360" width="600" height="100" fill="#1A1E27"/>
+            <line x1="0" y1="360" x2="600" y2="360" stroke="#2A2E37" stroke-width="1"/>
+            <path d="M 230 300 L 260 300 L 276 400 L 214 400 Z" fill="#8A1F3B" opacity="0.9"/>
+            <circle cx="245" cy="286" r="12" fill="#8A1F3B" opacity="0.9"/>
+            <path d="M 340 300 L 370 300 L 388 400 L 322 400 Z" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <circle cx="355" cy="286" r="12" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Treize — Dante</div>
+          <div class="chapter-num">XIII</div>
+          <h2 class="chapter-title">Le bal des couteaux</h2>
+          <p class="epigraph">« Camille n'est pas un jouet, et tu n'as aucun droit de lui parler ainsi. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 14 — Chapitre 14 — Camille — La rupture -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="L'interieur d'une voiture arretee a un feu rouge sous la pluie, deux tetes rapprochees derriere le pare-brise." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect width="600" height="460" fill="url(#rain)" opacity="0.6"/>
+            <rect x="60" y="120" width="480" height="240" rx="24" fill="#12151C" stroke="#2A2E37" stroke-width="1.5"/>
+            <rect x="90" y="150" width="420" height="140" rx="10" fill="#1A1E27" opacity="0.7"/>
+            <circle cx="480" cy="230" r="16" fill="#8A1F3B" opacity="0.9"/>
+            <circle class="glow" cx="480" cy="230" r="34" fill="#8A1F3B" opacity="0.3"/>
+            <circle cx="480" cy="230" r="4" fill="#EAE3D6" opacity="0.6"/>
+            <circle cx="270" cy="210" r="13" fill="#8A1F3B" opacity="0.85"/>
+            <circle cx="296" cy="216" r="13" fill="#12151C" stroke="#C6A15B" stroke-width="1"/>
+            <path d="M 60 380 Q 300 340 540 380" fill="none" stroke="#2A2E37" stroke-width="2"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Quatorze — Camille</div>
+          <div class="chapter-num">XIV</div>
+          <h2 class="chapter-title">La rupture</h2>
+          <p class="epigraph">« Si je vous touche maintenant, je ne serai plus capable de m'arreter. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 15 — Chapitre 15 — Dante — La distance necessaire -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Un bureau vide face a un fauteuil, un dossier ferme entre les deux, sous une fenetre battue par la pluie." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect width="600" height="460" fill="url(#rain)" opacity="0.5"/>
+            <rect x="0" y="300" width="600" height="160" fill="#1A1E27"/>
+            <rect x="150" y="280" width="300" height="30" rx="4" fill="#12151C" stroke="#2A2E37" stroke-width="1"/>
+            <rect x="270" y="255" width="60" height="30" rx="3" fill="#8A1F3B" opacity="0.6"/>
+            <path d="M 230 460 L 250 340 L 340 340 L 360 460 Z" fill="#12151C" stroke="#2A2E37" stroke-width="1" opacity="0.9"/>
+            <path d="M 480 460 L 470 380 Q 500 365 530 380 L 520 460 Z" fill="#1A1E27" stroke="#2A2E37" stroke-width="1"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.06" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Quinze — Dante</div>
+          <div class="chapter-num">XV</div>
+          <h2 class="chapter-title">La distance necessaire</h2>
+          <p class="epigraph">« Je fais ca parce que j'ai peur. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 16 — Chapitre 16 — Camille — Ce qu'elle a trouve -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Une boite ouverte d'ou s'echappent de vieilles photographies et une coupure de journal, eclairee par une lampe de bureau." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect x="0" y="340" width="600" height="120" fill="#1A1E27"/>
+            <path d="M 220 300 L 380 300 L 390 380 L 210 380 Z" fill="#12151C" stroke="#C6A15B" stroke-width="1.2"/>
+            <rect x="190" y="270" width="70" height="90" fill="#EAE3D6" opacity="0.14" stroke="#9C9585" stroke-width="1" transform="rotate(-8 225 315)"/>
+            <rect x="340" y="265" width="70" height="90" fill="#EAE3D6" opacity="0.1" stroke="#9C9585" stroke-width="1" transform="rotate(6 375 310)"/>
+            <rect x="260" y="250" width="90" height="60" fill="#EAE3D6" opacity="0.1" stroke="#9C9585" stroke-width="1" transform="rotate(-3 305 280)"/>
+            <line x1="450" y1="120" x2="450" y2="220" stroke="#9C9585" stroke-width="3"/>
+            <path d="M 420 100 Q 450 90 480 100 L 480 130 Q 450 118 420 130 Z" fill="#12151C" stroke="#C6A15B" stroke-width="1.5"/>
+            <circle class="glow" cx="450" cy="115" r="60" fill="url(#warmGlow)"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Seize — Camille</div>
+          <div class="chapter-num">XVI</div>
+          <h2 class="chapter-title">Ce qu'elle a trouve</h2>
+          <p class="epigraph">« Ce n'etait pas un accident. J'aurais du parler. Je n'ai pas parle. »</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- PLATE 17 — Chapitre 17 — Dante — Se rendre -->
+    <article class="plate">
+      <div class="plate-frame">
+        <div class="scene">
+          <svg viewBox="0 0 600 460" role="img" aria-label="Deux silhouettes enlacees pres d'une fenetre eclairee par les lumieres de la ville, des vetements abandonnes au sol." >
+            <rect width="600" height="460" fill="url(#skyNight)"/>
+            <rect x="0" y="0" width="600" height="260" fill="#1A1E27" opacity="0.5"/>
+            <g fill="#C6A15B" opacity="0.35">
+              <circle cx="80" cy="90" r="2"/>
+              <circle cx="140" cy="60" r="1.6"/>
+              <circle cx="500" cy="80" r="2.2"/>
+              <circle cx="540" cy="120" r="1.8"/>
+              <circle cx="60" cy="150" r="1.4"/>
+            </g>
+            <circle class="glow" cx="300" cy="220" r="170" fill="url(#warmGlow)" opacity="0.55"/>
+            <path d="M 255 160 Q 230 220 260 300 Q 280 340 320 340 Q 350 300 340 240 Q 330 180 300 160 Q 278 148 255 160 Z" fill="#12151C" opacity="0.88"/>
+            <circle cx="285" cy="150" r="13" fill="#12151C" opacity="0.9"/>
+            <path d="M 330 175 Q 355 210 345 270 Q 338 310 310 330" fill="none" stroke="#8A1F3B" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
+            <rect x="140" y="380" width="90" height="16" rx="6" fill="#1A1E27" stroke="#2A2E37" stroke-width="1" transform="rotate(-9 185 388)"/>
+            <rect x="390" y="390" width="70" height="14" rx="6" fill="#8A1F3B" opacity="0.6" transform="rotate(7 425 397)"/>
+            <rect width="600" height="460" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:overlay"/>
+          </svg>
+        </div>
+        <div class="plate-text">
+          <div class="eyebrow">Chapitre Dix-sept — Dante</div>
+          <div class="chapter-num">XVII</div>
+          <h2 class="chapter-title">Se rendre</h2>
+          <p class="epigraph">« Pour la premiere fois depuis quinze ans, je choisis de rester. »</p>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="footer">Sous ton Emprise — Les Ombres de Marseille, Tome 1</div>
+</div>

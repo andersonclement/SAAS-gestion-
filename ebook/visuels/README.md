@@ -4,7 +4,7 @@ Plaques d'ouverture illustrees pour le roman "Sous ton Emprise".
 
 ## Fichiers
 
-- `plaques-chapitres-01-05.html` — Page autonome (HTML/CSS/SVG, aucune dependance externe hors Google Fonts) contenant les 5 plaques d'ouverture pour les chapitres 1 a 5. Ouvrir dans un navigateur.
+- `plaques-chapitres-01-17.html` — Page autonome (HTML/CSS/SVG, aucune dependance externe hors Google Fonts) contenant les 17 plaques d'ouverture pour les chapitres 1 a 17. Ouvrir dans un navigateur.
 
 ## Utilisation
 
